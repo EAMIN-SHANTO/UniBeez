@@ -51,16 +51,12 @@ const EditProfile: React.FC = () => {
     setFormError('');
     setIsSubmitting(true);
     
-    console.log('Submitting form data:', formData);
-    
     try {
       const success = await updateProfile(formData);
-      console.log('Update profile result:', success);
       if (success) {
         navigate('/profile');
       }
     } catch (err) {
-      console.error('Error in handleSubmit:', err);
       setFormError('An error occurred while updating your profile');
     } finally {
       setIsSubmitting(false);

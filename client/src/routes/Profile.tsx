@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useProfile } from '../context/ProfileContext';
 import { useAuth } from '../context/AuthContext';
-import UniversityUpdateTest from '../components/UniversityUpdateTest';
 
 const Profile: React.FC = () => {
   const { user } = useAuth();
@@ -74,38 +73,25 @@ const Profile: React.FC = () => {
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-white shadow rounded-lg overflow-hidden">
           {/* Profile Header */}
-          <div className="bg-gradient-to-r from-blue-500 to-indigo-600 px-6 py-16 relative">
-            <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2">
-              <div className="w-32 h-32 rounded-full border-4 border-white overflow-hidden bg-white">
+          <div className="p-6">
+            <div className="flex items-center">
+              <div className="flex-shrink-0 mr-4">
                 <img 
-                  src={profile.img || "https://cdn-icons-png.flaticon.com/512/4908/4908415.png"} 
-                  alt={profile.username} 
-                  className="w-full h-full object-cover"
+                  src={profile.img} 
+                  alt={profile.username}
+                  className="h-24 w-24 rounded-full object-cover border-4 border-white shadow"
                 />
               </div>
-            </div>
-          </div>
-          
-          {/* Profile Content */}
-          <div className="pt-20 pb-8 px-6">
-            <div className="text-center mb-6">
-              <h1 className="text-2xl font-bold text-gray-900">
-                {profile.fullName || profile.username}
-              </h1>
-              <p className="text-gray-500">@{profile.username}</p>
-              <p className="text-gray-500">{profile.email}</p>
-              
-              <div className="mt-4 flex justify-center space-x-2">
-                <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">{profile.username}</h1>
+                <p className="text-sm text-gray-500">{profile.email}</p>
+                <p className="mt-1 text-xs text-gray-500 bg-gray-100 inline-block px-2 py-1 rounded-full capitalize">
                   {profile.role}
-                </span>
-                <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
-                  {profile.type}
-                </span>
+                </p>
               </div>
             </div>
             
-            <div className="border-t border-gray-200 pt-6">
+            <div className="border-t border-gray-200 pt-6 mt-6">
               <dl className="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
                 <div className="sm:col-span-1">
                   <dt className="text-sm font-medium text-gray-500">Full Name</dt>
@@ -145,10 +131,6 @@ const Profile: React.FC = () => {
               >
                 Edit Profile
               </Link>
-            </div>
-
-            <div className="mt-4">
-              <UniversityUpdateTest />
             </div>
           </div>
         </div>
