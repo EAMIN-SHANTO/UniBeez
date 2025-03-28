@@ -1,34 +1,38 @@
 import dotenv from 'dotenv';
 import express from 'express';
-dotenv.config();
-// import userRouter from './routes/user.route.js';
-// import postRouter from './routes/post.route.js';
-// import coommentRouter from './routes/comment.js';
+import cookieParser from 'cookie-parser';
+import authRouter from './routes/auth.route.js';
 import connectDB from './lib/connectDB.js';
+import cors from 'cors';
 
-
-
+dotenv.config();
 
 const app = express();
+
+// Middleware
 app.use(express.json());
+app.use(cookieParser());
+
+// CORS configuration
+app.use(cors({
+  origin: 'http://localhost:5173', // Your frontend URL
+  credentials: true, // Important for cookies
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 const PORT = process.env.PORT || 3000;
 
-// Correct variable name, should be 'test' not 'text'
-// console.log('Text from .env:', process.env.test);  // Logs the value of 'test' from the .env file
+// Routes
+app.get("/", (req, res) => {
+  res.status(200).json({ message: "API is working!" });
+});
 
+// Auth routes
+app.use('/api/auth', authRouter);
 
-// app.get("/test", (req, res) => {
-
-//     res.status(200).send("It works!");
-// });
-
-// app.use('/users', userRouter);
-// app.use('/posts', postRouter);
-// app.use('/comments', coommentRouter);
-
-
+// Start server
 app.listen(PORT, () => {
-
-    connectDB();
-    console.log("Server is running ");
+  connectDB();
+  console.log(`Server is running on port ${PORT}`);
 });

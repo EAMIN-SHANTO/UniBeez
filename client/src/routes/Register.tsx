@@ -1,41 +1,69 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 interface FormData {
-  name: string;
+  username: string;
   email: string;
   password: string;
   confirmPassword: string;
-  agreeToTerms: boolean;
 }
 
 const Register: React.FC = () => {
   const navigate = useNavigate();
+  const { login, API_URL } = useAuth();
   const [formData, setFormData] = useState<FormData>({
-    name: '',
+    username: '',
     email: '',
     password: '',
-    confirmPassword: '',
-    agreeToTerms: false
+    confirmPassword: ''
   });
 
   const [error, setError] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-
+    setLoading(true);
+    
+    // Validate passwords match
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
+      setLoading(false);
       return;
     }
-
+    
     try {
-      // Add your registration logic here
-      console.log('Registration attempt:', formData);
-      navigate('/login'); // Redirect to login after successful registration
+      console.log('Register attempt:', formData);
+      
+      const response = await fetch(`${API_URL}/api/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          username: formData.username,
+          email: formData.email,
+          password: formData.password
+        })
+      });
+
+      const data = await response.json();
+      console.log('Register response:', data);
+
+      if (data.success) {
+        login(data.user);
+        navigate('/');
+      } else {
+        setError(data.message || 'Registration failed');
+      }
     } catch (err) {
-      setError('Registration failed. Please try again.');
+      console.error('Register error:', err);
+      setError('An error occurred during registration. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -45,7 +73,7 @@ const Register: React.FC = () => {
         <Link to="/" className="flex items-center justify-center gap-3 group">
           <div className="relative">
             <img 
-              src="/.svg" 
+              src="/unibeez.png" 
               alt="logo" 
               className="h-16 w-16"
             />
@@ -55,9 +83,9 @@ const Register: React.FC = () => {
           Create your account
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
-          Already have an account?{' '}
+          Or{' '}
           <Link to="/login" className="font-medium text-blue-600 hover:text-blue-500">
-            Sign in
+            sign in to your existing account
           </Link>
         </p>
       </div>
@@ -72,18 +100,18 @@ const Register: React.FC = () => {
             )}
 
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                Full name
+              <label htmlFor="username" className="block text-sm font-medium text-gray-700">
+                Username
               </label>
               <div className="mt-1">
                 <input
-                  id="name"
-                  name="name"
+                  id="username"
+                  name="username"
                   type="text"
-                  autoComplete="name"
+                  autoComplete="username"
                   required
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  value={formData.username}
+                  onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                   className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 />
               </div>
@@ -116,6 +144,7 @@ const Register: React.FC = () => {
                   id="password"
                   name="password"
                   type="password"
+                  autoComplete="new-password"
                   required
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
@@ -126,13 +155,14 @@ const Register: React.FC = () => {
 
             <div>
               <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-                Confirm password
+                Confirm Password
               </label>
               <div className="mt-1">
                 <input
                   id="confirmPassword"
                   name="confirmPassword"
                   type="password"
+                  autoComplete="new-password"
                   required
                   value={formData.confirmPassword}
                   onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
@@ -141,34 +171,13 @@ const Register: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex items-center">
-              <input
-                id="agree-terms"
-                name="agree-terms"
-                type="checkbox"
-                required
-                checked={formData.agreeToTerms}
-                onChange={(e) => setFormData({ ...formData, agreeToTerms: e.target.checked })}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-              />
-              <label htmlFor="agree-terms" className="ml-2 block text-sm text-gray-900">
-                I agree to the{' '}
-                <Link to="/terms" className="font-medium text-blue-600 hover:text-blue-500">
-                  Terms of Service
-                </Link>{' '}
-                and{' '}
-                <Link to="/privacy" className="font-medium text-blue-600 hover:text-blue-500">
-                  Privacy Policy
-                </Link>
-              </label>
-            </div>
-
             <div>
               <button
                 type="submit"
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                disabled={loading}
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
               >
-                Create account
+                {loading ? 'Creating account...' : 'Create account'}
               </button>
             </div>
           </form>

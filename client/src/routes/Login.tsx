@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 interface FormData {
   email: string;
@@ -9,6 +10,7 @@ interface FormData {
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
+  const { login, API_URL } = useAuth();
   const [formData, setFormData] = useState<FormData>({
     email: '',
     password: '',
@@ -16,17 +18,42 @@ const Login: React.FC = () => {
   });
 
   const [error, setError] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
     
     try {
-      // Add your authentication logic here
       console.log('Login attempt:', formData);
-      navigate('/'); // Redirect to home after successful login
+      
+      const response = await fetch(`${API_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password
+        })
+      });
+
+      const data = await response.json();
+      console.log('Login response:', data);
+
+      if (data.success) {
+        login(data.user);
+        navigate('/');
+      } else {
+        setError(data.message || 'Login failed');
+      }
     } catch (err) {
-      setError('Invalid email or password');
+      console.error('Login error:', err);
+      setError('An error occurred during login. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -36,7 +63,7 @@ const Login: React.FC = () => {
         <Link to="/" className="flex items-center justify-center gap-3 group">
           <div className="relative">
             <img 
-              src="/.svg" 
+              src="/unibeez.png" 
               alt="logo" 
               className="h-16 w-16"
             />
@@ -123,9 +150,10 @@ const Login: React.FC = () => {
             <div>
               <button
                 type="submit"
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                disabled={loading}
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
               >
-                Sign in
+                {loading ? 'Signing in...' : 'Sign in'}
               </button>
             </div>
           </form>

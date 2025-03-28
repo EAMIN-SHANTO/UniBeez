@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { theme } from '../utils/theme';
+import { useAuth } from '../context/AuthContext';
 
 const Navbar: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
   const [scrolled, setScrolled] = useState<boolean>(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
 
@@ -15,6 +18,11 @@ const Navbar: React.FC = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/');
+  };
 
   return (
     <header className={`fixed w-full z-50 transition-all duration-300 ${
@@ -75,20 +83,43 @@ const Navbar: React.FC = () => {
 
             {/* Auth Buttons */}
             <div className="flex items-center gap-2">
-              <Link
-                to="/login"
-                className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
-              >
-                Log in
-              </Link>
-              <Link
-                to="/register"
-                className={`px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors`}
-                style={{ backgroundColor: theme.colors.secondary.main, 
-                         hover: { backgroundColor: theme.colors.secondary.dark } }}
-              >
-                Join UniBeez
-              </Link>
+              {user ? (
+                <>
+                  {/* User is logged in - show profile and logout */}
+                  <Link
+                    to="/profile"
+                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-medium">
+                      {user.username.charAt(0).toUpperCase()}
+                    </div>
+                    <span>{user.username}</span>
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  {/* User is not logged in - show login and register */}
+                  <Link
+                    to="/login"
+                    className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                  >
+                    Log in
+                  </Link>
+                  <Link
+                    to="/register"
+                    className="px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors"
+                    style={{ backgroundColor: theme.colors.secondary.main }}
+                  >
+                    Join UniBeez
+                  </Link>
+                </>
+              )}
             </div>
 
             {/* Mobile Menu Button */}
@@ -123,6 +154,45 @@ const Navbar: React.FC = () => {
                     {label}
                   </Link>
                 ))}
+                
+                {/* Add auth links to mobile menu */}
+                {user ? (
+                  <>
+                    <Link
+                      to="/profile"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      Profile
+                    </Link>
+                    <button
+                      onClick={() => {
+                        handleLogout();
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg"
+                    >
+                      Logout
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      to="/login"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      Log in
+                    </Link>
+                    <Link
+                      to="/register"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      Join UniBeez
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
           )}
