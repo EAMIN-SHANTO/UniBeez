@@ -51,6 +51,7 @@ export const updateUserProfile = async (req, res) => {
       studentId,
       department,
       batch,
+      university,
       type,
       phone,
       img
@@ -71,6 +72,7 @@ export const updateUserProfile = async (req, res) => {
     if (studentId !== undefined) user.studentId = studentId;
     if (department !== undefined) user.department = department;
     if (batch !== undefined) user.batch = batch;
+    if (university !== undefined) user.university = university;
     if (type !== undefined && ['customer', 'seller'].includes(type)) user.type = type;
     if (phone !== undefined) user.phone = phone;
     if (img !== undefined) user.img = img;
@@ -90,6 +92,7 @@ export const updateUserProfile = async (req, res) => {
         studentId: updatedUser.studentId,
         department: updatedUser.department,
         batch: updatedUser.batch,
+        university: updatedUser.university,
         type: updatedUser.type,
         phone: updatedUser.phone,
         img: updatedUser.img

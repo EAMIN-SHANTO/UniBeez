@@ -10,6 +10,7 @@ interface UserProfile {
   studentId?: string;
   department?: string;
   batch?: string;
+  university?: string;
   type: string;
   phone?: string;
   img: string;

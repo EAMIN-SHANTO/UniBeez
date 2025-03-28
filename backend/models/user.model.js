@@ -43,6 +43,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
+  university: {
+    type: String,
+    trim: true
+  },
   type: {
     type: String,
     enum: ['customer', 'seller'],

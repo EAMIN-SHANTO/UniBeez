@@ -7,6 +7,7 @@ interface FormData {
   studentId: string;
   department: string;
   batch: string;
+  university: string;
   type: string;
   phone: string;
   img: string;
@@ -20,6 +21,7 @@ const EditProfile: React.FC = () => {
     studentId: '',
     department: '',
     batch: '',
+    university: '',
     type: 'customer',
     phone: '',
     img: ''
@@ -36,6 +38,7 @@ const EditProfile: React.FC = () => {
         studentId: profile.studentId || '',
         department: profile.department || '',
         batch: profile.batch || '',
+        university: profile.university || '',
         type: profile.type || 'customer',
         phone: profile.phone || '',
         img: profile.img || ''
@@ -161,6 +164,19 @@ const EditProfile: React.FC = () => {
                   onChange={(e) => setFormData({ ...formData, batch: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="2023"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  University
+                </label>
+                <input
+                  type="text"
+                  value={formData.university}
+                  onChange={(e) => setFormData({ ...formData, university: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter your university"
                 />
               </div>
               
