@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -11,7 +11,7 @@ interface FormData {
 
 const Register: React.FC = () => {
   const navigate = useNavigate();
-  const { login, API_URL } = useAuth();
+  const { login, API_URL, user } = useAuth();
   const [formData, setFormData] = useState<FormData>({
     username: '',
     email: '',
@@ -21,6 +21,13 @@ const Register: React.FC = () => {
 
   const [error, setError] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
+  
+  // Add this effect to redirect logged-in users
+  useEffect(() => {
+    if (user) {
+      navigate('/');
+    }
+  }, [user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
