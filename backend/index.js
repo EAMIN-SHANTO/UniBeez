@@ -1,9 +1,9 @@
 import dotenv from 'dotenv';
 import express from 'express';
 dotenv.config();
-import userRouter from './routes/user.route.js';
-import postRouter from './routes/post.route.js';
-import coommentRouter from './routes/comment.js';
+// import userRouter from './routes/user.route.js';
+// import postRouter from './routes/post.route.js';
+// import coommentRouter from './routes/comment.js';
 import connectDB from './lib/connectDB.js';
 
 
@@ -22,9 +22,9 @@ const PORT = process.env.PORT || 3000;
 //     res.status(200).send("It works!");
 // });
 
-app.use('/users', userRouter);
-app.use('/posts', postRouter);
-app.use('/comments', coommentRouter);
+// app.use('/users', userRouter);
+// app.use('/posts', postRouter);
+// app.use('/comments', coommentRouter);
 
 
 app.listen(PORT, () => {
