@@ -1,20 +1,8 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { useAuth } from './AuthContext';
+import { User } from '../types/user';
 
-interface UserProfile {
-  id: string;
-  username: string;
-  email: string;
-  role: string;
-  fullName?: string;
-  studentId?: string;
-  department?: string;
-  batch?: string;
-  university?: string;
-  type: string;
-  phone?: string;
-  img: string;
-}
+type UserProfile = User;
 
 interface ProfileContextType {
   profile: UserProfile | null;
