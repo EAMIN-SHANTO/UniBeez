@@ -1,9 +1,10 @@
 import dotenv from 'dotenv';
 import express from 'express';
 import cookieParser from 'cookie-parser';
-import authRouter from './routes/auth.route.js';
-import connectDB from './lib/connectDB.js';
 import cors from 'cors';
+import authRouter from './routes/auth.route.js';
+import userRouter from './routes/user.route.js';
+import connectDB from './lib/connectDB.js';
 
 dotenv.config();
 
@@ -30,6 +31,13 @@ app.get("/", (req, res) => {
 
 // Auth routes
 app.use('/api/auth', authRouter);
+
+// User routes
+app.use('/api/users', userRouter);
+
+console.log('Routes registered:');
+console.log('- Auth routes: /api/auth');
+console.log('- User routes: /api/users');
 
 // Start server
 app.listen(PORT, () => {

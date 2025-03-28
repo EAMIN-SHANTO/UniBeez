@@ -4,6 +4,7 @@ import User from "../models/user.model.js";
 export const verifyToken = async (req, res, next) => {
   try {
     console.log('Verifying token...');
+    console.log('Cookies:', req.cookies);
     
     const token = req.cookies.token;
     

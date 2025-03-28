@@ -20,6 +20,41 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Password is required'],
     minlength: [6, 'Password must be at least 6 characters long']
+  },
+  // New fields
+  role: {
+    type: String,
+    enum: ['user', 'staff', 'admin'],
+    default: 'user'
+  },
+  fullName: {
+    type: String,
+    trim: true
+  },
+  studentId: {
+    type: String,
+    trim: true
+  },
+  department: {
+    type: String,
+    trim: true
+  },
+  batch: {
+    type: String,
+    trim: true
+  },
+  type: {
+    type: String,
+    enum: ['customer', 'seller'],
+    default: 'customer'
+  },
+  phone: {
+    type: String,
+    trim: true
+  },
+  img: {
+    type: String,
+    default: 'https://cdn-icons-png.flaticon.com/512/4908/4908415.png'
   }
 }, {
   timestamps: true
@@ -28,6 +63,7 @@ const userSchema = new mongoose.Schema({
 // Create indexes to ensure uniqueness
 userSchema.index({ email: 1 }, { unique: true });
 userSchema.index({ username: 1 }, { unique: true });
+userSchema.index({ studentId: 1 }, { sparse: true }); // Sparse index for optional field
 
 const User = mongoose.model("User", userSchema);
 
