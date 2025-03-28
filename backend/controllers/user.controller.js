@@ -45,6 +45,8 @@ export const getUserProfile = async (req, res) => {
 // Update user profile
 export const updateUserProfile = async (req, res) => {
   try {
+    console.log('updateUserProfile called with body:', req.body);
+    
     const userId = req.user._id;
     const {
       fullName,
@@ -57,6 +59,8 @@ export const updateUserProfile = async (req, res) => {
       img
     } = req.body;
     
+    console.log('Extracted university field:', university);
+    
     // Find user
     const user = await User.findById(userId);
     
@@ -67,36 +71,55 @@ export const updateUserProfile = async (req, res) => {
       });
     }
     
+    console.log('Current user data:', {
+      fullName: user.fullName,
+      studentId: user.studentId,
+      department: user.department,
+      batch: user.batch,
+      university: user.university,
+      type: user.type,
+      phone: user.phone
+    });
+    
     // Update fields if provided
     if (fullName !== undefined) user.fullName = fullName;
     if (studentId !== undefined) user.studentId = studentId;
     if (department !== undefined) user.department = department;
     if (batch !== undefined) user.batch = batch;
-    if (university !== undefined) user.university = university;
+    if (university !== undefined) {
+      console.log('Setting university to:', university);
+      user.university = university;
+    }
     if (type !== undefined && ['customer', 'seller'].includes(type)) user.type = type;
     if (phone !== undefined) user.phone = phone;
     if (img !== undefined) user.img = img;
     
     // Save updated user
     const updatedUser = await user.save();
+    console.log('User saved with university:', updatedUser.university);
+    
+    // Create a response object with all fields explicitly included
+    const responseUser = {
+      id: updatedUser._id,
+      username: updatedUser.username,
+      email: updatedUser.email,
+      role: updatedUser.role,
+      fullName: updatedUser.fullName,
+      studentId: updatedUser.studentId,
+      department: updatedUser.department,
+      batch: updatedUser.batch,
+      university: updatedUser.university,
+      type: updatedUser.type,
+      phone: updatedUser.phone,
+      img: updatedUser.img
+    };
+    
+    console.log('Sending response with user:', responseUser);
     
     res.status(200).json({
       success: true,
       message: 'Profile updated successfully',
-      user: {
-        id: updatedUser._id,
-        username: updatedUser.username,
-        email: updatedUser.email,
-        role: updatedUser.role,
-        fullName: updatedUser.fullName,
-        studentId: updatedUser.studentId,
-        department: updatedUser.department,
-        batch: updatedUser.batch,
-        university: updatedUser.university,
-        type: updatedUser.type,
-        phone: updatedUser.phone,
-        img: updatedUser.img
-      }
+      user: responseUser
     });
   } catch (error) {
     console.error('Update profile error:', error);

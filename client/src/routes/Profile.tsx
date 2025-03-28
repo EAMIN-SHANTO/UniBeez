@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useProfile } from '../context/ProfileContext';
 import { useAuth } from '../context/AuthContext';
+import UniversityUpdateTest from '../components/UniversityUpdateTest';
 
 const Profile: React.FC = () => {
   const { user } = useAuth();
@@ -144,6 +145,10 @@ const Profile: React.FC = () => {
               >
                 Edit Profile
               </Link>
+            </div>
+
+            <div className="mt-4">
+              <UniversityUpdateTest />
             </div>
           </div>
         </div>

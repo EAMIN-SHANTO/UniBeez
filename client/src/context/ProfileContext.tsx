@@ -68,6 +68,8 @@ export const ProfileProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setLoading(true);
     setError(null);
     
+    console.log('Updating profile with data:', updateData);
+    
     try {
       const response = await fetch(`${API_URL}/api/users/profile`, {
         method: 'PUT',
@@ -79,9 +81,14 @@ export const ProfileProvider: React.FC<{ children: React.ReactNode }> = ({ child
       });
       
       const data = await response.json();
+      console.log('Server response:', data);
       
       if (data.success) {
-        setProfile(prev => prev ? { ...prev, ...data.user } : data.user);
+        setProfile(prev => {
+          const updated = prev ? { ...prev, ...data.user } : data.user;
+          console.log('Updated profile state:', updated);
+          return updated;
+        });
         return true;
       } else {
         setError(data.message || 'Failed to update profile');
