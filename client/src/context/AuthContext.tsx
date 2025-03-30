@@ -4,7 +4,7 @@ import { User } from '../types/user';
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (user: User) => void;
+  login: (username: string, password: string) => Promise<{ success: boolean; message?: string }>;
   logout: () => void;
   API_URL: string;
 }
@@ -74,9 +74,42 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     checkAuth();
   }, [API_URL]);
 
-  const login = (newUser: User) => {
-    setUser(newUser);
-    localStorage.setItem('user', JSON.stringify(newUser));
+  const login = async (username: string, password: string) => {
+    setLoading(true);
+    try {
+      const response = await fetch(`${API_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          email: username, 
+          password 
+        }),
+        credentials: 'include',
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Login failed');
+      }
+      
+      console.log('Login successful, user data:', data.user);
+      
+      // Store the user data exactly as received
+      setUser(data.user);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      return { success: true };
+    } catch (error) {
+      console.error('Login error:', error);
+      return { 
+        success: false, 
+        message: error instanceof Error ? error.message : 'An unknown error occurred' 
+      };
+    } finally {
+      setLoading(false);
+    }
   };
 
   const logout = async () => {

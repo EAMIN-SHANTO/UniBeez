@@ -9,10 +9,15 @@ import Register from "./routes/Register";
 import Profile from "./routes/Profile";
 import EditProfile from "./routes/EditProfile";
 import ProtectedRoute from "./components/ProtectedRoute";
+import AdminDashboard from "./routes/admin/AdminDashboard";
+import UsersManagement from "./routes/admin/UsersManagement";
+import ShopManagement from "./routes/admin/ShopManagement";
+import EventManagement from "./routes/admin/EventManagement";
+import ServiceManagement from "./routes/admin/ServiceManagement";
+import SellerManagement from "./routes/admin/SellerManagement";
+import RegistrationInbox from "./routes/admin/RegistrationInbox";
 
 const App: React.FC = () => {
-  console.log('App rendered');
-
   return (
     <AuthProvider>
       <ProfileProvider>
@@ -30,6 +35,36 @@ const App: React.FC = () => {
               <Route path="/profile/edit" element={
                 <ProtectedRoute>
                   <EditProfile />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin" element={
+                <ProtectedRoute adminOnly>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/users" element={
+                <ProtectedRoute adminOnly>
+                  <UsersManagement />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/shops" element={
+                <ProtectedRoute adminOnly>
+                  <ShopManagement />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/events" element={
+                <ProtectedRoute adminOnly>
+                  <EventManagement />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/services" element={
+                <ProtectedRoute adminOnly>
+                  <ServiceManagement />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/sellers" element={
+                <ProtectedRoute adminOnly>
+                  <SellerManagement />
                 </ProtectedRoute>
               } />
               <Route path="*" element={

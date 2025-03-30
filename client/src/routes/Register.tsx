@@ -61,8 +61,13 @@ const Register: React.FC = () => {
       console.log('Register response:', data);
 
       if (data.success) {
-        login(data.user);
-        navigate('/');
+        // After successful registration, login with the new credentials
+        const loginResult = await login(formData.email, formData.password);
+        if (loginResult.success) {
+          navigate('/');
+        } else {
+          setError(loginResult.message || 'Login failed after registration');
+        }
       } else {
         setError(data.message || 'Registration failed');
       }

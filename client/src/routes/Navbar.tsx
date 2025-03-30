@@ -34,6 +34,12 @@ const Navbar: React.FC = () => {
     { path: '/community', label: 'Community' }
   ];
 
+  // Add debug logging
+  console.log('Current user:', user);
+  
+  const isAdmin = user?.role === 'admin' || user?.role === 'staff';
+  console.log('Is admin?', isAdmin, 'Role:', user?.role);
+
   return (
     <header className={`fixed w-full z-50 transition-all duration-300 ${
       scrolled ? 'bg-white/90 backdrop-blur-sm shadow-sm' : 'bg-transparent'
@@ -66,6 +72,18 @@ const Navbar: React.FC = () => {
                 {label}
               </Link>
             ))}
+            {isAdmin && (
+              <Link
+                to="/admin"
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  location.pathname.startsWith('/admin')
+                    ? 'bg-blue-50 text-blue-600'
+                    : 'text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                Admin Dashboard
+              </Link>
+            )}
           </nav>
 
           {/* Right Side Actions */}

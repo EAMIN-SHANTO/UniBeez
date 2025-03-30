@@ -32,28 +32,12 @@ const Login: React.FC = () => {
     setLoading(true);
     
     try {
-      console.log('Login attempt:', formData);
+      const result = await login(formData.email, formData.password);
       
-      const response = await fetch(`${API_URL}/api/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password
-        })
-      });
-
-      const data = await response.json();
-      console.log('Login response:', data);
-
-      if (data.success) {
-        login(data.user);
+      if (result.success) {
         navigate('/');
       } else {
-        setError(data.message || 'Login failed');
+        setError(result.message || 'Login failed');
       }
     } catch (err) {
       console.error('Login error:', err);

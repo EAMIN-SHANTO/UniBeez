@@ -107,6 +107,15 @@ export const login = async (req, res) => {
       });
     }
     
+    // Log the user data from database
+    console.log('Found user:', {
+      id: user._id,
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      type: user.type
+    });
+    
     // Check password
     const isMatch = verifyPassword(password, user.password);
     if (!isMatch) {
@@ -130,20 +139,24 @@ export const login = async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     });
     
+    // Return user info with explicit role
     res.status(200).json({
       success: true,
       message: 'Login successful',
       user: {
-        id: user._id,
+        _id: user._id,
         username: user.username,
-        email: user.email
+        email: user.email,
+        role: user.role,
+        type: user.type,
+        img: user.img
       }
     });
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({
       success: false,
-      message: 'Login failed',
+      message: 'Server error',
       error: error.message
     });
   }
@@ -162,12 +175,22 @@ export const getProfile = async (req, res) => {
       });
     }
     
+    // Log the user data
+    console.log('Profile request for user:', {
+      id: req.user._id,
+      username: req.user.username,
+      role: req.user.role
+    });
+
     res.status(200).json({
       success: true,
       user: {
-        id: req.user._id,
+        _id: req.user._id,
         username: req.user.username,
-        email: req.user.email
+        email: req.user.email,
+        role: req.user.role,
+        type: req.user.type,
+        img: req.user.img
       }
     });
   } catch (error) {
