@@ -1,4 +1,5 @@
 import Event from '../models/event.model.js';
+import multer from 'multer';
 
 // Get all events
 export const getAllEvents = async (req, res) => {
@@ -68,11 +69,26 @@ export const createEvent = async (req, res) => {
   } catch (error) {
     console.error('Event creation error:', error);
     console.error('Error stack:', error.stack);
+    
+    // Handle Multer errors
+    if (error instanceof multer.MulterError) {
+      if (error.code === 'LIMIT_FILE_SIZE') {
+        return res.status(400).json({
+          success: false,
+          message: 'File is too large. Maximum size is 5MB.'
+        });
+      }
+      return res.status(400).json({
+        success: false,
+        message: 'File upload error',
+        error: error.message
+      });
+    }
+
     res.status(500).json({
       success: false,
       message: 'Error creating event',
-      error: error.message,
-      details: error.stack
+      error: error.message
     });
   }
 };

@@ -70,7 +70,7 @@ const Events: React.FC = () => {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
       if (!selectedFile) {
@@ -78,6 +78,7 @@ const Events: React.FC = () => {
         return;
       }
 
+      // Create FormData with all the required fields
       const formData = new FormData();
       formData.append('title', newEvent.title);
       formData.append('description', newEvent.description);
@@ -94,23 +95,23 @@ const Events: React.FC = () => {
         endDate: newEvent.endDate,
         location: newEvent.location,
         status: newEvent.status,
-        file: selectedFile.name // Log just the filename
+        file: selectedFile.name
       });
 
-      const response = await fetch(`${API_URL}/api/events`, {
+      const response = await fetch(`${API_URL}/api/events-21301429`, {
         method: 'POST',
         credentials: 'include',
-        body: formData
+        body: formData // Don't set Content-Type header for FormData
       });
 
       const data = await response.json();
-      
+      console.log('Response data:', data);
+
       if (!response.ok) {
         throw new Error(data.message || 'Failed to create event');
       }
 
       if (data.success) {
-        await fetchEvents();
         setShowAddForm(false);
         setNewEvent({
           title: '',
@@ -122,6 +123,7 @@ const Events: React.FC = () => {
         });
         setSelectedFile(null);
         setPreviewUrl('');
+        await fetchEvents();
       } else {
         setError(data.message);
       }
@@ -275,6 +277,7 @@ const Events: React.FC = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
                 <input
                   type="text"
+                  name="title"
                   value={newEvent.title}
                   onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -295,15 +298,21 @@ const Events: React.FC = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Banner Image
+                  Banner Image <span className="text-gray-500">(Max 5MB)</span>
                 </label>
                 <input
                   type="file"
+                  name="bannerImage"
                   accept="image/*"
                   onChange={handleFileChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 />
+                {selectedFile && selectedFile.size > 5 * 1024 * 1024 && (
+                  <p className="mt-1 text-sm text-red-600">
+                    File is too large. Please select an image under 5MB.
+                  </p>
+                )}
                 {previewUrl && (
                   <div className="mt-2">
                     <img
