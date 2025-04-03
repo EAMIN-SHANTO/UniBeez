@@ -418,7 +418,6 @@ const Events: React.FC = () => {
                     </div>
                   )}
                 </div>
-                <p className="text-gray-600 mb-4">{event.description}</p>
                 <div className="flex items-center justify-between text-sm text-gray-500">
                   <span>{new Date(event.startDate).toLocaleDateString()}</span>
                   <span>{event.location}</span>
