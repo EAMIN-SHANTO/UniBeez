@@ -75,4 +75,51 @@ export const createEvent = async (req, res) => {
       details: error.stack
     });
   }
+};
+
+// Toggle current event status
+export const toggleCurrentEvent = async (req, res) => {
+  try {
+    console.log('Toggle request received:', {
+      eventId: req.params.eventId,
+      user: req.user,
+      method: req.method
+    });
+
+    if (!['admin', 'staff'].includes(req.user.role)) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied'
+      });
+    }
+
+    const event = await Event.findById(req.params.eventId);
+    if (!event) {
+      return res.status(404).json({
+        success: false,
+        message: 'Event not found'
+      });
+    }
+
+    // Toggle the status
+    event.status = event.status === 'current' ? 'upcoming' : 'current';
+    await event.save();
+
+    console.log('Event updated successfully:', {
+      id: event._id,
+      status: event.status
+    });
+
+    return res.status(200).json({
+      success: true,
+      event: event
+    });
+  } catch (error) {
+    console.error('Error in toggleCurrentEvent:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Error updating event',
+      error: error.message
+    });
+  }
 }; 

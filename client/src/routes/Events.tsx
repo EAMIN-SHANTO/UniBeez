@@ -72,6 +72,11 @@ const Events: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      if (!selectedFile) {
+        setError('Please select an image file');
+        return;
+      }
+
       const formData = new FormData();
       formData.append('title', newEvent.title);
       formData.append('description', newEvent.description);
@@ -79,10 +84,17 @@ const Events: React.FC = () => {
       formData.append('endDate', newEvent.endDate);
       formData.append('location', newEvent.location);
       formData.append('status', newEvent.status);
-      
-      if (selectedFile) {
-        formData.append('bannerImage', selectedFile);
-      }
+      formData.append('bannerImage', selectedFile);
+
+      console.log('Submitting form data:', {
+        title: newEvent.title,
+        description: newEvent.description,
+        startDate: newEvent.startDate,
+        endDate: newEvent.endDate,
+        location: newEvent.location,
+        status: newEvent.status,
+        file: selectedFile.name // Log just the filename
+      });
 
       const response = await fetch(`${API_URL}/api/events`, {
         method: 'POST',
@@ -92,6 +104,10 @@ const Events: React.FC = () => {
 
       const data = await response.json();
       
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to create event');
+      }
+
       if (data.success) {
         await fetchEvents();
         setShowAddForm(false);
@@ -109,7 +125,8 @@ const Events: React.FC = () => {
         setError(data.message);
       }
     } catch (err) {
-      setError('Failed to create event');
+      console.error('Error creating event:', err);
+      setError(err instanceof Error ? err.message : 'Failed to create event');
     }
   };
 
@@ -249,7 +266,58 @@ const Events: React.FC = () => {
                 }}
               />
               <div className="p-4">
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">{event.title}</h3>
+                <div className="flex justify-between items-start mb-2">
+                  <h3 className="text-xl font-semibold text-gray-900">{event.title}</h3>
+                  {(user?.role === 'admin' || user?.role === 'staff') && (
+                    <button
+                      onClick={async () => {
+                        try {
+                          const eventId = event._id;
+                          console.log('Toggling event:', eventId);
+                          
+                          const url = `${API_URL}/api/events/${eventId}/toggle-current`;
+                          console.log('Making request to:', url);
+                          
+                          const response = await fetch(url, {
+                            method: 'PATCH',
+                            credentials: 'include',
+                            headers: {
+                              'Content-Type': 'application/json'
+                            }
+                          });
+
+                          console.log('Response:', response);
+                          const text = await response.text();
+                          console.log('Response text:', text);
+
+                          let data;
+                          try {
+                            data = JSON.parse(text);
+                          } catch (e) {
+                            console.error('Failed to parse response:', text);
+                            throw new Error('Invalid server response');
+                          }
+
+                          if (!response.ok || !data.success) {
+                            throw new Error(data.message || 'Failed to update event status');
+                          }
+
+                          await fetchEvents(); // Refresh events list
+                        } catch (err) {
+                          console.error('Error updating event status:', err);
+                          setError(err instanceof Error ? err.message : 'Failed to update event status');
+                        }
+                      }}
+                      className={`px-3 py-1 rounded-full text-sm ${
+                        event.status === 'current'
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-gray-100 text-gray-800'
+                      } hover:opacity-80`}
+                    >
+                      {event.status === 'current' ? 'Current Event' : 'Set as Current'}
+                    </button>
+                  )}
+                </div>
                 <p className="text-gray-600 mb-4">{event.description}</p>
                 <div className="flex items-center justify-between text-sm text-gray-500">
                   <span>{new Date(event.startDate).toLocaleDateString()}</span>
