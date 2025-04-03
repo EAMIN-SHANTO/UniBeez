@@ -21,24 +21,27 @@ const Events: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string>('');
   const [newEvent, setNewEvent] = useState({
     title: '',
     description: '',
-    bannerImage: '',
     startDate: '',
     endDate: '',
     location: '',
-    status: 'upcoming'
+    status: 'upcoming' as const
   });
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string>('');
 
   const fetchEvents = async () => {
+    console.log('Fetching events...');
     try {
+      console.log('Making request to:', `${API_URL}/api/events`);
       const response = await fetch(`${API_URL}/api/events`, {
         credentials: 'include'
       });
+      console.log('Response received:', response);
       const data = await response.json();
+      console.log('Data received:', data);
       
       if (data.success) {
         setEvents(data.events);
@@ -46,6 +49,7 @@ const Events: React.FC = () => {
         setError(data.message);
       }
     } catch (err) {
+      console.error('Error fetching events:', err);
       setError('Failed to fetch events');
     } finally {
       setLoading(false);
@@ -53,6 +57,7 @@ const Events: React.FC = () => {
   };
 
   useEffect(() => {
+    console.log('Events component mounted');
     fetchEvents();
   }, []);
 
@@ -82,7 +87,7 @@ const Events: React.FC = () => {
       const response = await fetch(`${API_URL}/api/events`, {
         method: 'POST',
         credentials: 'include',
-        body: formData // Don't set Content-Type header, browser will set it
+        body: formData
       });
 
       const data = await response.json();
@@ -93,7 +98,6 @@ const Events: React.FC = () => {
         setNewEvent({
           title: '',
           description: '',
-          bannerImage: '',
           startDate: '',
           endDate: '',
           location: '',
@@ -110,9 +114,11 @@ const Events: React.FC = () => {
   };
 
   if (loading) {
-    return <div className="min-h-screen pt-20 flex items-center justify-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-    </div>;
+    return (
+      <div className="min-h-screen pt-20 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500" />
+      </div>
+    );
   }
 
   return (
@@ -232,9 +238,15 @@ const Events: React.FC = () => {
           {events.map(event => (
             <div key={event._id} className="bg-white rounded-lg shadow-sm overflow-hidden">
               <img
-                src={event.bannerImage}
+                src={event.bannerImage.startsWith('http') 
+                  ? event.bannerImage 
+                  : `${API_URL}${event.bannerImage}`}
                 alt={event.title}
                 className="w-full h-48 object-cover"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = 'https://placehold.co/600x400?text=No+Image';
+                }}
               />
               <div className="p-4">
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">{event.title}</h3>
