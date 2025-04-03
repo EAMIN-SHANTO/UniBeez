@@ -17,6 +17,7 @@ import ServiceManagement from "./routes/admin/ServiceManagement";
 import SellerManagement from "./routes/admin/SellerManagement";
 import RegistrationInbox from "./routes/admin/RegistrationInbox";
 import Events from './routes/Events';
+import ProductManagement from './routes/ProductManagement';
 
 const App: React.FC = () => {
   return (
@@ -29,6 +30,8 @@ const App: React.FC = () => {
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/events" element={<Events />} />
+              <Route path="/products" element={<ProductManagement />} />
+
               <Route path="/profile" element={
                 <ProtectedRoute>
                   <Profile />
