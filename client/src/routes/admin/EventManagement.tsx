@@ -126,11 +126,14 @@ const EventManagement: React.FC = () => {
     }
   };
 
-  const handleArchiveEvent = async (eventId: string) => {
+  const handleArchiveEvent = async (eventId: string, currentStatus: string) => {
     try {
       const response = await fetch(`${API_URL}/api/events-21301429/${eventId}/archive`, {
         method: 'PATCH',
-        credentials: 'include'
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
 
       const data = await response.json();
@@ -140,7 +143,7 @@ const EventManagement: React.FC = () => {
         setError(data.message);
       }
     } catch (err) {
-      setError('Failed to archive event');
+      setError(`Failed to ${currentStatus === 'archived' ? 'unarchive' : 'archive'} event`);
     }
   };
 
@@ -338,7 +341,7 @@ const EventManagement: React.FC = () => {
                         {event.status === 'current' ? 'Unset Current' : 'Set Current'}
                       </button>
                       <button
-                        onClick={() => handleArchiveEvent(event._id)}
+                        onClick={() => handleArchiveEvent(event._id, event.status)}
                         className="text-orange-600 hover:text-orange-900"
                       >
                         {event.status === 'archived' ? 'Unarchive' : 'Archive'}

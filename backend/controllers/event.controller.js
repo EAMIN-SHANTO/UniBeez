@@ -216,7 +216,7 @@ export const deleteEvent = async (req, res) => {
   }
 };
 
-// Archive event
+// Archive/Unarchive event
 export const archiveEvent = async (req, res) => {
   try {
     if (!['admin', 'staff'].includes(req.user.role)) {
@@ -234,7 +234,8 @@ export const archiveEvent = async (req, res) => {
       });
     }
 
-    event.status = 'archived';
+    // Toggle between archived and upcoming
+    event.status = event.status === 'archived' ? 'upcoming' : 'archived';
     await event.save();
 
     return res.status(200).json({
@@ -245,7 +246,7 @@ export const archiveEvent = async (req, res) => {
     console.error('Error in archiveEvent:', error);
     return res.status(500).json({
       success: false,
-      message: 'Error archiving event',
+      message: 'Error updating event status',
       error: error.message
     });
   }
