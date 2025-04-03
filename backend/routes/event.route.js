@@ -1,7 +1,7 @@
 import express from 'express';
 import { verifyToken } from '../middleware/auth.middleware.js';
 import upload from '../config/multer.js';
-import { getAllEvents, createEvent, toggleCurrentEvent } from '../controllers/event.controller.js';
+import { getAllEvents, createEvent, toggleCurrentEvent, updateEvent, deleteEvent, archiveEvent } from '../controllers/event.controller.js';
 import multer from 'multer';
 
 const router = express.Router();
@@ -24,39 +24,21 @@ router.get('/test', (req, res) => {
 });
 
 // Get all events
-router.get('/', getAllEvents);
+router.get('/events-21301429', getAllEvents);
 
-// Create new event with file upload (admin/staff only)
-router.post('/', verifyToken, (req, res) => {
-  upload.single('bannerImage')(req, res, async (err) => {
-    try {
-      if (err instanceof multer.MulterError) {
-        console.error('Multer error:', err);
-        return res.status(400).json({
-          success: false,
-          message: 'File upload error',
-          error: err.message
-        });
-      } else if (err) {
-        console.error('Other upload error:', err);
-        return res.status(400).json({
-          success: false,
-          message: err.message || 'File upload error'
-        });
-      }
-      await createEvent(req, res);
-    } catch (error) {
-      console.error('Route error:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Error in route',
-        error: error.message
-      });
-    }
-  });
-});
+// Create new event
+router.post('/events-21301429', verifyToken, upload.single('bannerImage'), createEvent);
+
+// Update event
+router.put('/events-21301429/:eventId', verifyToken, updateEvent);
+
+// Delete event
+router.delete('/events-21301429/:eventId', verifyToken, deleteEvent);
+
+// Archive event
+router.patch('/events-21301429/:eventId/archive', verifyToken, archiveEvent);
 
 // Toggle current event status
-router.patch('/:eventId/toggle-current', verifyToken, toggleCurrentEvent);
+router.patch('/events-21301429/:eventId/toggle-current', verifyToken, toggleCurrentEvent);
 
 export default router; 

@@ -32,7 +32,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // API Routes - make sure these come before error handlers
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
-app.use("/api/events", eventRoutes);
+app.use("/api", eventRoutes);
 
 // Test route to verify API is working
 app.get("/api/test", (req, res) => {
@@ -69,7 +69,7 @@ mongoose
       console.log('Routes registered:');
       console.log('- Auth routes: /api/auth');
       console.log('- User routes: /api/users');
-      console.log('- Event routes: /api/events');
+      console.log('- Event routes: /api');
     });
     console.log("Connected to MongoDB");
   })

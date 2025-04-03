@@ -24,7 +24,7 @@ const CurrentEvent: React.FC = () => {
   useEffect(() => {
     const fetchCurrentEvent = async () => {
       try {
-        const response = await fetch(`${API_URL}/api/events`, {
+        const response = await fetch(`${API_URL}/api/events-21301429`, {
           credentials: 'include'
         });
         const data = await response.json();
@@ -68,51 +68,72 @@ const CurrentEvent: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen pt-20 px-4 pb-12">
+    <div className="min-h-screen pt-20 pb-12">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Current Event</h1>
-        
         {error && (
           <div className="mb-8 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
             {error}
           </div>
         )}
 
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-          <img
-            src={currentEvent.bannerImage.startsWith('http') 
-              ? currentEvent.bannerImage 
-              : `${API_URL}${currentEvent.bannerImage}`}
-            alt={currentEvent.title}
-            className="w-full h-96 object-cover"
-            onError={(e) => {
-              const target = e.target as HTMLImageElement;
-              target.src = 'https://placehold.co/600x400?text=No+Image';
-            }}
-          />
-          <div className="p-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">{currentEvent.title}</h2>
-            <p className="text-gray-600 mb-6">{currentEvent.description}</p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-500">
-              <div>
-                <span className="font-medium text-gray-700">Start Date:</span>
-                <br />
-                {new Date(currentEvent.startDate).toLocaleString()}
+        <div className="bg-white shadow-lg overflow-hidden">
+          <div className="relative w-full" style={{ height: '500px' }}>
+            <img
+              src={currentEvent.bannerImage.startsWith('http') 
+                ? currentEvent.bannerImage 
+                : `${API_URL}${currentEvent.bannerImage}`}
+              alt={currentEvent.title}
+              className="w-full h-full object-contain bg-gray-50"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = 'https://placehold.co/600x400?text=No+Image';
+              }}
+            />
+          </div>
+
+          <div className="p-8 bg-white">
+            <div className="flex justify-between items-center mb-6">
+              <h1 className="text-4xl font-bold text-gray-900">{currentEvent.title}</h1>
+              <div className="flex space-x-4">
+                <button 
+                  className="px-6 py-2 bg-white text-blue-600 border-2 border-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
+                  onClick={() => {}}
+                >
+                  Register Event Shop
+                </button>
+                <button 
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  onClick={() => {}}
+                >
+                  See Event Shops
+                </button>
               </div>
-              <div>
-                <span className="font-medium text-gray-700">End Date:</span>
-                <br />
-                {new Date(currentEvent.endDate).toLocaleString()}
+            </div>
+            <p className="text-xl text-gray-600 mb-8">{currentEvent.description}</p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="font-semibold text-gray-900 mb-2">Start Date</h3>
+                <p className="text-gray-700">
+                  {new Date(currentEvent.startDate).toLocaleString()}
+                </p>
               </div>
-              <div>
-                <span className="font-medium text-gray-700">Location:</span>
-                <br />
-                {currentEvent.location}
+              
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="font-semibold text-gray-900 mb-2">End Date</h3>
+                <p className="text-gray-700">
+                  {new Date(currentEvent.endDate).toLocaleString()}
+                </p>
               </div>
-              <div>
-                <span className="font-medium text-gray-700">Organizer:</span>
-                <br />
-                {currentEvent.organizer.username}
+              
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="font-semibold text-gray-900 mb-2">Location</h3>
+                <p className="text-gray-700">{currentEvent.location}</p>
+              </div>
+              
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="font-semibold text-gray-900 mb-2">Organizer</h3>
+                <p className="text-gray-700">{currentEvent.organizer.username}</p>
               </div>
             </div>
           </div>
