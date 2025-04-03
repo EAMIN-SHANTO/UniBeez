@@ -6,51 +6,45 @@ import EventSlideshow from '../components/EventSlideshow';
 const Homepage: React.FC = () => {
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Hero Section */}
-      <section className="relative pt-20 pb-32 overflow-hidden" style={{ 
-        background: `linear-gradient(to bottom, ${theme.colors.accent.yellow}20, ${theme.colors.background.default})` 
-      }}>
-        <div className="absolute inset-0 opacity-5">
-          <div className="absolute inset-0" style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-          }} />
-        </div>
-        <div className="relative max-w-7xl mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-center gap-12">
-            <div className="flex-1 space-y-8">
-              <h1 className="text-5xl md:text-6xl font-bold">
+      {/* Hero Section with Event Slideshow */}
+      <section className="relative bg-gradient-to-b from-blue-50 to-white py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            {/* Left Column - Text Content */}
+            <div className="space-y-8">
+              <h1 className="text-5xl font-bold leading-tight">
                 Welcome to{' '}
-                <span style={{ 
-                  background: `linear-gradient(to right, ${theme.colors.primary.main}, ${theme.colors.primary.dark})`,
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent'
-                }}>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-800">
                   UniBeez
                 </span>
               </h1>
-              <p className="text-xl text-gray-600 max-w-2xl">
-                Empowering university entrepreneurs through digital marketplace solutions.
+              <p className="text-xl text-gray-600 leading-relaxed">
+                Empowering university entrepreneurs through digital marketplace solutions. 
+                Connect, grow, and succeed in the university business ecosystem.
               </p>
               <div className="flex flex-wrap gap-4">
                 <Link 
-                  to="/learn" 
-                  className="px-6 py-3 text-white rounded-lg font-medium transition-colors"
-                  style={{ backgroundColor: theme.colors.secondary.main }}
+                  to="/register"
+                  className="px-8 py-3 bg-blue-600 text-white rounded-full font-medium hover:bg-blue-700 transition-colors shadow-lg hover:shadow-xl"
                 >
                   Get Started
                 </Link>
                 <Link 
-                  to="/about" 
-                  className="px-6 py-3 bg-white border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+                  to="/about"
+                  className="px-8 py-3 bg-white text-blue-600 rounded-full font-medium border-2 border-blue-600 hover:bg-blue-50 transition-colors"
                 >
                   Learn More
                 </Link>
               </div>
             </div>
-            <div className="flex-1 w-full">
-              <div className="w-full max-w-xl mx-auto">
+            {/* Right Column - Event Slideshow */}
+            <div className="relative">
+              <div className="w-full">
                 <EventSlideshow />
               </div>
+              {/* Decorative elements */}
+              <div className="absolute -top-4 -right-4 w-72 h-72 bg-blue-100 rounded-full filter blur-3xl opacity-30 animate-pulse"></div>
+              <div className="absolute -bottom-8 -left-8 w-72 h-72 bg-purple-100 rounded-full filter blur-3xl opacity-30 animate-pulse delay-1000"></div>
             </div>
           </div>
         </div>
@@ -58,11 +52,11 @@ const Homepage: React.FC = () => {
 
       {/* Features Section */}
       <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Why Choose UniBeez?</h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              We provide a comprehensive platform for university entrepreneurs to showcase their products and services.
+              Your one-stop platform for university entrepreneurship and marketplace solutions.
             </p>
           </div>
           
@@ -71,25 +65,31 @@ const Homepage: React.FC = () => {
               {
                 title: "Connect with Customers",
                 description: "Reach potential customers within and beyond your university community.",
-                color: theme.colors.primary.main
+                icon: "🤝",
+                color: "bg-blue-50 text-blue-600"
               },
               {
                 title: "Grow Your Business",
                 description: "Access tools and resources to help scale your entrepreneurial venture.",
-                color: theme.colors.secondary.main
+                icon: "📈",
+                color: "bg-green-50 text-green-600"
               },
               {
                 title: "Build Your Network",
                 description: "Connect with like-minded entrepreneurs and potential collaborators.",
-                color: theme.colors.accent.green
+                icon: "🌐",
+                color: "bg-purple-50 text-purple-600"
               }
             ].map((feature, index) => (
-              <div key={index} className="bg-gray-50 p-8 rounded-xl hover:shadow-md transition-all">
-                <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4" style={{ backgroundColor: `${feature.color}30` }}>
-                  <span className="text-2xl" style={{ color: feature.color }}>✓</span>
+              <div 
+                key={index} 
+                className="relative group p-8 rounded-2xl transition-all duration-300 hover:shadow-xl bg-white border border-gray-100 hover:border-transparent"
+              >
+                <div className={`w-16 h-16 ${feature.color} rounded-xl flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform`}>
+                  {feature.icon}
                 </div>
-                <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-                <p className="text-gray-600">{feature.description}</p>
+                <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
+                <p className="text-gray-600 leading-relaxed">{feature.description}</p>
               </div>
             ))}
           </div>
@@ -97,18 +97,17 @@ const Homepage: React.FC = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20" style={{ backgroundColor: `${theme.colors.accent.green}20` }}>
-        <div className="max-w-7xl mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">Ready to get started?</h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
-            Join UniBeez today and take your university business to the next level.
+      <section className="py-20 bg-gradient-to-br from-blue-600 to-blue-800 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl font-bold mb-8">Ready to Start Your Journey?</h2>
+          <p className="text-xl text-blue-100 mb-12 max-w-2xl mx-auto">
+            Join UniBeez today and become part of a thriving university business community.
           </p>
           <Link 
-            to="/register" 
-            className="px-8 py-4 text-white rounded-lg font-medium transition-colors inline-block"
-            style={{ backgroundColor: theme.colors.secondary.main }}
+            to="/register"
+            className="inline-block px-8 py-3 bg-white text-blue-600 rounded-full font-medium hover:bg-blue-50 transition-colors shadow-lg hover:shadow-xl"
           >
-            Join UniBeez
+            Get Started Now
           </Link>
         </div>
       </section>
