@@ -8,6 +8,7 @@ import { fileURLToPath } from 'url';
 import authRoutes from "./routes/auth.route.js";
 import userRoutes from "./routes/user.route.js";
 import eventRoutes from './routes/event.route.js';
+import productRoutes from './routes/product.route.js';
 import connectDB from './lib/connectDB.js';
 
 // Load environment variables
@@ -41,6 +42,7 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/events", eventRoutes);
+app.use("/api/products", productRoutes);
 
 // Test route
 app.get("/test", (req, res) => {
@@ -72,6 +74,7 @@ mongoose
       console.log('- Auth routes: /api/auth');
       console.log('- User routes: /api/users');
       console.log('- Event routes: /api/events');
+      console.log('- Product routes: /api/products');
     });
     console.log("Connected to MongoDB");
   })
