@@ -55,7 +55,7 @@ const App: React.FC = () => {
                   <ShopManagement />
                 </ProtectedRoute>
               } />
-              <Route path="/admin/events-21301429" element={
+              <Route path="/admin/events" element={
                 <ProtectedRoute adminOnly>
                   <EventManagement />
                 </ProtectedRoute>
