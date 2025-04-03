@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from './context/AuthContext';
 import { ProfileProvider } from './context/ProfileContext';
 import Layout from "./routes/Layout";
@@ -26,7 +26,8 @@ const App: React.FC = () => {
         <Router>
           <Routes>
             <Route element={<Layout />}>
-              <Route path="/" element={<Homepage />} />
+              <Route path="/" element={<Navigate to="/21301429" replace />} />
+              <Route path="/21301429" element={<Homepage />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/events-21301429" element={<Events />} />

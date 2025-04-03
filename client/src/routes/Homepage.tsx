@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from "react-router-dom";
 import { theme } from '../utils/theme';
+import EventSlideshow from '../components/EventSlideshow';
 
 const Homepage: React.FC = () => {
   return (
@@ -46,13 +47,9 @@ const Homepage: React.FC = () => {
                 </Link>
               </div>
             </div>
-            <div className="flex-1 flex justify-center">
-              <div className="w-full max-w-md bg-white p-1 rounded-2xl shadow-xl">
-                <img 
-                  src="https://placehold.co/600x400/648dcb/ffffff?text=UniBeez" 
-                  alt="UniBeez Platform" 
-                  className="w-full h-auto rounded-xl"
-                />
+            <div className="flex-1 w-full">
+              <div className="w-full max-w-xl mx-auto">
+                <EventSlideshow />
               </div>
             </div>
           </div>
