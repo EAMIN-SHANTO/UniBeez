@@ -17,7 +17,9 @@ import ServiceManagement from "./routes/admin/ServiceManagement";
 import SellerManagement from "./routes/admin/SellerManagement";
 import RegistrationInbox from "./routes/admin/RegistrationInbox";
 import Events from './routes/Events';
-
+import Shops from './routes/Shops';
+import CreateShop from './routes/CreateShop';
+import ShopDetail from './routes/ShopDetail';
 const App: React.FC = () => {
   return (
     <AuthProvider>
@@ -69,6 +71,13 @@ const App: React.FC = () => {
                   <SellerManagement />
                 </ProtectedRoute>
               } />
+              <Route path="shops" element={<Shops />} />
+              <Route path="shops/create" element={
+                <ProtectedRoute>
+                  <CreateShop />
+                </ProtectedRoute>
+              } />
+              <Route path="shops/:id" element={<ShopDetail />} />
               <Route path="*" element={
                 <div className="min-h-screen bg-gray-50 pt-20 flex items-center justify-center">
                   <div className="text-center">
