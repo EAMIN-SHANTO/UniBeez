@@ -26,11 +26,11 @@ const Navbar: React.FC = () => {
 
   const isAdmin = user?.role === 'admin' || user?.role === 'staff';
 
-  const navItems = [
+  const navLinks = [
     { path: '/', label: 'Home' },
     { path: '/shops', label: 'Shops' },
-    { path: '/marketplace', label: 'Marketplace' },
-    { path: '/events', label: 'Events' },
+    { path: '/current-event-21301429', label: 'Current Event' },
+    { path: '/events-21301429', label: 'Events' },
     { path: '/services', label: 'Services' }
   ];
 
@@ -52,7 +52,7 @@ const Navbar: React.FC = () => {
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-1">
-              {navItems.map(item => (
+              {navLinks.map(item => (
                 <Link
                   key={item.path}
                   to={item.path}
@@ -184,7 +184,7 @@ const Navbar: React.FC = () => {
       {isMenuOpen && (
         <div className="md:hidden border-t border-gray-200 bg-white">
           <div className="px-2 pt-2 pb-3 space-y-1">
-            {navItems.map(item => (
+            {navLinks.map(item => (
               <Link
                 key={item.path}
                 to={item.path}

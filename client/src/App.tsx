@@ -15,8 +15,9 @@ import ShopManagement from "./routes/admin/ShopManagement";
 import EventManagement from "./routes/admin/EventManagement";
 import ServiceManagement from "./routes/admin/ServiceManagement";
 import SellerManagement from "./routes/admin/SellerManagement";
-import RegistrationInbox from "./routes/admin/RegistrationInbox";
+// import RegistrationInbox from "./routes/admin/RegistrationInbox";
 import Events from './routes/Events';
+import CurrentEvent from './routes/CurrentEvent';
 
 const App: React.FC = () => {
   return (
@@ -28,7 +29,7 @@ const App: React.FC = () => {
               <Route path="/" element={<Homepage />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
-              <Route path="/events" element={<Events />} />
+              <Route path="/events-21301429" element={<Events />} />
               <Route path="/profile" element={
                 <ProtectedRoute>
                   <Profile />
@@ -54,7 +55,7 @@ const App: React.FC = () => {
                   <ShopManagement />
                 </ProtectedRoute>
               } />
-              <Route path="/admin/events" element={
+              <Route path="/admin/events-21301429" element={
                 <ProtectedRoute adminOnly>
                   <EventManagement />
                 </ProtectedRoute>
@@ -69,6 +70,7 @@ const App: React.FC = () => {
                   <SellerManagement />
                 </ProtectedRoute>
               } />
+              <Route path="/current-event-21301429" element={<CurrentEvent />} />
               <Route path="*" element={
                 <div className="min-h-screen bg-gray-50 pt-20 flex items-center justify-center">
                   <div className="text-center">
