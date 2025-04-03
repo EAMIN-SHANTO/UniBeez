@@ -31,7 +31,9 @@ const Navbar: React.FC = () => {
     { path: '/shops', label: 'Shops' },
     { path: '/marketplace', label: 'Marketplace' },
     { path: '/events', label: 'Events' },
-    { path: '/services', label: 'Services' }
+    { path: '/services', label: 'Services' },
+    { path: '/ProductManagement', label: 'Products' }
+    
   ];
 
   return (
