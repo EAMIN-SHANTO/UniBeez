@@ -10,10 +10,11 @@ import userRoutes from "./routes/user.route.js";
 import eventRoutes from './routes/event.route.js';
 import connectDB from './lib/connectDB.js';
 
+// Load environment variables
+dotenv.config();
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-dotenv.config();
 
 const app = express();
 
@@ -60,23 +61,23 @@ app.use((err, req, res, next) => {
 
 // Start server
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  connectDB();
-  console.log(`Server is running on port ${PORT}`);
-  console.log('Routes registered:');
-  console.log('- Auth routes: /api/auth');
-  console.log('- User routes: /api/users');
-  console.log('- Event routes: /api/events');
-  console.log('Available endpoints:');
-  console.log('- GET /api/users/all');
-  console.log('- PATCH /api/users/:userId/role');
-  console.log('- DELETE /api/users/:userId');
-});
 
-// Connect to MongoDB
+// Connect to MongoDB first, then start the server
 mongoose
-  .connect(process.env.MONGODB_URI)
-  .then(() => console.log("Connected to MongoDB"))
-  .catch((err) => console.error("MongoDB connection error:", err));
+  .connect(process.env.MONGO_URI)
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
+      console.log('Routes registered:');
+      console.log('- Auth routes: /api/auth');
+      console.log('- User routes: /api/users');
+      console.log('- Event routes: /api/events');
+    });
+    console.log("Connected to MongoDB");
+  })
+  .catch((err) => {
+    console.error("MongoDB connection error:", err);
+    process.exit(1); // Exit if cannot connect to database
+  });
 
 export default app;
