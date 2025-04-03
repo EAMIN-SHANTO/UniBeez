@@ -101,8 +101,22 @@ export const toggleCurrentEvent = async (req, res) => {
       });
     }
 
-    // Toggle the status
-    event.status = event.status === 'current' ? 'upcoming' : 'current';
+    // If trying to set as current, check if any other event is current
+    if (event.status !== 'current') {
+      const currentEvent = await Event.findOne({ status: 'current' });
+      
+      if (currentEvent) {
+        return res.status(400).json({
+          success: false,
+          message: 'Another event is already set as current. Please unset it first.'
+        });
+      }
+
+      event.status = 'current';
+    } else {
+      event.status = 'upcoming';
+    }
+
     await event.save();
 
     console.log('Event updated successfully:', {
