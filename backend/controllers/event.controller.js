@@ -1,16 +1,21 @@
 import Event from '../models/event.model.js';
 import multer from 'multer';
+import User from '../models/user.model.js';
+import { createEventNotification } from './notification.controller.js';
 
 // Get all events
 export const getAllEvents = async (req, res) => {
   try {
-    const events = await Event.find({ isActive: true })
+    console.log('Getting all events');
+    const events = await Event.find()
       .sort({ startDate: 1 })
       .populate('organizer', 'username');
     
+    console.log(`Found ${events.length} events`);
+    
     res.status(200).json({
       success: true,
-      events: events
+      events
     });
   } catch (error) {
     console.error('Error fetching events:', error);
@@ -26,7 +31,6 @@ export const getAllEvents = async (req, res) => {
 export const createEvent = async (req, res) => {
   try {
     if (!['admin', 'staff'].includes(req.user.role)) {
-      console.log('Access denied for role:', req.user.role);
       return res.status(403).json({
         success: false,
         message: 'Access denied'
@@ -34,7 +38,6 @@ export const createEvent = async (req, res) => {
     }
 
     if (!req.file) {
-      console.log('No file uploaded');
       return res.status(400).json({
         success: false,
         message: 'Banner image is required'
@@ -55,12 +58,14 @@ export const createEvent = async (req, res) => {
       organizer: req.user._id
     };
 
-    console.log('Creating event with data:', eventData);
-
     const event = new Event(eventData);
     await event.save();
 
-    console.log('Event created successfully:', event);
+    // Create notifications for all users
+    const users = await User.find({});
+    await Promise.all(users.map(user => 
+      createEventNotification(user._id, event)
+    ));
 
     res.status(201).json({
       success: true,
@@ -68,27 +73,9 @@ export const createEvent = async (req, res) => {
     });
   } catch (error) {
     console.error('Event creation error:', error);
-    console.error('Error stack:', error.stack);
-    
-    // Handle Multer errors
-    if (error instanceof multer.MulterError) {
-      if (error.code === 'LIMIT_FILE_SIZE') {
-        return res.status(400).json({
-          success: false,
-          message: 'File is too large. Maximum size is 5MB.'
-        });
-      }
-      return res.status(400).json({
-        success: false,
-        message: 'File upload error',
-        error: error.message
-      });
-    }
-
     res.status(500).json({
       success: false,
-      message: 'Error creating event',
-      error: error.message
+      message: error.message
     });
   }
 };

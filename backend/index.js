@@ -8,6 +8,7 @@ import { fileURLToPath } from 'url';
 import authRoutes from "./routes/auth.route.js";
 import userRoutes from "./routes/user.route.js";
 import eventRoutes from './routes/event.route.js';
+import notificationRoutes from './routes/notification.route.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -26,20 +27,35 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// Configure static file serving before routes
+// Add debug logging middleware
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`);
+  next();
+});
+
+// Configure static file serving
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// API Routes - make sure these come before error handlers
+// API Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
-app.use("/api", eventRoutes);
+app.use("/api/events-21301429", eventRoutes);
+app.use("/api", notificationRoutes);
 
-// Test route to verify API is working
+// Test routes
 app.get("/api/test", (req, res) => {
   res.json({ message: "API is working!" });
 });
 
-// Error handling for 404
+app.get("/api/notifications/test", (req, res) => {
+  res.json({ message: "Notification routes are working!" });
+});
+
+app.get("/api/events-21301429/test", (req, res) => {
+  res.json({ message: "Event routes are working!" });
+});
+
+// Error handling
 app.use((req, res, next) => {
   console.log('404 hit for:', req.method, req.url);
   res.status(404).json({
@@ -66,10 +82,26 @@ mongoose
   .then(() => {
     app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
-      console.log('Routes registered:');
-      console.log('- Auth routes: /api/auth');
-      console.log('- User routes: /api/users');
-      console.log('- Event routes: /api');
+      console.log('\nRoutes registered:');
+      console.log('- Auth routes: /api/auth/*');
+      console.log('- User routes: /api/users/*');
+      console.log('- Event routes: /api/events-21301429/*');
+      console.log('- Notification routes: /api/notifications/*');
+      
+      // Log available endpoints
+      console.log('\nEvent endpoints:');
+      console.log('GET    /api/events-21301429');
+      console.log('POST   /api/events-21301429');
+      console.log('PUT    /api/events-21301429/:eventId');
+      console.log('DELETE /api/events-21301429/:eventId');
+      console.log('PATCH  /api/events-21301429/:eventId/archive');
+      console.log('GET    /api/events-21301429/test');
+      
+      console.log('\nNotification endpoints:');
+      console.log('GET    /api/notifications');
+      console.log('PATCH  /api/notifications/:notificationId/read');
+      console.log('PATCH  /api/notifications/read-all');
+      console.log('GET    /api/notifications/test');
     });
     console.log("Connected to MongoDB");
   })
