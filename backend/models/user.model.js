@@ -3,14 +3,14 @@ import mongoose from "mongoose";
 const userSchema = new mongoose.Schema({
   username: {
     type: String,
-    required: [true, 'Username is required'],
+    required: true,
     unique: true,
     trim: true,
-    minlength: [3, 'Username must be at least 3 characters long']
+    minlength: 3
   },
   email: {
     type: String,
-    required: [true, 'Email is required'],
+    required: true,
     unique: true,
     trim: true,
     lowercase: true,
@@ -18,13 +18,13 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: [true, 'Password is required'],
-    minlength: [6, 'Password must be at least 6 characters long']
+    required: true,
+    minlength: 6
   },
   // New fields
   role: {
     type: String,
-    enum: ['user', 'staff', 'admin'],
+    enum: ['user', 'admin', 'staff', 'seller'],
     default: 'user'
   },
   fullName: {
@@ -59,15 +59,14 @@ const userSchema = new mongoose.Schema({
   img: {
     type: String,
     default: 'https://cdn-icons-png.flaticon.com/512/4908/4908415.png'
+  },
+  isActive: {
+    type: Boolean,
+    default: true
   }
 }, {
   timestamps: true
 });
-
-// Create indexes to ensure uniqueness
-userSchema.index({ email: 1 }, { unique: true });
-userSchema.index({ username: 1 }, { unique: true });
-userSchema.index({ studentId: 1 }, { sparse: true }); // Sparse index for optional field
 
 const User = mongoose.model("User", userSchema);
 
