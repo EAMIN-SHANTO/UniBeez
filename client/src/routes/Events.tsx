@@ -30,6 +30,8 @@ const Events: React.FC = () => {
     location: '',
     status: 'upcoming'
   });
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string>('');
 
   const fetchEvents = async () => {
     try {
@@ -54,22 +56,39 @@ const Events: React.FC = () => {
     fetchEvents();
   }, []);
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setSelectedFile(file);
+      setPreviewUrl(URL.createObjectURL(file));
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const formData = new FormData();
+      formData.append('title', newEvent.title);
+      formData.append('description', newEvent.description);
+      formData.append('startDate', newEvent.startDate);
+      formData.append('endDate', newEvent.endDate);
+      formData.append('location', newEvent.location);
+      formData.append('status', newEvent.status);
+      
+      if (selectedFile) {
+        formData.append('bannerImage', selectedFile);
+      }
+
       const response = await fetch(`${API_URL}/api/events`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
         credentials: 'include',
-        body: JSON.stringify(newEvent)
+        body: formData // Don't set Content-Type header, browser will set it
       });
 
       const data = await response.json();
       
       if (data.success) {
-        await fetchEvents(); // Refresh events list
+        await fetchEvents();
         setShowAddForm(false);
         setNewEvent({
           title: '',
@@ -80,6 +99,8 @@ const Events: React.FC = () => {
           location: '',
           status: 'upcoming'
         });
+        setSelectedFile(null);
+        setPreviewUrl('');
       } else {
         setError(data.message);
       }
@@ -142,14 +163,25 @@ const Events: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Banner Image URL</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Banner Image
+                </label>
                 <input
-                  type="url"
-                  value={newEvent.bannerImage}
-                  onChange={(e) => setNewEvent({ ...newEvent, bannerImage: e.target.value })}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 />
+                {previewUrl && (
+                  <div className="mt-2">
+                    <img
+                      src={previewUrl}
+                      alt="Preview"
+                      className="w-full h-48 object-cover rounded-lg"
+                    />
+                  </div>
+                )}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
