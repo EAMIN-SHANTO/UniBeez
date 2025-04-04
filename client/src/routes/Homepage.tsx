@@ -5,6 +5,9 @@ import { Link } from 'react-router-dom';
 const Homepage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
+
+      <br />
+      
       {/* Hero Section */}
       <div className="relative bg-white mt-16">
         <div className="mx-auto max-w-7xl lg:grid lg:grid-cols-12 lg:gap-x-8 lg:px-8">
