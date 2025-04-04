@@ -9,6 +9,7 @@ import authRoutes from "./routes/auth.route.js";
 import userRoutes from "./routes/user.route.js";
 import eventRoutes from './routes/event.route.js';
 import shopRoutes from './routes/shop.route.js';
+import productRoutes from './routes/product.route.js'; 
 import connectDB from './lib/connectDB.js';
 
 // Load environment variables
@@ -42,7 +43,8 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/events", eventRoutes);
-app.use("/api/shops", shopRoutes);  
+app.use("/api/1584/shops", shopRoutes);
+app.use("/api/products/1584", productRoutes); 
 
 // Test route
 app.get("/test", (req, res) => {

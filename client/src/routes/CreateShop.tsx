@@ -40,7 +40,7 @@ const CreateShop: React.FC = () => {
       
       // Use withCredentials to send cookies with the request
       await axios.post(
-        `${API_URL}/api/shops`, 
+        `${API_URL}/api/1584/shops`, 
         formData,
         {
           headers: {

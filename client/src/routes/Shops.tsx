@@ -31,7 +31,7 @@ const Shops: React.FC = () => {
     const fetchShops = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`${API_URL}/api/shops`); // Use API_URL from context
+        const response = await axios.get(`${API_URL}/api/1584/shops`); // Use API_URL from context
         setShops(response.data.shops);
         setError(null);
       } catch (err) {

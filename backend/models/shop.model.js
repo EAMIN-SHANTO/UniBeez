@@ -33,7 +33,7 @@ const shopSchema = new mongoose.Schema({
   status: {
     type: String,
     enum: ['pending', 'active', 'suspended'],
-    default: 'pending'
+    default: 'active'
   },
   rating: {
     type: Number,

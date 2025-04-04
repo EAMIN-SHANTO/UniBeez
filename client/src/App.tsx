@@ -20,6 +20,8 @@ import Events from './routes/Events';
 import Shops from './routes/Shops';
 import CreateShop from './routes/CreateShop';
 import ShopDetail from './routes/ShopDetail';
+import ProductDetail from './routes/ProductDetail';
+import CreateProduct from './routes/CreateProduct';
 const App: React.FC = () => {
   return (
     <AuthProvider>
@@ -77,14 +79,25 @@ const App: React.FC = () => {
                   <CreateShop />
                 </ProtectedRoute>
               } />
-              <Route path="shops/:id" element={<ShopDetail />} />
-              <Route path="*" element={
-                <div className="min-h-screen bg-gray-50 pt-20 flex items-center justify-center">
-                  <div className="text-center">
-                    <h1 className="text-4xl font-bold text-gray-900 mb-4">404</h1>
-                    <p className="text-gray-600">Page not found</p>
-                  </div>
-                </div>
+              <Route path="/shops" element={<Shops />} />
+              <Route path="/shops/create" element={
+                <ProtectedRoute>
+                  <CreateShop />
+                </ProtectedRoute>
+              } />
+              <Route path="/shops/:id" element={<ShopDetail />} />
+              
+              <Route path="/products/:id" element={<ProductDetail />} />
+              <Route path="/products/create/:shopId" element={
+                      <ProtectedRoute>
+                  <CreateProduct />
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/profile" element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
               } />
             </Route>
           </Routes>
