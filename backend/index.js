@@ -8,7 +8,10 @@ import { fileURLToPath } from 'url';
 import authRoutes from "./routes/auth.route.js";
 import userRoutes from "./routes/user.route.js";
 import eventRoutes from './routes/event.route.js';
-import notificationRoutes from './routes/notification.route.js';
+import connectDB from './lib/connectDB.js';
+
+// Load environment variables
+dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -39,8 +42,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // API Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
-app.use("/api/events-21301429", eventRoutes);
-app.use("/api", notificationRoutes);
+app.use("/api/events", eventRoutes);
 
 // Test routes
 app.get("/api/test", (req, res) => {
@@ -82,26 +84,10 @@ mongoose
   .then(() => {
     app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
-      console.log('\nRoutes registered:');
-      console.log('- Auth routes: /api/auth/*');
-      console.log('- User routes: /api/users/*');
-      console.log('- Event routes: /api/events-21301429/*');
-      console.log('- Notification routes: /api/notifications/*');
-      
-      // Log available endpoints
-      console.log('\nEvent endpoints:');
-      console.log('GET    /api/events-21301429');
-      console.log('POST   /api/events-21301429');
-      console.log('PUT    /api/events-21301429/:eventId');
-      console.log('DELETE /api/events-21301429/:eventId');
-      console.log('PATCH  /api/events-21301429/:eventId/archive');
-      console.log('GET    /api/events-21301429/test');
-      
-      console.log('\nNotification endpoints:');
-      console.log('GET    /api/notifications');
-      console.log('PATCH  /api/notifications/:notificationId/read');
-      console.log('PATCH  /api/notifications/read-all');
-      console.log('GET    /api/notifications/test');
+      console.log('Routes registered:');
+      console.log('- Auth routes: /api/auth');
+      console.log('- User routes: /api/users');
+      console.log('- Event routes: /api/events');
     });
     console.log("Connected to MongoDB");
   })
