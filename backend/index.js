@@ -9,6 +9,8 @@ import authRoutes from "./routes/auth.route.js";
 import userRoutes from "./routes/user.route.js";
 import eventRoutes from './routes/event.route.js';
 import notificationRoutes from './routes/notification.route.js';
+import shopRoutes from './routes/shop.route.js';
+import productRoutes from './routes/product.route.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -40,7 +42,9 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/events-21301429", eventRoutes);
-app.use("/api", notificationRoutes);
+app.use("/api/notifications", notificationRoutes);
+app.use("/api/shops", shopRoutes);
+app.use("/api/products", productRoutes);
 
 // Test routes
 app.get("/api/test", (req, res) => {
@@ -87,6 +91,8 @@ mongoose
       console.log('- User routes: /api/users/*');
       console.log('- Event routes: /api/events-21301429/*');
       console.log('- Notification routes: /api/notifications/*');
+      console.log('- Shop routes: /api/shops/*');
+      console.log('- Product routes: /api/products/*');
       
       // Log available endpoints
       console.log('\nEvent endpoints:');

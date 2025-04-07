@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from './context/AuthContext';
 import { ProfileProvider } from './context/ProfileContext';
+import { NotificationProvider } from './context/NotificationContext';
 import Layout from "./routes/Layout";
 import Homepage from "./routes/Homepage";
 import Login from "./routes/Login";
@@ -15,17 +16,22 @@ import ShopManagement from "./routes/admin/ShopManagement";
 import EventManagement from "./routes/admin/EventManagement";
 import ServiceManagement from "./routes/admin/ServiceManagement";
 import SellerManagement from "./routes/admin/SellerManagement";
+
 // import RegistrationInbox from "./routes/admin/RegistrationInbox";
 import Events from './routes/Events';
 import CurrentEvent from './routes/CurrentEvent';
-import { NotificationProvider } from './context/NotificationContext';
+import Shops from './routes/Shops';
+import CreateShop from './routes/CreateShop';
+import ShopDetail from './routes/ShopDetail';
+import ProductDetail from './routes/ProductDetail';
+import CreateProduct from './routes/CreateProduct';
 
 const App: React.FC = () => {
   return (
     <AuthProvider>
       <ProfileProvider>
-        <NotificationProvider>
-          <Router>
+        <Router>
+          <NotificationProvider>
             <Routes>
               <Route element={<Layout />}>
                 <Route path="/" element={<Navigate to="/21301429" replace />} />
@@ -73,6 +79,22 @@ const App: React.FC = () => {
                     <SellerManagement />
                   </ProtectedRoute>
                 } />
+
+                <Route path="shops" element={<Shops />} />
+                <Route path="shops/create" element={
+                  <ProtectedRoute>
+                    <CreateShop />
+                  </ProtectedRoute>
+                } />
+                <Route path="/shops/:id" element={<ShopDetail />} />
+                
+                <Route path="/products/:id" element={<ProductDetail />} />
+                <Route path="/products/create/:shopId" element={
+                  <ProtectedRoute>
+                    <CreateProduct />
+                  </ProtectedRoute>
+                } />
+
                 <Route path="/current-event-21301429" element={<CurrentEvent />} />
                 <Route path="*" element={
                   <div className="min-h-screen bg-gray-50 pt-20 flex items-center justify-center">
@@ -84,8 +106,8 @@ const App: React.FC = () => {
                 } />
               </Route>
             </Routes>
-          </Router>
-        </NotificationProvider>
+          </NotificationProvider>
+        </Router>
       </ProfileProvider>
     </AuthProvider>
   );

@@ -35,6 +35,15 @@ const Navbar: React.FC = () => {
     { path: '/services', label: 'Services' }
   ];
 
+  const renderNotifications = () => {
+    try {
+      return <NotificationDropdown />;
+    } catch (error) {
+      console.error('Error rendering notifications:', error);
+      return null;
+    }
+  };
+
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
       scrolled ? 'bg-white/95 backdrop-blur-sm shadow-sm' : 'bg-white/0'
@@ -73,7 +82,7 @@ const Navbar: React.FC = () => {
             {user && (
               <div className="hidden md:flex items-center gap-4 mr-4">
                 {/* Notification */}
-                <NotificationDropdown />
+                {renderNotifications()}
 
                 {/* Cart */}
                 <button className="relative p-2 text-gray-500 hover:text-blue-600 transition-colors">

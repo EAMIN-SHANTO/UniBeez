@@ -30,12 +30,18 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     
     try {
       const response = await fetch(`${API_URL}/api/notifications`, {
-        credentials: 'include'
+        credentials: 'include',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
       });
       const data = await response.json();
       
       if (data.success) {
         setNotifications(data.notifications);
+      } else {
+        console.error('Failed to fetch notifications:', data);
       }
     } catch (error) {
       console.error('Error fetching notifications:', error);

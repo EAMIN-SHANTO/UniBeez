@@ -9,13 +9,18 @@ import {
 const router = express.Router();
 
 // Add debug route
-router.get('/notifications/debug', (req, res) => {
+router.get('/debug', (req, res) => {
   res.json({ message: 'Notification routes are accessible' });
 });
 
-router.get('/notifications', verifyToken, getUserNotifications);
-router.patch('/notifications/:notificationId/read', verifyToken, markAsRead);
-router.patch('/notifications/read-all', verifyToken, markAllAsRead);
+// GET /api/notifications
+router.get('/', verifyToken, getUserNotifications);
+
+// PATCH /api/notifications/:notificationId/read
+router.patch('/:notificationId/read', verifyToken, markAsRead);
+
+// PATCH /api/notifications/read-all
+router.patch('/read-all', verifyToken, markAllAsRead);
 
 // Log routes when they're registered
 console.log('Notification routes registered:');

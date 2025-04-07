@@ -58,7 +58,7 @@ const userSchema = new mongoose.Schema({
   },
   img: {
     type: String,
-    default: 'https://cdn-icons-png.flaticon.com/512/4908/4908415.png'
+    default: 'https://placehold.co/150'
   },
   isActive: {
     type: Boolean,
