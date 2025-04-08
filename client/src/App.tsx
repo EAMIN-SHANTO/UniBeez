@@ -3,28 +3,28 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import { AuthProvider } from './context/AuthContext';
 import { ProfileProvider } from './context/ProfileContext';
 import { NotificationProvider } from './context/NotificationContext';
-import Layout from "./routes/Layout";
-import Homepage from "./routes/Homepage";
-import Login from "./routes/Login";
-import Register from "./routes/Register";
-import Profile from "./routes/Profile";
-import EditProfile from "./routes/EditProfile";
+import Layout from "./pages/Layout";
+import Homepage from "./pages/Homepage";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Profile from "./pages/Profile";
+import EditProfile from "./pages/EditProfile";
 import ProtectedRoute from "./components/ProtectedRoute";
-import AdminDashboard from "./routes/admin/AdminDashboard";
-import UsersManagement from "./routes/admin/UsersManagement";
-import ShopManagement from "./routes/admin/ShopManagement";
-import EventManagement from "./routes/admin/EventManagement";
-import ServiceManagement from "./routes/admin/ServiceManagement";
-import SellerManagement from "./routes/admin/SellerManagement";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import UsersManagement from "./pages/admin/UsersManagement";
+import ShopManagement from "./pages/admin/ShopManagement";
+import EventManagement from "./pages/admin/EventManagement";
+import ServiceManagement from "./pages/admin/ServiceManagement";
+import SellerManagement from "./pages/admin/SellerManagement";
 
 // import RegistrationInbox from "./routes/admin/RegistrationInbox";
-import Events from './routes/Events';
-import CurrentEvent from './routes/CurrentEvent';
-import Shops from './routes/Shops';
-import CreateShop from './routes/CreateShop';
-import ShopDetail from './routes/ShopDetail';
-import ProductDetail from './routes/ProductDetail';
-import CreateProduct from './routes/CreateProduct';
+import Events from './pages/Events';
+import CurrentEvent from './pages/CurrentEvent';
+import Shops from './pages/Shops';
+import CreateShop from './pages/CreateShop';
+import ShopDetail from './pages/ShopDetail';
+import ProductDetail from './pages/ProductDetail';
+import CreateProduct from './pages/CreateProduct';
 
 const App: React.FC = () => {
   return (
