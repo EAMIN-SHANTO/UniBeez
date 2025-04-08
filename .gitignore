@@ -2,10 +2,10 @@
 .env
 
 # Node modules
-node_modules/
+# node_modules/
 
 # Logs
 *.log
 
 # Build files
-dist/
+# dist/
