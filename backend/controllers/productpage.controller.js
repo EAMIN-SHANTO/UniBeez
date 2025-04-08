@@ -88,17 +88,26 @@ export const getProductById = async (req, res) => {
     }
   };
 // Get all products
+// Get all products for a product page
 export const getAllProducts = async (req, res) => {
   try {
-    const { category, minPrice, maxPrice, sort } = req.query;
+    const { category, minPrice, maxPrice, sort, search, shop } = req.query;
     
-    // Build query - only keep essential filters
+    // Build query
     const query = {};
     if (category) query.category = category;
+    if (shop) query.shop = shop;
     if (minPrice || maxPrice) {
       query.price = {};
       if (minPrice) query.price.$gte = Number(minPrice);
       if (maxPrice) query.price.$lte = Number(maxPrice);
+    }
+    // Add search functionality
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } }
+      ];
     }
     
     // Build sort options
@@ -107,14 +116,17 @@ export const getAllProducts = async (req, res) => {
     else if (sort === 'price-desc') sortOptions.price = -1;
     else if (sort === 'newest') sortOptions.createdAt = -1;
     else if (sort === 'rating') sortOptions.rating = -1;
-    else sortOptions.createdAt = -1;
-
-    // Fetch all products with minimal shop and owner info
+    else sortOptions.createdAt = -1; // Default sort
+    
     const products = await Product.find(query)
       .sort(sortOptions)
       .populate({
         path: 'shop',
-        select: 'name',
+        select: 'name owner',
+        populate: {
+          path: 'owner',
+          select: '_id username'
+        }
       });
     
     res.status(200).json({

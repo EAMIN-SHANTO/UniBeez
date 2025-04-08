@@ -23,8 +23,7 @@ import ShopDetail from './routes/ShopDetail';
 import ProductDetail from './routes/ProductDetail';
 import CreateProduct from './routes/CreateProduct';
 import ProductPages from './routes/ProductDetail';
-import ProductPage from './routes/ProductPage';
-
+import ProductPage from './routes/ProductPage'; 
 const App: React.FC = () => {
   return (
     <AuthProvider>
@@ -102,8 +101,7 @@ const App: React.FC = () => {
                   <Profile />
                 </ProtectedRoute>
               } />
-              <Route path="/productpages" element={<ProductPages />} />
-              <Route path="/productpages/:id" element={<ProductPage />} />
+              <Route path="/products" element={<ProductPage />} />
             </Route>
           </Routes>
         </Router>

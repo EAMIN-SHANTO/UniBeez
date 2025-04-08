@@ -32,7 +32,7 @@ const Navbar: React.FC = () => {
     { path: '/marketplace', label: 'Marketplace' },
     { path: '/events', label: 'Events' },
     { path: '/services', label: 'Services' },
-    { path: '/productpages', label: 'Product Pages' }
+    { path: '/products', label: 'Products' }
   ];
 
   return (
