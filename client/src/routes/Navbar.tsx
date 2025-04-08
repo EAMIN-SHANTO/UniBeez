@@ -29,10 +29,10 @@ const Navbar: React.FC = () => {
   const navItems = [
     { path: '/', label: 'Home' },
     { path: '/shops', label: 'Shops' },
-    { path: '/marketplace', label: 'Marketplace' },
+    { path: '/products', label: 'Products' },
     { path: '/events', label: 'Events' },
     { path: '/services', label: 'Services' },
-    { path: '/products', label: 'Products' }
+    
   ];
 
   return (
