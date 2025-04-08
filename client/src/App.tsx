@@ -15,13 +15,16 @@ import ShopManagement from "./routes/admin/ShopManagement";
 import EventManagement from "./routes/admin/EventManagement";
 import ServiceManagement from "./routes/admin/ServiceManagement";
 import SellerManagement from "./routes/admin/SellerManagement";
-import RegistrationInbox from "./routes/admin/RegistrationInbox";
+//import RegistrationInbox from "./routes/admin/RegistrationInbox";
 import Events from './routes/Events';
 import Shops from './routes/Shops';
 import CreateShop from './routes/CreateShop';
 import ShopDetail from './routes/ShopDetail';
 import ProductDetail from './routes/ProductDetail';
 import CreateProduct from './routes/CreateProduct';
+import ProductPages from './routes/ProductDetail';
+import ProductPage from './routes/ProductPage';
+
 const App: React.FC = () => {
   return (
     <AuthProvider>
@@ -99,6 +102,8 @@ const App: React.FC = () => {
                   <Profile />
                 </ProtectedRoute>
               } />
+              <Route path="/productpages" element={<ProductPages />} />
+              <Route path="/productpages/:id" element={<ProductPage />} />
             </Route>
           </Routes>
         </Router>
@@ -107,4 +112,4 @@ const App: React.FC = () => {
   );
 };
 
-export default App; 
+export default App;
