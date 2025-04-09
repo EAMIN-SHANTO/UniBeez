@@ -29,17 +29,24 @@ const ProductPage: React.FC = () => {
       try {
         setShopLoading(true);
         if (user) {
+          console.log('Fetching shop ID for user:', user._id); // Debugging log
           const response = await axios.get(`${API_URL}/api/shops/user/${user._id}`, {
             withCredentials: true,
           });
-          setShopId(response.data.shopId || null);
+          console.log('API Response:', response.data); // Debugging log
+          if (!response.data.shopId) {
+            console.warn('No shop found for this user.'); // Debugging log
+            throw new Error('Shop not found');
+          }
+          setShopId(response.data.shopId);
           setError(null);
         } else {
+          console.warn('User is not logged in.'); // Debugging log
           setShopId(null);
         }
       } catch (err) {
-        console.error('Failed to fetch shop ID:', err);
-        setError('Failed to fetch shop information.');
+        console.error('Error fetching shop ID:', (err as Error).message || err);
+        setError((err as any).response?.data?.message || 'Failed to fetch shop information.');
         setShopId(null);
       } finally {
         setShopLoading(false);
@@ -144,7 +151,7 @@ const ProductPage: React.FC = () => {
             {filteredProducts.map((product) => (
               <Link 
                 key={product._id} 
-                to={`/product/${product._id}`}
+                to={`/products/${product._id}`}
                 className="bg-white overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow duration-300"
               >
                 <div className="relative h-48">
