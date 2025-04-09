@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 
@@ -13,13 +13,41 @@ interface Product {
 
 const ProductPage: React.FC = () => {
   const { API_URL, user } = useAuth();
+  const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<string>('');
   const [categoryFilter, setCategoryFilter] = useState<string>('');
+  const [shopId, setShopId] = useState<string | null>(null);
+  const [shopLoading, setShopLoading] = useState<boolean>(true);
 
   const categories = ['Featured', 'Trending', 'New Arrivals', 'Deals', 'Collections'];
+
+  useEffect(() => {
+    const fetchShopId = async () => {
+      try {
+        setShopLoading(true);
+        if (user) {
+          const response = await axios.get(`${API_URL}/api/shops/user/${user._id}`, {
+            withCredentials: true,
+          });
+          setShopId(response.data.shopId || null);
+          setError(null);
+        } else {
+          setShopId(null);
+        }
+      } catch (err) {
+        console.error('Failed to fetch shop ID:', err);
+        setError('Failed to fetch shop information.');
+        setShopId(null);
+      } finally {
+        setShopLoading(false);
+      }
+    };
+
+    fetchShopId();
+  }, [API_URL, user]);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -79,13 +107,25 @@ const ProductPage: React.FC = () => {
               ))}
             </select>
           </div>
-          {user && (
+          {shopLoading ? (
+            <div className="text-gray-500">Loading shop information...</div>
+          ) : shopId ? (
             <div>
               <Link
-                to="/product/create"
+                to="/products/create"
+                state={{ shopId }}
                 className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
               >
                 Add Product
+              </Link>
+            </div>
+          ) : (
+            <div>
+              <Link
+                to="/shops/create"
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                Create Your Own Shop
               </Link>
             </div>
           )}

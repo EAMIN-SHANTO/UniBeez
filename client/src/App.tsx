@@ -22,7 +22,6 @@ import CreateShop from './routes/CreateShop';
 import ShopDetail from './routes/ShopDetail';
 import ProductDetail from './routes/ProductDetail';
 import CreateProduct from './routes/CreateProduct';
-import ProductPages from './routes/ProductDetail';
 import ProductPage from './routes/ProductPage'; 
 const App: React.FC = () => {
   return (
@@ -87,8 +86,7 @@ const App: React.FC = () => {
                   <CreateShop />
                 </ProtectedRoute>
               } />
-              <Route path="/shops/:id" element={<ShopDetail />} />
-              
+              <Route path="/shops/:id" element={<ShopDetail />} />             
               <Route path="/products/:id" element={<ProductDetail />} />
               <Route path="/products/create/:shopId" element={
                       <ProtectedRoute>
