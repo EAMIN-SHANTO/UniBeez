@@ -16,7 +16,6 @@ import ShopManagement from "./pages/admin/ShopManagement";
 import EventManagement from "./pages/admin/EventManagement";
 import ServiceManagement from "./pages/admin/ServiceManagement";
 import SellerManagement from "./pages/admin/SellerManagement";
-
 // import RegistrationInbox from "./routes/admin/RegistrationInbox";
 import Events from './pages/Events';
 import CurrentEvent from './pages/CurrentEvent';
@@ -25,6 +24,7 @@ import CreateShop from './pages/CreateShop';
 import ShopDetail from './pages/ShopDetail';
 import ProductDetail from './pages/ProductDetail';
 import CreateProduct from './pages/CreateProduct';
+import EditShop from './pages/EditShop';
 
 const App: React.FC = () => {
   return (
@@ -92,6 +92,11 @@ const App: React.FC = () => {
                 <Route path="/products/create/:shopId" element={
                   <ProtectedRoute>
                     <CreateProduct />
+                  </ProtectedRoute>
+                } />
+                <Route path="/shops/edit/:id" element={
+                  <ProtectedRoute>
+                    <EditShop />
                   </ProtectedRoute>
                 } />
 

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { useAuth } from '../context/AuthContext'; // Add this import
+import { useAuth } from '../context/AuthContext';
 
-// Define the Shop interface
+// Update the Shop interface to include owner information
 interface Shop {
   _id: string;
   name: string;
@@ -13,17 +13,21 @@ interface Shop {
   rating: number;
   reviewCount: number;
   university?: string;
+  owner: {
+    _id: string;
+    username: string;
+    email: string;
+  };
 }
 
-// Rest of the imports and interfaces remain the same
-
 const Shops: React.FC = () => {
-  const { API_URL } = useAuth(); // Get API_URL from context
+  const { API_URL, user } = useAuth(); // Get user from context
   const [shops, setShops] = useState<Shop[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<string>('');
   const [categoryFilter, setCategoryFilter] = useState<string>('');
+  const [showOnlyMyShops, setShowOnlyMyShops] = useState<boolean>(false); // Add this state
   
   const categories = ['Food', 'Clothing', 'Electronics', 'Books', 'Services', 'Other'];
 
@@ -31,7 +35,7 @@ const Shops: React.FC = () => {
     const fetchShops = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`${API_URL}/api/shops`); // Fixed API endpoint
+        const response = await axios.get(`${API_URL}/api/shops`);
         setShops(response.data.shops);
         setError(null);
       } catch (err) {
@@ -43,18 +47,26 @@ const Shops: React.FC = () => {
     };
 
     fetchShops();
-  }, [API_URL]); // Add API_URL to dependency array
+  }, [API_URL]);
 
+  // Update the filtering logic to include ownership filtering
   const filteredShops = shops.filter(shop => {
     const matchesSearch = shop.name.toLowerCase().includes(filter.toLowerCase()) ||
                          shop.description.toLowerCase().includes(filter.toLowerCase());
     const matchesCategory = categoryFilter === '' || shop.category === categoryFilter;
-    return matchesSearch && matchesCategory;
+    const matchesOwnership = !showOnlyMyShops || (user && shop.owner && shop.owner._id === user._id);
+    return matchesSearch && matchesCategory && matchesOwnership;
   });
+
+  // Add toggle handler
+  const toggleMyShops = () => {
+    setShowOnlyMyShops(prev => !prev);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
+        {/* Title section remains unchanged */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
             University Shops
@@ -64,6 +76,7 @@ const Shops: React.FC = () => {
           </p>
         </div>
 
+        {/* Update the filter section to include the ownership toggle */}
         <div className="mb-8 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
           <div className="flex-1">
             <input
@@ -86,6 +99,20 @@ const Shops: React.FC = () => {
               ))}
             </select>
           </div>
+          {user && (
+            <div className="flex items-center mr-4">
+              <button
+                onClick={toggleMyShops}
+                className={`px-4 py-2 text-sm font-medium rounded-md ${
+                  showOnlyMyShops 
+                    ? 'bg-indigo-600 text-white' 
+                    : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500`}
+              >
+                {showOnlyMyShops ? 'My Shops' : 'All Shops'}
+              </button>
+            </div>
+          )}
           <div>
             <Link
               to="/shops/create"
@@ -96,6 +123,7 @@ const Shops: React.FC = () => {
           </div>
         </div>
 
+        {/* Rest of your component remains the same */}
         {loading ? (
           <div className="flex justify-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500"></div>
@@ -115,7 +143,21 @@ const Shops: React.FC = () => {
           </div>
         ) : filteredShops.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-lg text-gray-500">No shops found. Try adjusting your filters.</p>
+            <p className="text-lg text-gray-500">
+              {showOnlyMyShops 
+                ? "You don't have any shops yet. Create one to get started!"
+                : "No shops found. Try adjusting your filters."}
+            </p>
+            {showOnlyMyShops && (
+              <div className="mt-4">
+                <Link
+                  to="/shops/create"
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                  Create Your First Shop
+                </Link>
+              </div>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -151,9 +193,16 @@ const Shops: React.FC = () => {
                         {shop.rating} ({shop.reviewCount} reviews)
                       </span>
                     </div>
-                    {shop.university && (
-                      <span className="text-xs text-gray-500">{shop.university}</span>
-                    )}
+                    <div className="flex items-center">
+                      {user && shop.owner && user._id === shop.owner._id && (
+                        <span className="text-xs bg-green-100 text-green-800 rounded-full px-2 py-1 mr-2">
+                          Your Shop
+                        </span>
+                      )}
+                      {shop.university && (
+                        <span className="text-xs text-gray-500">{shop.university}</span>
+                      )}
+                    </div>
                   </div>
                 </div>
               </Link>

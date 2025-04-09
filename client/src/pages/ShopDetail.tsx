@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 
@@ -34,6 +34,7 @@ interface Product {
 }
 
 const ShopDetail: React.FC = () => {
+  const navigate = useNavigate(); // Add useNavigate hook
   const { API_URL, user } = useAuth(); // Add user from AuthContext
   const { id } = useParams<{ id: string }>();
   const [shop, setShop] = useState<Shop | null>(null);
@@ -42,6 +43,9 @@ const ShopDetail: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [productsLoading, setProductsLoading] = useState<boolean>(true);
   const [productsError, setProductsError] = useState<string | null>(null);
+  // Add state for delete confirmation modal
+  const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchShopDetails = async () => {
@@ -86,6 +90,32 @@ const ShopDetail: React.FC = () => {
   }, [id, API_URL, shop, loading, error]);
 
   const isOwner = user && shop && user._id === shop.owner._id;
+
+  const handleDeleteClick = () => {
+    setShowDeleteModal(true);
+  };
+  
+  const handleDeleteConfirm = async () => {
+    try {
+      setIsDeleting(true);
+      await axios.delete(`${API_URL}/api/shops/${id}`, {
+        withCredentials: true
+      });
+      
+      setShowDeleteModal(false);
+      navigate('/shops');
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to delete shop. Please try again.');
+      console.error(err);
+      setShowDeleteModal(false);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+  
+  const handleDeleteCancel = () => {
+    setShowDeleteModal(false);
+  };
 
   if (loading) {
     return (
@@ -134,12 +164,30 @@ const ShopDetail: React.FC = () => {
                 Information about the shop and its services.
               </p>
             </div>
-            <Link
-              to="/shops"
-              className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              Back to Shops
-            </Link>
+            <div className="flex space-x-2">
+              <Link
+                to="/shops"
+                className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                Back to Shops
+              </Link>
+              {isOwner && (
+                <>
+                  <Link
+                    to={`/shops/edit/${shop._id}`}
+                    className="inline-flex items-center px-3 py-1.5 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  >
+                    Edit Shop
+                  </Link>
+                  <button
+                    onClick={handleDeleteClick}
+                    className="inline-flex items-center px-3 py-1.5 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                  >
+                    Delete Shop
+                  </button>
+                </>
+              )}
+            </div>
           </div>
           
           <div className="border-t border-gray-200">
@@ -299,6 +347,38 @@ const ShopDetail: React.FC = () => {
           </div>
         </div>
       </div>
+      
+      {/* Delete confirmation modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <div className="mb-4">
+              <h3 className="text-lg font-medium text-gray-900">Confirm Deletion</h3>
+              <p className="text-sm text-gray-500 mt-1">
+                Are you sure you want to delete {shop?.name}? This action cannot be undone.
+              </p>
+            </div>
+            <div className="mt-5 sm:mt-6 flex justify-end space-x-2">
+              <button
+                type="button"
+                onClick={handleDeleteCancel}
+                disabled={isDeleting}
+                className="inline-flex justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteConfirm}
+                disabled={isDeleting}
+                className={`inline-flex justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 ${isDeleting ? 'opacity-70 cursor-not-allowed' : ''}`}
+              >
+                {isDeleting ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
