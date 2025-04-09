@@ -1,4 +1,6 @@
 export interface User {
+  shopId: any;
+  _id: string;
   id: string;
   username: string;
   email: string;

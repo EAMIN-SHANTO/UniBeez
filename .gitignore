@@ -1,0 +1,11 @@
+# Environment files
+.env
+
+# Node modules
+node_modules/
+
+# Logs
+*.log
+
+# Build files
+dist/

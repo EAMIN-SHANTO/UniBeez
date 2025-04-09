@@ -8,9 +8,18 @@ import { fileURLToPath } from 'url';
 import authRoutes from "./routes/auth.route.js";
 import userRoutes from "./routes/user.route.js";
 import eventRoutes from './routes/event.route.js';
+<<<<<<< HEAD
 import notificationRoutes from './routes/notification.route.js';
 import shopRoutes from './routes/shop.route.js';
 import productRoutes from './routes/product.route.js';
+=======
+import shopRoutes from './routes/shop.route.js';
+import productRoutes from './routes/product.route.js'; 
+import connectDB from './lib/connectDB.js';
+
+// Load environment variables
+dotenv.config();
+>>>>>>> ar15
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -41,10 +50,16 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // API Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
+<<<<<<< HEAD
 app.use("/api/events-21301429", eventRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/shops", shopRoutes);
 app.use("/api/products", productRoutes);
+=======
+app.use("/api/events", eventRoutes);
+app.use("/api/1584/shops", shopRoutes);
+app.use("/api/products/1584", productRoutes); 
+>>>>>>> ar15
 
 // Test routes
 app.get("/api/test", (req, res) => {
@@ -86,6 +101,7 @@ mongoose
   .then(() => {
     app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
+<<<<<<< HEAD
       console.log('\nRoutes registered:');
       console.log('- Auth routes: /api/auth/*');
       console.log('- User routes: /api/users/*');
@@ -108,6 +124,13 @@ mongoose
       console.log('PATCH  /api/notifications/:notificationId/read');
       console.log('PATCH  /api/notifications/read-all');
       console.log('GET    /api/notifications/test');
+=======
+      console.log('Routes registered:');
+      console.log('- Auth routes: /api/auth');
+      console.log('- User routes: /api/users');
+      console.log('- Event routes: /api/events');
+      console.log('- Shop routes: /api/shops');  
+>>>>>>> ar15
     });
     console.log("Connected to MongoDB");
   })

@@ -1,5 +1,9 @@
 import express from 'express';
+<<<<<<< HEAD
 import { createProduct, getAllProducts, getProductById, updateProduct, deleteProduct } from '../controllers/product.controller.js';
+=======
+import { createProduct, getAllProducts, getProductById } from '../controllers/product.controller.js';
+>>>>>>> ar15
 import { verifyToken } from '../middleware/auth.middleware.js';
 
 const router = express.Router();
@@ -9,6 +13,7 @@ router.post('/', verifyToken, createProduct);
 
 // Get all products (public)
 router.get('/', getAllProducts);
+<<<<<<< HEAD
 
 // Get product by ID (public)
 router.get('/:id', getProductById);
@@ -20,3 +25,8 @@ router.put('/:id', verifyToken, updateProduct);
 router.delete('/:id', verifyToken, deleteProduct);
 
 export default router; 
+=======
+router.get('/:id', getProductById);
+
+export default router;
+>>>>>>> ar15

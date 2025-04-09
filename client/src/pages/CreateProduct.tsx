@@ -30,7 +30,11 @@ const CreateProduct: React.FC = () => {
   useEffect(() => {
     const fetchShopDetails = async () => {
       try {
+<<<<<<< HEAD:client/src/pages/CreateProduct.tsx
         const response = await axios.get(`${API_URL}/api/shops/${shopId}`, {
+=======
+        const response = await axios.get(`${API_URL}/api/1584/shops/${shopId}`, {
+>>>>>>> ar15:client/src/routes/CreateProduct.tsx
           withCredentials: true
         });
         
@@ -104,6 +108,7 @@ const CreateProduct: React.FC = () => {
       setSubmitting(true);
       setError(null);
       
+<<<<<<< HEAD:client/src/pages/CreateProduct.tsx
       // Filter out empty image URLs
       const filteredImages = formData.images.filter(img => img.trim() !== '');
       
@@ -129,10 +134,28 @@ const CreateProduct: React.FC = () => {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           },
+=======
+      const filteredImages = formData.images.filter(img => img.trim() !== '');
+      
+      await axios.post(
+        `${API_URL}/api/products/1584`,
+        {
+          name: formData.name,
+          description: formData.description,
+          price: parseFloat(formData.price),
+          category: formData.category,
+          quantity: parseInt(formData.quantity),
+          shopId: shopId,
+          images: filteredImages
+        },
+        {
+          headers: { 'Content-Type': 'application/json' },
+>>>>>>> ar15:client/src/routes/CreateProduct.tsx
           withCredentials: true
         }
       );
       
+<<<<<<< HEAD:client/src/pages/CreateProduct.tsx
       console.log('Server response:', response.data);
       navigate(`/shops/${shopId}`);
     } catch (err: any) {
@@ -145,6 +168,12 @@ const CreateProduct: React.FC = () => {
       
       setError(errorMessage);
       console.error('Error details:', err);
+=======
+      navigate(`/shops/${shopId}`);
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to create product');
+      console.error(err);
+>>>>>>> ar15:client/src/routes/CreateProduct.tsx
     } finally {
       setSubmitting(false);
     }

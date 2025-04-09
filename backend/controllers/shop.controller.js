@@ -20,7 +20,11 @@ export const createShop = async (req, res) => {
       description,
       category,
       university,
+<<<<<<< HEAD
       logo: logo || 'https://png.pngtree.com/png-vector/20220129/ourmid/pngtree-store-front-isolated-vector-icon-grocery-sign-symbol-vector-png-image_44268366.jpg',
+=======
+      logo: logo || 'https://via.placeholder.com/150',
+>>>>>>> ar15
       owner: userId
     });
     
@@ -84,6 +88,7 @@ export const getShopById = async (req, res) => {
       error: error.message
     });
   }
+<<<<<<< HEAD
 };
 
 // Update shop by ID
@@ -178,4 +183,6 @@ export const deleteShop = async (req, res) => {
       error: error.message
     });
   }
+=======
+>>>>>>> ar15
 };

@@ -27,10 +27,16 @@ const productSchema = new mongoose.Schema({
     ref: 'Shop',
     required: true
   },
+<<<<<<< HEAD
   images: {
     type: [String], 
     default: []
   },
+=======
+  images: [{
+    type: String
+  }],
+>>>>>>> ar15
   inStock: {
     type: Boolean,
     default: true

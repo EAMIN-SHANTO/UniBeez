@@ -30,9 +30,16 @@ const Navbar: React.FC = () => {
   const navLinks = [
     { path: '/', label: 'Home' },
     { path: '/shops', label: 'Shops' },
+<<<<<<< HEAD:client/src/pages/Navbar.tsx
     { path: '/current-event-21301429', label: 'Current Event' },
     { path: '/events-21301429', label: 'Events' },
     { path: '/services', label: 'Services' }
+=======
+    { path: '/products', label: 'Products' },
+    { path: '/events', label: 'Events' },
+    { path: '/services', label: 'Services' },
+    
+>>>>>>> ar15:client/src/routes/Navbar.tsx
   ];
 
   const renderNotifications = () => {
@@ -205,4 +212,4 @@ const Navbar: React.FC = () => {
   );
 };
 
-export default Navbar; 
+export default Navbar;

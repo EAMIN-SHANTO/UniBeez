@@ -1,9 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+<<<<<<< HEAD:client/src/pages/Shops.tsx
 import { useAuth } from '../context/AuthContext';
 
 // Update the Shop interface to include owner information
+=======
+import { useAuth } from '../context/AuthContext'; // Add this import
+
+// Define the Shop interface
+>>>>>>> ar15:client/src/routes/Shops.tsx
 interface Shop {
   _id: string;
   name: string;
@@ -13,6 +19,7 @@ interface Shop {
   rating: number;
   reviewCount: number;
   university?: string;
+<<<<<<< HEAD:client/src/pages/Shops.tsx
   owner: {
     _id: string;
     username: string;
@@ -22,12 +29,23 @@ interface Shop {
 
 const Shops: React.FC = () => {
   const { API_URL, user } = useAuth(); // Get user from context
+=======
+}
+
+// Rest of the imports and interfaces remain the same
+
+const Shops: React.FC = () => {
+  const { API_URL } = useAuth(); // Get API_URL from context
+>>>>>>> ar15:client/src/routes/Shops.tsx
   const [shops, setShops] = useState<Shop[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<string>('');
   const [categoryFilter, setCategoryFilter] = useState<string>('');
+<<<<<<< HEAD:client/src/pages/Shops.tsx
   const [showOnlyMyShops, setShowOnlyMyShops] = useState<boolean>(false); // Add this state
+=======
+>>>>>>> ar15:client/src/routes/Shops.tsx
   
   const categories = ['Food', 'Clothing', 'Electronics', 'Books', 'Services', 'Other'];
 
@@ -35,7 +53,11 @@ const Shops: React.FC = () => {
     const fetchShops = async () => {
       try {
         setLoading(true);
+<<<<<<< HEAD:client/src/pages/Shops.tsx
         const response = await axios.get(`${API_URL}/api/shops`);
+=======
+        const response = await axios.get(`${API_URL}/api/1584/shops`); // Use API_URL from context
+>>>>>>> ar15:client/src/routes/Shops.tsx
         setShops(response.data.shops);
         setError(null);
       } catch (err) {
@@ -47,13 +69,19 @@ const Shops: React.FC = () => {
     };
 
     fetchShops();
+<<<<<<< HEAD:client/src/pages/Shops.tsx
   }, [API_URL]);
 
   // Update the filtering logic to include ownership filtering
+=======
+  }, [API_URL]); // Add API_URL to dependency array
+
+>>>>>>> ar15:client/src/routes/Shops.tsx
   const filteredShops = shops.filter(shop => {
     const matchesSearch = shop.name.toLowerCase().includes(filter.toLowerCase()) ||
                          shop.description.toLowerCase().includes(filter.toLowerCase());
     const matchesCategory = categoryFilter === '' || shop.category === categoryFilter;
+<<<<<<< HEAD:client/src/pages/Shops.tsx
     const matchesOwnership = !showOnlyMyShops || (user && shop.owner && shop.owner._id === user._id);
     return matchesSearch && matchesCategory && matchesOwnership;
   });
@@ -67,6 +95,14 @@ const Shops: React.FC = () => {
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         {/* Title section remains unchanged */}
+=======
+    return matchesSearch && matchesCategory;
+  });
+
+  return (
+    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+>>>>>>> ar15:client/src/routes/Shops.tsx
         <div className="text-center mb-8">
           <h1 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
             University Shops
@@ -76,7 +112,10 @@ const Shops: React.FC = () => {
           </p>
         </div>
 
+<<<<<<< HEAD:client/src/pages/Shops.tsx
         {/* Update the filter section to include the ownership toggle */}
+=======
+>>>>>>> ar15:client/src/routes/Shops.tsx
         <div className="mb-8 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
           <div className="flex-1">
             <input
@@ -99,6 +138,7 @@ const Shops: React.FC = () => {
               ))}
             </select>
           </div>
+<<<<<<< HEAD:client/src/pages/Shops.tsx
           {user && (
             <div className="flex items-center mr-4">
               <button
@@ -113,6 +153,8 @@ const Shops: React.FC = () => {
               </button>
             </div>
           )}
+=======
+>>>>>>> ar15:client/src/routes/Shops.tsx
           <div>
             <Link
               to="/shops/create"
@@ -123,7 +165,10 @@ const Shops: React.FC = () => {
           </div>
         </div>
 
+<<<<<<< HEAD:client/src/pages/Shops.tsx
         {/* Rest of your component remains the same */}
+=======
+>>>>>>> ar15:client/src/routes/Shops.tsx
         {loading ? (
           <div className="flex justify-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500"></div>
@@ -143,6 +188,7 @@ const Shops: React.FC = () => {
           </div>
         ) : filteredShops.length === 0 ? (
           <div className="text-center py-12">
+<<<<<<< HEAD:client/src/pages/Shops.tsx
             <p className="text-lg text-gray-500">
               {showOnlyMyShops 
                 ? "You don't have any shops yet. Create one to get started!"
@@ -158,6 +204,9 @@ const Shops: React.FC = () => {
                 </Link>
               </div>
             )}
+=======
+            <p className="text-lg text-gray-500">No shops found. Try adjusting your filters.</p>
+>>>>>>> ar15:client/src/routes/Shops.tsx
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -193,6 +242,7 @@ const Shops: React.FC = () => {
                         {shop.rating} ({shop.reviewCount} reviews)
                       </span>
                     </div>
+<<<<<<< HEAD:client/src/pages/Shops.tsx
                     <div className="flex items-center">
                       {user && shop.owner && user._id === shop.owner._id && (
                         <span className="text-xs bg-green-100 text-green-800 rounded-full px-2 py-1 mr-2">
@@ -203,6 +253,11 @@ const Shops: React.FC = () => {
                         <span className="text-xs text-gray-500">{shop.university}</span>
                       )}
                     </div>
+=======
+                    {shop.university && (
+                      <span className="text-xs text-gray-500">{shop.university}</span>
+                    )}
+>>>>>>> ar15:client/src/routes/Shops.tsx
                   </div>
                 </div>
               </Link>

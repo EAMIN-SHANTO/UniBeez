@@ -23,7 +23,11 @@ const shopSchema = new mongoose.Schema({
   },
   logo: {
     type: String,
+<<<<<<< HEAD
     default: 'https://placehold.co/150'
+=======
+    default: 'https://via.placeholder.com/150'
+>>>>>>> ar15
   },
   owner: {
     type: mongoose.Schema.Types.ObjectId,

@@ -39,7 +39,11 @@ const ProductDetail: React.FC = () => {
     const fetchProductDetails = async () => {
       try {
         setLoading(true);
+<<<<<<< HEAD:client/src/pages/ProductDetail.tsx
         const response = await axios.get(`${API_URL}/api/products/${id}`);
+=======
+        const response = await axios.get(`${API_URL}/api/products/1584/${id}`);
+>>>>>>> ar15:client/src/routes/ProductDetail.tsx
         setProduct(response.data.product);
         setError(null);
       } catch (err) {

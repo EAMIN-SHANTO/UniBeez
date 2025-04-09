@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react';
+<<<<<<< HEAD:client/src/pages/ShopDetail.tsx
 import { useParams, Link, useNavigate } from 'react-router-dom';
+=======
+import { useParams, Link } from 'react-router-dom';
+>>>>>>> ar15:client/src/routes/ShopDetail.tsx
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 
@@ -34,7 +38,10 @@ interface Product {
 }
 
 const ShopDetail: React.FC = () => {
+<<<<<<< HEAD:client/src/pages/ShopDetail.tsx
   const navigate = useNavigate(); // Add useNavigate hook
+=======
+>>>>>>> ar15:client/src/routes/ShopDetail.tsx
   const { API_URL, user } = useAuth(); // Add user from AuthContext
   const { id } = useParams<{ id: string }>();
   const [shop, setShop] = useState<Shop | null>(null);
@@ -43,15 +50,22 @@ const ShopDetail: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [productsLoading, setProductsLoading] = useState<boolean>(true);
   const [productsError, setProductsError] = useState<string | null>(null);
+<<<<<<< HEAD:client/src/pages/ShopDetail.tsx
   // Add state for delete confirmation modal
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
+=======
+>>>>>>> ar15:client/src/routes/ShopDetail.tsx
 
   useEffect(() => {
     const fetchShopDetails = async () => {
       try {
         setLoading(true);
+<<<<<<< HEAD:client/src/pages/ShopDetail.tsx
         const response = await axios.get(`${API_URL}/api/shops/${id}`); // Fixed API path
+=======
+        const response = await axios.get(`${API_URL}/api/1584/shops/${id}`); // Fix API path
+>>>>>>> ar15:client/src/routes/ShopDetail.tsx
         setShop(response.data.shop);
         setError(null);
       } catch (err) {
@@ -73,7 +87,11 @@ const ShopDetail: React.FC = () => {
       
       try {
         setProductsLoading(true);
+<<<<<<< HEAD:client/src/pages/ShopDetail.tsx
         const response = await axios.get(`${API_URL}/api/products?shop=${id}`); // Fixed API path
+=======
+        const response = await axios.get(`${API_URL}/api/products/1584?shop=${id}`); // Fix API path
+>>>>>>> ar15:client/src/routes/ShopDetail.tsx
         setProducts(response.data.products);
         setProductsError(null);
       } catch (err) {
@@ -91,6 +109,7 @@ const ShopDetail: React.FC = () => {
 
   const isOwner = user && shop && user._id === shop.owner._id;
 
+<<<<<<< HEAD:client/src/pages/ShopDetail.tsx
   const handleDeleteClick = () => {
     setShowDeleteModal(true);
   };
@@ -117,6 +136,8 @@ const ShopDetail: React.FC = () => {
     setShowDeleteModal(false);
   };
 
+=======
+>>>>>>> ar15:client/src/routes/ShopDetail.tsx
   if (loading) {
     return (
       <div className="min-h-screen flex justify-center items-center bg-gray-50">
@@ -164,6 +185,7 @@ const ShopDetail: React.FC = () => {
                 Information about the shop and its services.
               </p>
             </div>
+<<<<<<< HEAD:client/src/pages/ShopDetail.tsx
             <div className="flex space-x-2">
               <Link
                 to="/shops"
@@ -188,6 +210,14 @@ const ShopDetail: React.FC = () => {
                 </>
               )}
             </div>
+=======
+            <Link
+              to="/shops"
+              className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            >
+              Back to Shops
+            </Link>
+>>>>>>> ar15:client/src/routes/ShopDetail.tsx
           </div>
           
           <div className="border-t border-gray-200">
@@ -312,7 +342,11 @@ const ShopDetail: React.FC = () => {
                     <div className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 h-full flex flex-col">
                       <div className="aspect-w-1 aspect-h-1 w-full overflow-hidden bg-gray-200">
                         <img
+<<<<<<< HEAD:client/src/pages/ShopDetail.tsx
                           src={product.images[0] || 'https://placehold.co/300?text=No+Image'}
+=======
+                          src={product.images[0] || 'https://via.placeholder.com/300?text=No+Image'}
+>>>>>>> ar15:client/src/routes/ShopDetail.tsx
                           alt={product.name}
                           className="w-full h-48 object-center object-cover group-hover:opacity-75"
                         />
@@ -347,6 +381,7 @@ const ShopDetail: React.FC = () => {
           </div>
         </div>
       </div>
+<<<<<<< HEAD:client/src/pages/ShopDetail.tsx
       
       {/* Delete confirmation modal */}
       {showDeleteModal && (
@@ -379,6 +414,8 @@ const ShopDetail: React.FC = () => {
           </div>
         </div>
       )}
+=======
+>>>>>>> ar15:client/src/routes/ShopDetail.tsx
     </div>
   );
 };
