@@ -11,6 +11,7 @@ import eventRoutes from './routes/event.route.js';
 import shopRoutes from './routes/shop.route.js';
 import productRoutes from './routes/product.route.js'; 
 import connectDB from './lib/connectDB.js';
+import productpageroutes from './routes/productpage.route.js';
 
 // Load environment variables
 dotenv.config();
@@ -45,6 +46,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/1584/shops", shopRoutes);
 app.use("/api/products/1584", productRoutes); 
+app.use("/api/productpage", productpageroutes); // Product page routes
 
 // Test route
 app.get("/test", (req, res) => {
@@ -76,7 +78,8 @@ mongoose
       console.log('- Auth routes: /api/auth');
       console.log('- User routes: /api/users');
       console.log('- Event routes: /api/events');
-      console.log('- Shop routes: /api/shops');  
+      console.log('- Shop routes: /api/shops'); 
+      console.log('- Product page routes: /api/productpage'); 
     });
     console.log("Connected to MongoDB");
   })

@@ -55,7 +55,22 @@ const ProductDetail: React.FC = () => {
     }
   }, [id, API_URL]);
 
-  const isOwner = user && product && user._id === product.shop.owner.toString();
+  const isOwner = user && product && user._id === product.shop.owner._id;
+
+  const handleDelete = async () => {
+    if (!product) return;
+    try {
+      const confirmDelete = window.confirm("Are you sure you want to delete this product?");
+      if (!confirmDelete) return;
+
+      await axios.delete(`${API_URL}/api/productpage/${product._id}`);
+      alert("Product deleted successfully.");
+      navigate(-1);
+    } catch (err) {
+      console.error("Failed to delete product:", err);
+      alert("Failed to delete product. Please try again.");
+    }
+  };
 
   if (loading) {
     return (
@@ -147,12 +162,20 @@ const ProductDetail: React.FC = () => {
                   </div>
                   <div>
                     {isOwner && (
-                      <Link
-                        to={`/products/edit/${product._id}`}
-                        className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                      >
-                        Edit Product
-                      </Link>
+                      <div className="flex space-x-4">
+                        <Link
+                          to={`/products/edit/${product._id}`}
+                          className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        >
+                          Edit Product
+                        </Link>
+                        <button
+                          onClick={handleDelete}
+                          className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                        >
+                          Delete Product
+                        </button>
+                      </div>
                     )}
                   </div>
                 </div>

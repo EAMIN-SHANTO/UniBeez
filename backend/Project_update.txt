@@ -1,0 +1,8 @@
+Implemented:
+1. create shop - name, photo
+1. add product - name, photo
+
+needs to look after in future:
+1. user ID, how it is authenticated and who can access shop and product
+2. api endpoints have to edited http://localhost:3000/api/products/1584 
+and http://localhost:3000/api/1584/shop

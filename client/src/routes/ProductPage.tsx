@@ -60,7 +60,7 @@ const ProductPage: React.FC = () => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`${API_URL}/api/products/1584`);
+        const response = await axios.get(`${API_URL}/api/productpage`);
         setProducts(response.data.products);
         setError(null);
       } catch (err) {

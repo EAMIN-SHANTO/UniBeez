@@ -1,40 +1,17 @@
 import express from 'express';
-import {
-  createProductPage,
-  getAllProductPages,
-  getProductPageById,
-  updateProductPage,
-  deleteProductPage
-} from '../controllers/productpage.controller.js';
-import {
-  createProduct,
-  getAllProducts,
-  getProductById
-} from '../controllers/product.controller.js';
+import { createProduct, getAllShopProducts, getProductById, deleteProduct } from '../controllers/productpage.controller.js';
 import { verifyToken } from '../middleware/auth.middleware.js';
 
 const router = express.Router();
 
-// Product routes
-router
-  .route('/')
-  .get(getAllProducts) // Get all products
-  .post(verifyToken, createProduct); // Create a new product (requires authentication)
+// Create a new product (requires authentication)
+router.post('/', verifyToken, createProduct);
 
-router
-  .route('/:id')
-  .get(getProductById); // Get a product by ID
+// Get all products (public)
+router.get('/', getAllShopProducts);
+router.get('/:id', getProductById);
 
-// // Product page routes
-// router
-//   .route('/pages')
-//   .get(getAllProductPages) // Get all product pages
-//   .post(verifyToken, createProductPage); // Create a new product page (requires authentication)
-
-// router
-//   .route('/pages/:id')
-//   .get(getProductPageById) // Get a product page by ID
-//   .put(verifyToken, updateProductPage) // Update a product page (requires authentication)
-//   .delete(verifyToken, deleteProductPage); // Delete a product page (requires authentication)
+// Delete a product (public access, no authentication required)
+router.delete('/:id', deleteProduct);
 
 export default router;

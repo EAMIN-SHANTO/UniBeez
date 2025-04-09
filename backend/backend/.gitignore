@@ -1,0 +1,4 @@
+node_modules/
+uploads/
+uploads/events/*
+!uploads/events/.gitkeep
