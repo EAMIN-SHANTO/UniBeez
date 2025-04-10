@@ -32,7 +32,9 @@ const Navbar: React.FC = () => {
     { path: '/shops', label: 'Shops' },
     { path: '/current-event-21301429', label: 'Current Event' },
     { path: '/events-21301429', label: 'Events' },
+    { path: '/productpage', label: 'Products' },
     { path: '/services', label: 'Services' }
+
   ];
 
   const renderNotifications = () => {

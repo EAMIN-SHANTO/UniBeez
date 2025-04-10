@@ -25,6 +25,8 @@ import ShopDetail from './pages/ShopDetail';
 import ProductDetail from './pages/ProductDetail';
 import CreateProduct from './pages/CreateProduct';
 import EditShop from './pages/EditShop';
+import ProductPage from './pages/ProductPage'; 
+
 
 const App: React.FC = () => {
   return (
@@ -100,6 +102,7 @@ const App: React.FC = () => {
                   </ProtectedRoute>
                 } />
 
+
                 <Route path="/current-event-21301429" element={<CurrentEvent />} />
                 <Route path="*" element={
                   <div className="min-h-screen bg-gray-50 pt-20 flex items-center justify-center">
@@ -109,6 +112,7 @@ const App: React.FC = () => {
                     </div>
                   </div>
                 } />
+                <Route path="/productpage" element={<ProductPage />} />
               </Route>
             </Routes>
           </NotificationProvider>

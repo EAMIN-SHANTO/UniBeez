@@ -11,6 +11,7 @@ import eventRoutes from './routes/event.route.js';
 import notificationRoutes from './routes/notification.route.js';
 import shopRoutes from './routes/shop.route.js';
 import productRoutes from './routes/product.route.js';
+import productpageroutes from './routes/productpage.route.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -45,6 +46,7 @@ app.use("/api/events-21301429", eventRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/shops", shopRoutes);
 app.use("/api/products", productRoutes);
+app.use("/api/productpage", productpageroutes);
 
 // Test routes
 app.get("/api/test", (req, res) => {
@@ -93,6 +95,7 @@ mongoose
       console.log('- Notification routes: /api/notifications/*');
       console.log('- Shop routes: /api/shops/*');
       console.log('- Product routes: /api/products/*');
+      console.log('- Product page routes: /api/productpage'); 
       
       // Log available endpoints
       console.log('\nEvent endpoints:');
