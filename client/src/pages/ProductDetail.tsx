@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 
 interface Product {
   _id: string;
@@ -29,11 +30,15 @@ const ProductDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { API_URL, user } = useAuth();
+  const { addToCart } = useCart();
   
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [activeImage, setActiveImage] = useState<number>(0);
+  const [quantity, setQuantity] = useState<number>(1);
+  const [isAddingToCart, setIsAddingToCart] = useState<boolean>(false);
+  const [cartMessage, setCartMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchProductDetails = async () => {
@@ -72,7 +77,31 @@ const ProductDetail: React.FC = () => {
     }
   };
 
-  
+  const handleAddToCart = async () => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    
+    try {
+      setIsAddingToCart(true);
+      setCartMessage(null);
+      
+      if (product) {
+        await addToCart(product._id, quantity);
+      }
+      setCartMessage('Product added to cart!');
+      
+      setTimeout(() => {
+        setCartMessage(null);
+      }, 3000);
+    } catch (err: any) {
+      setCartMessage(err.message || 'Failed to add to cart');
+    } finally {
+      setIsAddingToCart(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex justify-center items-center bg-gray-50">
@@ -222,20 +251,53 @@ const ProductDetail: React.FC = () => {
                 
                 <div className="mt-6">
                   {product.inStock ? (
-                    <button
-                      type="button"
-                      className="flex-1 bg-indigo-600 border border-transparent rounded-md py-3 px-8 flex items-center justify-center text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    >
-                      Add to Cart
-                    </button>
+                    <div>
+                      <div className="flex items-center mb-4">
+                        <label htmlFor="quantity" className="block text-sm font-medium text-gray-700 mr-4">
+                          Quantity:
+                        </label>
+                        <div className="flex items-center border border-gray-300 rounded">
+                          <button 
+                            type="button"
+                            className="px-3 py-1 text-gray-600 hover:bg-gray-100"
+                            onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                          >
+                            -
+                          </button>
+                          <span className="px-3 py-1">{quantity}</span>
+                          <button 
+                            type="button"
+                            className="px-3 py-1 text-gray-600 hover:bg-gray-100"
+                            onClick={() => setQuantity(Math.min(product.quantity, quantity + 1))}
+                          >
+                            +
+                          </button>
+                        </div>
+                        <span className="ml-2 text-sm text-gray-500">
+                          {product.quantity} available
+                        </span>
+                      </div>
+                      
+                      <button
+                        onClick={handleAddToCart}
+                        disabled={isAddingToCart}
+                        className="w-full bg-indigo-600 border border-transparent rounded-md py-3 px-8 flex items-center justify-center text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+                      >
+                        {isAddingToCart ? 'Adding...' : 'Add to Cart'}
+                      </button>
+                      
+                      {cartMessage && (
+                        <div className="mt-2 text-sm text-center">
+                          <span className={cartMessage.includes('Failed') ? 'text-red-500' : 'text-green-500'}>
+                            {cartMessage}
+                          </span>
+                        </div>
+                      )}
+                    </div>
                   ) : (
-                    <button
-                      type="button"
-                      disabled
-                      className="flex-1 bg-gray-300 border border-transparent rounded-md py-3 px-8 flex items-center justify-center text-base font-medium text-gray-500 cursor-not-allowed"
-                    >
+                    <div className="inline-block bg-red-100 text-red-700 px-4 py-2 rounded-md">
                       Out of Stock
-                    </button>
+                    </div>
                   )}
                 </div>
                 

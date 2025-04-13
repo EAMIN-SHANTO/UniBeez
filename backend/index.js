@@ -12,7 +12,7 @@ import notificationRoutes from './routes/notification.route.js';
 import shopRoutes from './routes/shop.route.js';
 import productRoutes from './routes/product.route.js';
 import productpageroutes from './routes/productpage.route.js';
-
+import cartRoutes from './routes/cart.route.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -47,6 +47,7 @@ app.use("/api/notifications", notificationRoutes);
 app.use("/api/shops", shopRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/productpage", productpageroutes);
+app.use("/api/cart", cartRoutes);
 
 // Test routes
 app.get("/api/test", (req, res) => {
@@ -96,7 +97,7 @@ mongoose
       console.log('- Shop routes: /api/shops/*');
       console.log('- Product routes: /api/products/*');
       console.log('- Product page routes: /api/productpage'); 
-      
+      console.log('- Cart routes: /api/cart/*');
       // Log available endpoints
       console.log('\nEvent endpoints:');
       console.log('GET    /api/events-21301429');

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import NotificationDropdown from '../components/NotificationDropdown';
-
+import { useCart } from '../context/CartContext';
 const Navbar: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -11,7 +11,8 @@ const Navbar: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const [isProfileOpen, setIsProfileOpen] = useState<boolean>(false);
   const [notificationCount] = useState(3);
-  const [cartCount] = useState(2);
+  // const [cartCount] = useState(2);
+  const { cart } = useCart();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -87,16 +88,18 @@ const Navbar: React.FC = () => {
                 {renderNotifications()}
 
                 {/* Cart */}
-                <button className="relative p-2 text-gray-500 hover:text-blue-600 transition-colors">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                  </svg>
-                  {cartCount > 0 && (
-                    <span className="absolute top-0 right-0 w-4 h-4 text-xs flex items-center justify-center text-white bg-blue-500 rounded-full">
-                      {cartCount}
-                    </span>
-                  )}
-                </button>
+                {/* <button className="relative p-1 text-gray-500 hover:text-blue-600 transition-colors"> */}
+                <Link to="/cart" className="relative p-2 text-gray-600 hover:text-indigo-600">
+  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+  </svg>
+  {cart && cart.items.length > 0 && (
+    <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
+      {cart.items.length}
+    </span>
+  )}
+</Link>
+                {/* </button> */}
               </div>
             )}
 

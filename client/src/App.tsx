@@ -26,13 +26,16 @@ import ProductDetail from './pages/ProductDetail';
 import CreateProduct from './pages/CreateProduct';
 import EditShop from './pages/EditShop';
 import ProductPage from './pages/ProductPage'; 
-
+import CartPage from './pages/CartPage';
+import Checkout from './pages/Checkout';
+import { CartProvider } from './context/CartContext'; 
 
 const App: React.FC = () => {
   return (
     <AuthProvider>
       <ProfileProvider>
         <Router>
+          <CartProvider>
           <NotificationProvider>
             <Routes>
               <Route element={<Layout />}>
@@ -46,6 +49,12 @@ const App: React.FC = () => {
                     <Profile />
                   </ProtectedRoute>
                 } />
+                  <Route path="/cart" element={<CartPage />} />
+                  <Route path="/checkout" element={
+                    <ProtectedRoute>
+                      <Checkout />
+                    </ProtectedRoute>
+                  } />
                 <Route path="/profile/edit" element={
                   <ProtectedRoute>
                     <EditProfile />
@@ -116,6 +125,7 @@ const App: React.FC = () => {
               </Route>
             </Routes>
           </NotificationProvider>
+          </CartProvider>
         </Router>
       </ProfileProvider>
     </AuthProvider>
