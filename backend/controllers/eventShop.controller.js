@@ -2,10 +2,34 @@ import EventShop from '../models/eventShop.model.js';
 import Shop from '../models/shop.model.js';
 import Event from '../models/event.model.js';
 
+// Get user's shops
+export const getUserShops = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    // Find all shops owned by the user
+    const shops = await Shop.find({ owner: userId })
+      .select('name description logo category');
+
+    res.status(200).json({
+      success: true,
+      shops
+    });
+  } catch (error) {
+    console.error('Error fetching user shops:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching user shops',
+      error: error.message
+    });
+  }
+};
+
 // Register a shop for an event
 export const registerEventShop = async (req, res) => {
   try {
     const { eventId } = req.params;
+    const { shopId } = req.body; // Now expecting shopId in request body
     const userId = req.user._id;
 
     // Find the event
@@ -26,11 +50,11 @@ export const registerEventShop = async (req, res) => {
     }
 
     // Find user's shop
-    const shop = await Shop.findOne({ owner: userId });
+    const shop = await Shop.findOne({ _id: shopId, owner: userId });
     if (!shop) {
       return res.status(404).json({
         success: false,
-        message: 'You need to create a shop first'
+        message: 'Shop not found or you do not own this shop'
       });
     }
 

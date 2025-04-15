@@ -34,6 +34,9 @@ const CurrentEvent: React.FC = () => {
   const [eventShops, setEventShops] = useState<Shop[]>([]);
   const [showShops, setShowShops] = useState(false);
   const [registrationStatus, setRegistrationStatus] = useState<string>('');
+  const [showShopSelection, setShowShopSelection] = useState(false);
+  const [userShops, setUserShops] = useState<Shop[]>([]);
+  const [selectedShopId, setSelectedShopId] = useState<string>('');
 
   useEffect(() => {
     const fetchCurrentEvent = async () => {
@@ -63,6 +66,29 @@ const CurrentEvent: React.FC = () => {
     fetchCurrentEvent();
   }, [API_URL]);
 
+  const fetchUserShops = async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/event-shops/user-shops`, {
+        credentials: 'include'
+      });
+      const data = await response.json();
+      
+      if (data.success) {
+        setUserShops(data.shops);
+        if (data.shops.length === 0) {
+          setRegistrationStatus('You need to create a shop first');
+        } else {
+          setShowShopSelection(true);
+        }
+      } else {
+        setRegistrationStatus(data.message);
+      }
+    } catch (err) {
+      console.error('Error fetching user shops:', err);
+      setRegistrationStatus('Failed to fetch your shops');
+    }
+  };
+
   const fetchEventShops = async (eventId: string) => {
     try {
       const response = await fetch(`${API_URL}/api/event-shops/${eventId}/shops`, {
@@ -87,13 +113,15 @@ const CurrentEvent: React.FC = () => {
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json'
-        }
+        },
+        body: JSON.stringify({ shopId: selectedShopId })
       });
 
       const data = await response.json();
       
       if (data.success) {
         setRegistrationStatus('success');
+        setShowShopSelection(false);
         // Refresh the list of event shops
         fetchEventShops(currentEvent._id);
       } else {
@@ -147,6 +175,72 @@ const CurrentEvent: React.FC = () => {
           </div>
         )}
 
+        {showShopSelection && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg p-6 max-w-md w-full">
+              <h2 className="text-2xl font-bold mb-4">Select Shop to Register</h2>
+              <div className="space-y-4 mb-6">
+                {userShops.map(shop => (
+                  <label
+                    key={shop._id}
+                    className={`block p-4 rounded-lg border-2 cursor-pointer transition-colors ${
+                      selectedShopId === shop._id
+                        ? 'border-blue-500 bg-blue-50'
+                        : 'border-gray-200 hover:border-blue-200'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="shop"
+                      value={shop._id}
+                      checked={selectedShopId === shop._id}
+                      onChange={(e) => setSelectedShopId(e.target.value)}
+                      className="hidden"
+                    />
+                    <div className="flex items-center space-x-4">
+                      <img
+                        src={shop.logo}
+                        alt={shop.name}
+                        className="w-12 h-12 rounded-full object-cover"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = 'https://cdn-icons-png.flaticon.com/512/166/166169.png';
+                        }}
+                      />
+                      <div>
+                        <h3 className="font-semibold">{shop.name}</h3>
+                        <p className="text-sm text-gray-500">{shop.category}</p>
+                      </div>
+                    </div>
+                  </label>
+                ))}
+              </div>
+              <div className="flex justify-end space-x-4">
+                <button
+                  onClick={() => {
+                    setShowShopSelection(false);
+                    setSelectedShopId('');
+                  }}
+                  className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleRegisterShop}
+                  disabled={!selectedShopId}
+                  className={`px-6 py-2 rounded-lg ${
+                    selectedShopId
+                      ? 'bg-blue-600 text-white hover:bg-blue-700'
+                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  }`}
+                >
+                  Register Shop
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="bg-white shadow-lg overflow-hidden">
           <div className="relative w-full" style={{ height: '500px' }}>
             <img
@@ -168,7 +262,7 @@ const CurrentEvent: React.FC = () => {
               <div className="flex space-x-4">
                 <button 
                   className="px-6 py-2 bg-white text-blue-600 border-2 border-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
-                  onClick={handleRegisterShop}
+                  onClick={fetchUserShops}
                 >
                   Register Event Shop
                 </button>
@@ -231,7 +325,7 @@ const CurrentEvent: React.FC = () => {
                               className="w-16 h-16 rounded-full object-cover"
                               onError={(e) => {
                                 const target = e.target as HTMLImageElement;
-                                target.src = 'https://placehold.co/150';
+                                target.src = 'https://cdn-icons-png.flaticon.com/512/166/166169.png';
                               }}
                             />
                             <div>
