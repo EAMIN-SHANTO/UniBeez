@@ -335,7 +335,7 @@ const Checkout: React.FC = () => {
                       <li key={item._id} className="flex py-4 space-x-3">
                         <div className="flex-none w-16 h-16 bg-gray-100 rounded-md overflow-hidden">
                           <img 
-                            src={item.product.images?.[0] || 'https://via.placeholder.com/150'} 
+                            src={item.product.images?.[0] || 'https://cdn-icons-png.flaticon.com/512/166/166169.png'} 
                             alt={item.product.name}
                             className="w-full h-full object-center object-cover"
                           />
