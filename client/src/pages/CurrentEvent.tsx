@@ -38,6 +38,9 @@ const CurrentEvent: React.FC = () => {
   const [userShops, setUserShops] = useState<Shop[]>([]);
   const [selectedShopId, setSelectedShopId] = useState<string>('');
 
+  // Update the placeholder URL constant
+  const PLACEHOLDER_IMAGE = 'https://cdn-icons-png.flaticon.com/512/166/166169.png';
+
   useEffect(() => {
     const fetchCurrentEvent = async () => {
       try {
@@ -204,7 +207,7 @@ const CurrentEvent: React.FC = () => {
                         className="w-12 h-12 rounded-full object-cover"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
-                          target.src = 'https://cdn-icons-png.flaticon.com/512/166/166169.png';
+                          target.src = PLACEHOLDER_IMAGE;
                         }}
                       />
                       <div>
@@ -325,7 +328,7 @@ const CurrentEvent: React.FC = () => {
                               className="w-16 h-16 rounded-full object-cover"
                               onError={(e) => {
                                 const target = e.target as HTMLImageElement;
-                                target.src = 'https://cdn-icons-png.flaticon.com/512/166/166169.png';
+                                target.src = PLACEHOLDER_IMAGE;
                               }}
                             />
                             <div>

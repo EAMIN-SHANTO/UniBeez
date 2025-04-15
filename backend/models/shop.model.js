@@ -23,7 +23,7 @@ const shopSchema = new mongoose.Schema({
   },
   logo: {
     type: String,
-    default: 'https://placehold.co/150'
+    default: 'https://cdn-icons-png.flaticon.com/512/166/166169.png'
   },
   owner: {
     type: mongoose.Schema.Types.ObjectId,
