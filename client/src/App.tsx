@@ -31,7 +31,8 @@ import Checkout from './pages/Checkout';
 import { CartProvider } from './context/CartContext'; 
 import UpdateProductDetails from './pages/UpdateProductDetails'; 
 import FeatureProduct from './pages/FeatureProduct';
-
+import PaymentPage from './pages/PaymentPage';
+import OrderConfirmation from './pages/OrderConfirmation';
 const App: React.FC = () => {
   return (
     <AuthProvider>
@@ -130,7 +131,8 @@ const App: React.FC = () => {
                     <UpdateProductDetails />
                   </ProtectedRoute>
                 } />
-                
+                <Route path="/payment" element={<PaymentPage />} />
+                <Route path="/order-confirmation" element={<OrderConfirmation />} />
                 <Route path="/updateproductdetails/:id" element={<UpdateProductDetails />} />
                 <Route path="/feature-product/:id" element={
                   <ProtectedRoute>

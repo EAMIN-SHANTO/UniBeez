@@ -5,7 +5,8 @@ import {
   updateCartItem, 
   removeFromCart, 
   clearCart,
-  checkout 
+  checkout,
+  processPayment // Add this import
 } from '../controllers/cart.controller.js';
 import { verifyToken } from '../middleware/auth.middleware.js';
 
@@ -31,5 +32,8 @@ router.delete('/clear', clearCart);
 
 // Checkout
 router.post('/checkout', checkout);
+
+// Process payment
+router.post('/process-payment', verifyToken, processPayment);
 
 export default router;

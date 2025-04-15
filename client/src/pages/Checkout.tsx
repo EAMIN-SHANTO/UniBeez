@@ -53,10 +53,15 @@ const Checkout: React.FC = () => {
         email: formData.email
       };
       
-      const result = await checkout(shippingAddress, formData.paymentMethod);
-      
-      setOrderId(result.orderId);
-      setOrderComplete(true);
+      // Instead of calling checkout directly, we'll redirect to payment page
+      navigate('/payment', {
+        state: {
+          orderId: 'TEMP-' + Math.floor(Math.random() * 1000000),
+          shippingAddress,
+          paymentMethod: formData.paymentMethod,
+          totalAmount: (cart?.totalAmount ?? 0) + 5 + ((cart?.totalAmount ?? 0) * 0.05) // Subtotal + shipping + tax
+        }
+      });
     } catch (err) {
       console.error('Checkout failed:', err);
       alert('Checkout failed. Please try again.');

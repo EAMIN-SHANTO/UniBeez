@@ -306,3 +306,98 @@ export const checkout = async (req, res) => {
     });
   }
 };
+
+// Process payment and reduce inventory
+export const processPayment = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { orderId, paymentMethod, paymentDetails, shippingAddress } = req.body;
+    
+    // Find user's cart
+    const cart = await Cart.findOne({ user: userId }).populate({
+      path: 'items.product',
+      select: 'name price quantity _id'
+    });
+    
+    if (!cart || cart.items.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Cart is empty'
+      });
+    }
+    
+    // Verify all products have sufficient inventory
+    for (const item of cart.items) {
+      const product = await Product.findById(item.product._id);
+      
+      if (!product) {
+        return res.status(404).json({
+          success: false,
+          message: `Product not found: ${item.product.name}`
+        });
+      }
+      
+      if (!product.inStock || product.quantity < item.quantity) {
+        return res.status(400).json({
+          success: false,
+          message: `Insufficient inventory for ${product.name}. Available: ${product.quantity}`
+        });
+      }
+    }
+    
+    // Process payment based on method
+    if (paymentMethod === 'card') {
+      if (!paymentDetails.cardNumber || !paymentDetails.cardName || 
+          !paymentDetails.expiryDate || !paymentDetails.cvv) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid card details'
+        });
+      }
+      // In a real app, you would process the card payment here
+    } else if (paymentMethod === 'Bkash') {
+      if (!paymentDetails.bkashNumber || !paymentDetails.bkashTransaction) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid Bkash details'
+        });
+      }
+      // In a real app, you would verify the Bkash transaction here
+    }
+    
+    // Generate confirmation ID
+    const confirmationId = 'CNF-' + Math.floor(Math.random() * 1000000);
+    
+    // Update product inventory
+    for (const item of cart.items) {
+      const product = await Product.findById(item.product._id);
+      
+      // Calculate new quantity
+      const newQuantity = product.quantity - item.quantity;
+      
+      // Update product
+      await Product.findByIdAndUpdate(item.product._id, {
+        $inc: { quantity: -item.quantity },
+        $set: { inStock: newQuantity > 0 }
+      });
+    }
+    
+    // Clear the cart
+    cart.items = [];
+    await cart.save();
+    
+    res.status(200).json({
+      success: true,
+      message: 'Payment processed successfully',
+      orderId,
+      confirmationId
+    });
+  } catch (error) {
+    console.error('Error processing payment:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Payment processing failed',
+      error: error.message
+    });
+  }
+};
