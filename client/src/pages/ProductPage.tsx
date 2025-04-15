@@ -75,8 +75,8 @@ const ProductPage: React.FC = () => {
     fetchProducts();
   }, [API_URL]);
 
-  const featuredProducts = products.filter((product) => product.featured);
-  const nonFeaturedProducts = products.filter((product) => !product.featured);
+  const featuredProducts = products.slice(0, 5); // First five products as featured
+  const nonFeaturedProducts = products.slice(5); // Remaining products as non-featured
   const filteredProducts = nonFeaturedProducts.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(filter.toLowerCase());
     const matchesCategory = categoryFilter === '' || product.description?.toLowerCase().includes(categoryFilter.toLowerCase());
@@ -86,6 +86,8 @@ const ProductPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
+        {/* Removed Last 5 Products Section */}
+
         <div className="text-center mb-16">
           <h1 className="text-4xl font-extrabold text-gray-900 sm:text-5xl mb-6">
             All Products
