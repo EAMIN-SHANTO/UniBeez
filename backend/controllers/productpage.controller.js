@@ -156,6 +156,59 @@ export const getAllShopProducts = async (req, res) => {
   }
 };
 
+
+
+export const setProductFeaturedStatus = async (req, res) => {
+  try {
+    const productId = req.params.id;
+    const { isFeatured } = req.body;
+    const userId = req.user._id;
+
+    // Validate isFeatured
+    if (typeof isFeatured !== 'boolean') {
+      return res.status(400).json({
+        success: false,
+        message: 'isFeatured must be a boolean',
+      });
+    }
+
+    // Find product
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: 'Product not found',
+      });
+    }
+
+    // Verify user is shop owner
+    const shop = await Shop.findById(product.shop);
+    if (!shop || shop.owner.toString() !== userId.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: 'You do not have permission to update this product',
+      });
+    }
+
+    product.featured = isFeatured;
+    await product.save();
+
+    res.status(200).json({
+      success: true,
+      message: `Product ${isFeatured ? 'marked as featured' : 'unfeatured'} successfully`,
+      product,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update featured status',
+      error: error.message,
+    });
+  }
+};
+
+
+
 export const updateProduct = async (req, res) => {
   try {
     const { id } = req.params;

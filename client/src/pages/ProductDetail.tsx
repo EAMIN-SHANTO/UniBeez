@@ -15,6 +15,7 @@ interface Product {
   reviewCount: number;
   inStock: boolean;
   quantity: number;
+  isFeatured: boolean; // Add isFeatured property instead of featured
   shop: {
     _id: string;
     name: string;
@@ -24,6 +25,7 @@ interface Product {
     }
   };
   createdAt: string;
+  // Remove the featured? property since we now have isFeatured
 }
 
 const ProductDetail: React.FC = () => {
@@ -117,7 +119,7 @@ const ProductDetail: React.FC = () => {
 
   if (error || !product) {
     return (
-      <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-gray-100 py-24 px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mx-auto bg-white shadow overflow-hidden sm:rounded-lg p-6">
           <div className="bg-red-50 p-4 rounded-md">
             <div className="flex">
@@ -142,7 +144,7 @@ const ProductDetail: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-100 py-24 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
         <div className="bg-white shadow overflow-hidden sm:rounded-lg">
           <div className="px-4 py-5 sm:p-6">
@@ -191,6 +193,11 @@ const ProductDetail: React.FC = () => {
                 <div className="flex justify-between items-center">
                   <div>
                     <h2 className="text-2xl font-bold text-gray-800">{product.name}</h2>
+                    {product.isFeatured && (
+                      <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-200 text-yellow-800 border border-yellow-400">
+                        Featured
+                      </span>
+                    )}
                     <Link to={`/shops/${product.shop._id}`} className="text-sm text-indigo-600 hover:text-indigo-800">
                       {product.shop.name}
                     </Link>
@@ -202,16 +209,30 @@ const ProductDetail: React.FC = () => {
                           to={`/updateproductdetails/${product._id}`} // Corrected path
                           className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                         >
-                          Edit Product
+                          Edit
                         </Link>
                         <button
                           onClick={handleDelete}
                           className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                         >
-                          Delete Product
+                          Delete
+                        </button>
+                        <button
+                          onClick={() => navigate(`/feature-product/${product._id}`)}
+                          className="flex items-center gap-2 px-3 py-1.5 rounded bg-amber-500 text-white font-semibold hover:bg-amber-600 transition"
+                        >
+                          <svg
+                            className="w-5 h-5"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                          </svg>
+                          Feature
                         </button>
                       </div>
-                    )}
+                     )}
                   </div>
                 </div>
                 

@@ -137,17 +137,17 @@ const UpdateProductDetails: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md mx-auto">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-extrabold text-gray-900">Edit Product</h2>
-          <p className="mt-2 text-gray-600">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 py-20 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-2xl mx-auto">
+        <div className="text-center mb-15">
+          <h2 className="text-4xl font-bold text-gray-900 tracking-tight">Edit Product</h2>
+          <p className="mt-2 text-lg text-gray-600">
             Update your product's information
           </p>
         </div>
 
         {error && (
-          <div className="mb-4 bg-red-50 p-4 rounded-md">
+          <div className="mb-6 bg-red-50 border border-red-200 p-4 rounded-xl shadow-sm">
             <div className="flex">
               <div className="flex-shrink-0">
                 <svg className="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -161,9 +161,9 @@ const UpdateProductDetails: React.FC = () => {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="bg-white py-8 px-6 shadow rounded-lg sm:px-10">
-          <div className="mb-6">
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+        <form onSubmit={handleSubmit} className="bg-white backdrop-blur-sm bg-opacity-80 py-8 px-6 shadow-lg rounded-2xl sm:px-10 space-y-6">
+          <div>
+            <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-1">
               Product Name *
             </label>
             <input
@@ -172,13 +172,13 @@ const UpdateProductDetails: React.FC = () => {
               name="name"
               value={formData.name}
               onChange={handleChange}
-              className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              className="appearance-none block w-full px-4 py-3 border border-gray-200 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-150 ease-in-out"
               required
             />
           </div>
 
-          <div className="mb-6">
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+          <div>
+            <label htmlFor="description" className="block text-sm font-semibold text-gray-700 mb-1">
               Description *
             </label>
             <textarea
@@ -187,47 +187,52 @@ const UpdateProductDetails: React.FC = () => {
               rows={4}
               value={formData.description}
               onChange={handleChange}
-              className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              className="appearance-none block w-full px-4 py-3 border border-gray-200 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-150 ease-in-out"
               required
             />
           </div>
 
-          <div className="mb-6">
-            <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
-              Price *
-            </label>
-            <input
-              type="number"
-              id="price"
-              name="price"
-              value={formData.price}
-              onChange={handleChange}
-              className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-              required
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label htmlFor="price" className="block text-sm font-semibold text-gray-700 mb-1">
+                Price *
+              </label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+                <input
+                  type="number"
+                  id="price"
+                  name="price"
+                  value={formData.price}
+                  onChange={handleChange}
+                  className="appearance-none block w-full pl-8 pr-4 py-3 border border-gray-200 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-150 ease-in-out"
+                  required
+                />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="category" className="block text-sm font-semibold text-gray-700 mb-1">
+                Category *
+              </label>
+              <select
+                id="category"
+                name="category"
+                value={formData.category}
+                onChange={handleChange}
+                className="appearance-none block w-full px-4 py-3 border border-gray-200 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-150 ease-in-out"
+                required
+              >
+                <option value="">Select a category</option>
+                {categories.map(category => (
+                  <option key={category} value={category}>{category}</option>
+                ))}
+              </select>
+            </div>
           </div>
 
-          <div className="mb-6">
-            <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
-              Category *
-            </label>
-            <select
-              id="category"
-              name="category"
-              value={formData.category}
-              onChange={handleChange}
-              className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-              required
-            >
-              <option value="">Select a category</option>
-              {categories.map(category => (
-                <option key={category} value={category}>{category}</option>
-              ))}
-            </select>
-          </div>
-
-          <div className="mb-6">
-            <label htmlFor="image" className="block text-sm font-medium text-gray-700 mb-1">
+          <div>
+            <label htmlFor="image" className="block text-sm font-semibold text-gray-700 mb-1">
               Image URL (Optional)
             </label>
             <input
@@ -237,51 +242,54 @@ const UpdateProductDetails: React.FC = () => {
               value={formData.image}
               onChange={handleChange}
               placeholder="https://example.com/image.png"
-              className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              className="appearance-none block w-full px-4 py-3 border border-gray-200 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-150 ease-in-out"
             />
           </div>
 
-          <div className="mb-6">
-            <label htmlFor="quantity" className="block text-sm font-medium text-gray-700 mb-1">
-              Quantity *
-            </label>
-            <input
-              type="number"
-              id="quantity"
-              name="quantity"
-              value={formData.quantity}
-              onChange={handleChange}
-              min={0}
-              className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-              required
-            />
-          </div>
-          <div className="mb-6 flex items-center">
-            <input
-              type="checkbox"
-              id="inStock"
-              name="inStock"
-              checked={formData.inStock}
-              onChange={handleChange}
-              className="mr-2"
-            />
-            <label htmlFor="inStock" className="text-sm font-medium text-gray-700">
-              In Stock
-            </label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label htmlFor="quantity" className="block text-sm font-semibold text-gray-700 mb-1">
+                Quantity *
+              </label>
+              <input
+                type="number"
+                id="quantity"
+                name="quantity"
+                value={formData.quantity}
+                onChange={handleChange}
+                min={0}
+                className="appearance-none block w-full px-4 py-3 border border-gray-200 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-150 ease-in-out"
+                required
+              />
+            </div>
+
+            <div className="flex items-center h-full pt-6">
+              <label className="flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  id="inStock"
+                  name="inStock"
+                  checked={formData.inStock}
+                  onChange={handleChange}
+                  className="w-4 h-4 text-indigo-600 bg-gray-100 border-gray-300 rounded focus:ring-indigo-500 focus:ring-2"
+                />
+                <span className="ml-3 text-sm font-semibold text-gray-700">In Stock</span>
+              </label>
+            </div>
           </div>
 
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between pt-6">
             <button
               type="button"
               onClick={() => navigate(`/products/${id}`)}
-              className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              className="inline-flex items-center px-6 py-3 border border-gray-300 shadow-sm text-sm font-medium rounded-xl text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${submitting ? 'opacity-70 cursor-not-allowed' : ''}`}
+              className={`inline-flex items-center px-6 py-3 border border-transparent text-sm font-medium rounded-xl shadow-sm text-white bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-300 ease-in-out ${submitting ? 'opacity-70 cursor-not-allowed' : ''}`}
             >
               {submitting ? 'Updating...' : 'Update Product'}
             </button>

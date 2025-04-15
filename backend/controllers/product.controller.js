@@ -211,4 +211,4 @@ export const deleteProduct = async (req, res) => {
       error: error.message
     });
   }
-}; 
+};

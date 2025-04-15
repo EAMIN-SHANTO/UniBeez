@@ -9,6 +9,7 @@ interface Product {
   price: number;
   images: string[];
   description?: string;
+  featured?: boolean; // Add featured property
 }
 
 const ProductPage: React.FC = () => {
@@ -74,23 +75,53 @@ const ProductPage: React.FC = () => {
     fetchProducts();
   }, [API_URL]);
 
-  const filteredProducts = products.filter(product => {
+  const featuredProducts = products.filter((product) => product.featured);
+  const nonFeaturedProducts = products.filter((product) => !product.featured);
+  const filteredProducts = nonFeaturedProducts.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(filter.toLowerCase());
     const matchesCategory = categoryFilter === '' || product.description?.toLowerCase().includes(categoryFilter.toLowerCase());
     return matchesSearch && matchesCategory;
   });
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 py-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
+        <div className="text-center mb-16">
+          <h1 className="text-4xl font-extrabold text-gray-900 sm:text-5xl mb-6">
             All Products
           </h1>
-          <p className="mt-3 max-w-2xl mx-auto text-xl text-gray-500 sm:mt-4">
+          <p className="text-xl text-gray-500 max-w-2xl mx-auto">
             Browse all products available in the marketplace
           </p>
         </div>
+
+        {/* Featured Products Section */}
+        {featuredProducts.length > 0 && (
+          <div className="mb-12">
+            <h2 className="text-2xl font-bold text-indigo-700 mb-6 text-center">Featured Products</h2>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {featuredProducts.map((product) => (
+                <Link 
+                  key={product._id} 
+                  to={`/products/${product._id}`}
+                  className="bg-yellow-50 border-2 border-yellow-300 overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow duration-300"
+                >
+                  <div className="relative h-48">
+                    <img 
+                      className="w-full h-full object-cover" 
+                      src={product.images[0] || 'https://via.placeholder.com/800x400'} 
+                      alt={product.name} 
+                    />
+                  </div>
+                  <div className="p-4">
+                    <h3 className="text-lg font-medium text-gray-900">{product.name}</h3>
+                    <p className="text-sm text-gray-600 mt-2">${product.price.toFixed(2)}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="mb-8 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
           <div className="flex-1">
@@ -148,24 +179,48 @@ const ProductPage: React.FC = () => {
           <div className="text-center text-gray-500">No products found.</div>
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {filteredProducts.map((product) => (
-              <Link 
-                key={product._id} 
-                to={`/products/${product._id}`}
-                className="bg-white overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow duration-300"
-              >
-                <div className="relative h-48">
-                  <img 
-                    className="w-full h-full object-cover" 
-                    src={product.images[0] || 'https://via.placeholder.com/800x400'} 
-                    alt={product.name} 
-                  />
-                </div>
-                <div className="p-4">
-                  <h3 className="text-lg font-medium text-gray-900">{product.name}</h3>
-                  <p className="text-sm text-gray-600 mt-2">${product.price.toFixed(2)}</p>
-                </div>
-              </Link>
+            {filteredProducts.map((product: any) => (
+              <div key={product._id} className="bg-white overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow duration-300 flex flex-col">
+                <Link 
+                  to={`/products/${product._id}`}
+                  className="flex-1"
+                >
+                  <div className="relative h-48">
+                    <img 
+                      className="w-full h-full object-cover" 
+                      src={product.images[0] || 'https://via.placeholder.com/800x400'} 
+                      alt={product.name} 
+                    />
+                  </div>
+                  <div className="p-4">
+                    <h3 className="text-lg font-medium text-gray-900">{product.name}</h3>
+                    <p className="text-sm text-gray-600 mt-2">${product.price.toFixed(2)}</p>
+                  </div>
+                </Link>
+                {/* Only show Feature Product button if user owns the product's shop */}
+                {user && product.shop && (
+                  (user._id === (product.shop.owner?._id || product.shop.owner)) && (
+                    <div className="p-4 pt-0">
+                      <button
+                        className="flex items-center gap-2 py-2 px-4 rounded bg-amber-500 text-white font-semibold hover:bg-amber-600 transition"
+                        onClick={() => navigate(`/feature-product/${product._id}`)}
+                      >
+                        <svg
+                          className="w-5 h-5"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
+                          />
+                        </svg>
+                        Feature
+                      </button>
+                    </div>
+                  )
+                )}
+              </div>
             ))}
           </div>
         )}

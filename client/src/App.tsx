@@ -30,6 +30,7 @@ import CartPage from './pages/CartPage';
 import Checkout from './pages/Checkout';
 import { CartProvider } from './context/CartContext'; 
 import UpdateProductDetails from './pages/UpdateProductDetails'; 
+import FeatureProduct from './pages/FeatureProduct';
 
 const App: React.FC = () => {
   return (
@@ -111,6 +112,7 @@ const App: React.FC = () => {
                     <EditShop />
                   </ProtectedRoute>
                 } />
+                
 
 
                 <Route path="/current-event-21301429" element={<CurrentEvent />} />
@@ -129,6 +131,11 @@ const App: React.FC = () => {
                   </ProtectedRoute>
                 } />
                 <Route path="/updateproductdetails/:id" element={<UpdateProductDetails />} />
+                <Route path="/feature-product/:id" element={
+                  <ProtectedRoute>
+                    <FeatureProduct />
+                  </ProtectedRoute>
+                } />
               </Route>
             </Routes>
           </NotificationProvider>
