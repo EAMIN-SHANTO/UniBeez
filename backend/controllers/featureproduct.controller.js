@@ -1,5 +1,4 @@
 import Product from '../models/product.model.js';
-import FeatureRequest from '../models/featuring.model.js';
 import mongoose from 'mongoose'; // Added missing import
 
 // Feature a product
