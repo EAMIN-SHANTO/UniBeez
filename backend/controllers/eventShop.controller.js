@@ -109,12 +109,15 @@ export const getEventShops = async (req, res) => {
     const eventShops = await EventShop.find({ event: eventId })
       .populate({
         path: 'shop',
-        select: 'name description logo category rating reviewCount'
+        select: 'name description logo category rating reviewCount owner'
       });
 
     res.status(200).json({
       success: true,
-      eventShops: eventShops.map(es => es.shop)
+      eventShops: eventShops.map(es => ({
+        ...es.shop.toObject(),
+        owner: es.shop.owner.toString()
+      }))
     });
   } catch (error) {
     console.error('Error fetching event shops:', error);

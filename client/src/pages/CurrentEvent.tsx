@@ -24,7 +24,7 @@ interface Shop {
   category: string;
   rating: number;
   reviewCount: number;
-  owner?: string;
+  owner: string;
 }
 
 const CurrentEvent: React.FC = () => {
@@ -33,7 +33,7 @@ const CurrentEvent: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [eventShops, setEventShops] = useState<Shop[]>([]);
-  const [showShops, setShowShops] = useState(false);
+  const [showMyShops, setShowMyShops] = useState(false);
   const [registrationStatus, setRegistrationStatus] = useState<string>('');
   const [showShopSelection, setShowShopSelection] = useState(false);
   const [userShops, setUserShops] = useState<Shop[]>([]);
@@ -162,6 +162,17 @@ const CurrentEvent: React.FC = () => {
       setRegistrationStatus('Failed to remove shop');
     }
   };
+
+  // Add a function to check if user can remove shop
+  const canRemoveShop = (shopOwnerId: string) => {
+    if (!user) return false;
+    return ['admin', 'staff'].includes(user.role) || user._id === shopOwnerId;
+  };
+
+  // Filter shops based on showMyShops state
+  const filteredShops = showMyShops && user 
+    ? eventShops.filter(shop => shop.owner === user._id)
+    : eventShops;
 
   if (loading) {
     return (
@@ -294,14 +305,16 @@ const CurrentEvent: React.FC = () => {
                   className="px-6 py-2 bg-white text-blue-600 border-2 border-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
                   onClick={fetchUserShops}
                 >
-                  Register Event Shop
+                  Register Shop in Event
                 </button>
-                <button 
-                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                  onClick={() => setShowShops(!showShops)}
-                >
-                  {showShops ? 'Hide Event Shops' : 'See Event Shops'}
-                </button>
+                {user && (
+                  <button 
+                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    onClick={() => setShowMyShops(!showMyShops)}
+                  >
+                    {showMyShops ? 'Show All Shops' : 'Show My Shops'}
+                  </button>
+                )}
               </div>
             </div>
             <p className="text-xl text-gray-600 mb-8">{currentEvent.description}</p>
@@ -332,61 +345,66 @@ const CurrentEvent: React.FC = () => {
               </div>
             </div>
 
-            {showShops && (
-              <div className="mt-12">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Event Shops</h2>
-                {eventShops.length === 0 ? (
-                  <div className="bg-gray-50 p-4 rounded-lg text-gray-600">
-                    No shops have registered for this event yet.
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {eventShops.map(shop => (
-                      <div key={shop._id} className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
-                        <Link
-                          to={`/shops/${shop._id}`}
-                          className="block p-4"
-                        >
-                          <div className="flex items-center space-x-4">
-                            <img
-                              src={shop.logo}
-                              alt={shop.name}
-                              className="w-16 h-16 rounded-full object-cover"
-                              onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                target.src = PLACEHOLDER_IMAGE;
-                              }}
-                            />
-                            <div>
-                              <h3 className="text-lg font-semibold text-gray-900">{shop.name}</h3>
-                              <p className="text-sm text-gray-500">{shop.category}</p>
-                            </div>
-                          </div>
-                          <p className="mt-2 text-gray-600 line-clamp-2">{shop.description}</p>
-                          <div className="mt-2 flex items-center text-sm text-gray-500">
-                            <span className="flex items-center">
-                              {shop.rating.toFixed(1)} ★
-                            </span>
-                            <span className="mx-2">•</span>
-                            <span>{shop.reviewCount} reviews</span>
-                          </div>
-                        </Link>
-                        {(user?.role === 'admin' || user?.role === 'staff' || user?._id === shop.owner) && (
-                          <div className="px-4 pb-4">
-                            <button
-                              onClick={() => handleRemoveShop(shop._id)}
-                              className="w-full px-4 py-2 text-red-600 border border-red-600 rounded-lg hover:bg-red-50 transition-colors"
-                            >
-                              Remove from Event
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
+            <div className="mt-12">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">
+                  {showMyShops ? 'My Event Shops' : 'Event Shops'}
+                </h2>
+                {showMyShops && filteredShops.length === 0 && (
+                  <p className="text-gray-600">You don't have any shops registered for this event</p>
                 )}
               </div>
-            )}
+              {filteredShops.length === 0 && !showMyShops ? (
+                <div className="bg-gray-50 p-4 rounded-lg text-gray-600">
+                  No shops have registered for this event yet.
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filteredShops.map(shop => (
+                    <div key={shop._id} className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                      <Link
+                        to={`/shops/${shop._id}`}
+                        className="block p-4"
+                      >
+                        <div className="flex items-center space-x-4">
+                          <img
+                            src={shop.logo}
+                            alt={shop.name}
+                            className="w-16 h-16 rounded-full object-cover"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.src = PLACEHOLDER_IMAGE;
+                            }}
+                          />
+                          <div>
+                            <h3 className="text-lg font-semibold text-gray-900">{shop.name}</h3>
+                            <p className="text-sm text-gray-500">{shop.category}</p>
+                          </div>
+                        </div>
+                        <p className="mt-2 text-gray-600 line-clamp-2">{shop.description}</p>
+                        <div className="mt-2 flex items-center text-sm text-gray-500">
+                          <span className="flex items-center">
+                            {shop.rating.toFixed(1)} ★
+                          </span>
+                          <span className="mx-2">•</span>
+                          <span>{shop.reviewCount} reviews</span>
+                        </div>
+                      </Link>
+                      {canRemoveShop(shop.owner) && (
+                        <div className="px-4 pb-4">
+                          <button
+                            onClick={() => handleRemoveShop(shop._id)}
+                            className="w-full px-4 py-2 text-red-600 border border-red-600 rounded-lg hover:bg-red-50 transition-colors"
+                          >
+                            Remove from Event
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
