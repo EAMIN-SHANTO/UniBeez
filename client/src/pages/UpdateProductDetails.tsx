@@ -12,7 +12,9 @@ const UpdateProductDetails: React.FC = () => {
     description: '',
     price: '',
     category: '',
-    image: ''
+    image: '',
+    quantity: '', 
+    inStock: true 
   });
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -31,7 +33,7 @@ const UpdateProductDetails: React.FC = () => {
         const product = response.data.product;
 
         // Check if current user is the product owner
-        if (user?._id !== product.shop.owner._id) { // Adjusted owner check
+        if (user?._id !== product.shop.owner._id) { 
           navigate(`/products/${id}`);
           return;
         }
@@ -41,7 +43,9 @@ const UpdateProductDetails: React.FC = () => {
           description: product.description,
           price: product.price.toString(),
           category: product.category,
-          image: product.images?.[0] || '' // Handle image array
+          image: product.images?.[0] || '', // Handle image array
+          quantity: product.quantity?.toString() || '1', // Set quantity
+          inStock: product.inStock ?? true // Set inStock
         });
 
         setError(null);
@@ -59,18 +63,26 @@ const UpdateProductDetails: React.FC = () => {
   }, [id, API_URL, user, navigate]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target as any;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: type === 'checkbox' ? checked : value
     }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.name.trim() || !formData.description.trim() || !formData.price || !formData.category.trim()) {
-      setError('Please fill in all required fields.');
+    if (
+      !formData.name.trim() ||
+      !formData.description.trim() ||
+      !formData.price ||
+      !formData.category.trim() ||
+      formData.quantity === '' ||
+      isNaN(Number(formData.quantity)) ||
+      Number(formData.quantity) < 0
+    ) {
+      setError('Please fill in all required fields and ensure quantity is valid.');
       return;
     }
 
@@ -78,13 +90,17 @@ const UpdateProductDetails: React.FC = () => {
       setSubmitting(true);
       setError(null);
 
+      // If inStock is false, force quantity to 0
+      const adjustedQuantity = formData.inStock ? Number(formData.quantity) : 0;
+
       const payload = {
         ...formData,
         price: parseFloat(formData.price),
+        quantity: adjustedQuantity,
+        inStock: Boolean(formData.inStock), // Ensure boolean is sent
         image: formData.image.trim() || undefined, // Remove empty image field
       };
 
-      // Try PATCH to /updateProduct/:id first (your backend route)
       try {
         await axios.patch(
           `${API_URL}/api/productpage/updateProduct/${id}`,
@@ -92,7 +108,6 @@ const UpdateProductDetails: React.FC = () => {
           { withCredentials: true }
         );
       } catch (err: any) {
-        // If 404, try PATCH to /api/productpage/:id (in case backend expects this)
         if (err.response && err.response.status === 404) {
           await axios.patch(
             `${API_URL}/api/productpage/${id}`,
@@ -224,6 +239,35 @@ const UpdateProductDetails: React.FC = () => {
               placeholder="https://example.com/image.png"
               className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
             />
+          </div>
+
+          <div className="mb-6">
+            <label htmlFor="quantity" className="block text-sm font-medium text-gray-700 mb-1">
+              Quantity *
+            </label>
+            <input
+              type="number"
+              id="quantity"
+              name="quantity"
+              value={formData.quantity}
+              onChange={handleChange}
+              min={0}
+              className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              required
+            />
+          </div>
+          <div className="mb-6 flex items-center">
+            <input
+              type="checkbox"
+              id="inStock"
+              name="inStock"
+              checked={formData.inStock}
+              onChange={handleChange}
+              className="mr-2"
+            />
+            <label htmlFor="inStock" className="text-sm font-medium text-gray-700">
+              In Stock
+            </label>
           </div>
 
           <div className="flex items-center justify-between">

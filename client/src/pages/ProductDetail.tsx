@@ -234,12 +234,26 @@ const ProductDetail: React.FC = () => {
                   <span className="text-3xl font-bold text-gray-900">${product.price.toFixed(2)}</span>
                 </div>
                 
+                <div className="mt-6 prose prose-sm text-gray-500">
+                  <h3 className="text-sm font-medium text-gray-900">Description</h3>
+                  <div className="mt-2">
+                    <p>{product.description}</p>
+                  </div>
+                </div>
+
+     
                 <div className="mt-4">
                   <div className="flex items-center">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${product.inStock ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                      {product.inStock ? 'In Stock' : 'Out of Stock'}
+                    <span
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        product.inStock && product.quantity > 0
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-red-100 text-red-800'
+                      }`}
+                    >
+                      {product.inStock && product.quantity > 0 ? 'In Stock' : 'Out of Stock'}
                     </span>
-                    {product.quantity > 0 && product.inStock && (
+                    {product.inStock && product.quantity > 0 && (
                       <span className="ml-2 text-sm text-gray-500">
                         {product.quantity} available
                       </span>
@@ -247,13 +261,7 @@ const ProductDetail: React.FC = () => {
                   </div>
                 </div>
                 
-                <div className="mt-6 prose prose-sm text-gray-500">
-                  <h3 className="text-sm font-medium text-gray-900">Description</h3>
-                  <div className="mt-2">
-                    <p>{product.description}</p>
-                  </div>
-                </div>
-                
+                {/* Cart/quantity section remains below */}
                 <div className="mt-6">
                   {product.inStock ? (
                     <div>
