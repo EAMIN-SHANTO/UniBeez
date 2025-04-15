@@ -14,6 +14,8 @@ import productRoutes from './routes/product.route.js';
 import productpageroutes from './routes/productpage.route.js';
 import cartRoutes from './routes/cart.route.js';
 import eventShopRoutes from './routes/eventShop.route.js';
+import featureproductsroutes from './routes/featureproducts.route.js';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -50,6 +52,7 @@ app.use("/api/products", productRoutes);
 app.use("/api/productpage", productpageroutes);
 app.use("/api/cart", cartRoutes);
 app.use('/api/event-shops', eventShopRoutes);
+app.use('/api/featureproducts', featureproductsroutes);
 
 // Test routes
 app.get("/api/test", (req, res) => {

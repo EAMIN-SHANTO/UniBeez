@@ -31,8 +31,13 @@ const FeatureProduct: React.FC = () => {
 
   const checkFeatureStatus = async () => {
     try {
+      if (!id) {
+        setError('Product ID is missing.');
+        return false;
+      }
+
       const response = await axios.get(
-        `${API_URL}/api/productpage/feature/${id}/requests`,
+        `${API_URL}/api/feature/${id}`,
         { withCredentials: true }
       );
       const requests = response.data.data;
@@ -53,9 +58,6 @@ const FeatureProduct: React.FC = () => {
     setError(null);
     setSuccess(false);
 
-    if (!(await checkFeatureStatus())) {
-      return;
-    }
 
     if (!startDate) {
       setError('Please select a start date.');
@@ -77,8 +79,8 @@ const FeatureProduct: React.FC = () => {
 
     setSubmitting(true);
     try {
-      await axios.post(
-        `${API_URL}/api/productpage/feature/${id}`,
+      await axios.put(
+        `${API_URL}/api/feature/${id}/true`,
         {
           startDate,
           duration: Number(duration),

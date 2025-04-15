@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import Product from '../models/product.model.js';
 import Shop from '../models/shop.model.js';
 //import productpage from '../models/productpage.model.js';
@@ -57,31 +58,41 @@ export const createProduct = async (req, res) => {
 // Get a single product by ID
 export const getProductById = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id).populate({
+    const { id } = req.params;
+
+    // Validate ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid product ID',
+      });
+    }
+
+    const product = await Product.findById(id).populate({
       path: 'shop',
       select: 'name owner',
       populate: {
         path: 'owner',
-        select: '_id username'
-      }
+        select: '_id username',
+      },
     });
 
     if (!product) {
       return res.status(404).json({
         success: false,
-        message: 'Product not found'
+        message: 'Product not found',
       });
     }
 
     res.status(200).json({
       success: true,
-      product
+      product,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
       message: 'Failed to fetch product',
-      error: error.message
+      error: error.message,
     });
   }
 };
