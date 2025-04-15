@@ -86,46 +86,7 @@ const ProductPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        {/* Removed Last 5 Products Section */}
-
-        <div className="text-center mb-16">
-          <h1 className="text-4xl font-extrabold text-gray-900 sm:text-5xl mb-6">
-            All Products
-          </h1>
-          <p className="text-xl text-gray-500 max-w-2xl mx-auto">
-            Browse all products available in the marketplace
-          </p>
-        </div>
-
-        {/* Featured Products Section */}
-        {featuredProducts.length > 0 && (
-          <div className="mb-12">
-            <h2 className="text-2xl font-bold text-indigo-700 mb-6 text-center">Featured Products</h2>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {featuredProducts.map((product) => (
-                <Link 
-                  key={product._id} 
-                  to={`/products/${product._id}`}
-                  className="bg-yellow-50 border-2 border-yellow-300 overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow duration-300"
-                >
-                  <div className="relative h-48">
-                    <img 
-                      className="w-full h-full object-cover" 
-                      src={product.images[0] || 'https://via.placeholder.com/800x400'} 
-                      alt={product.name} 
-                    />
-                  </div>
-                  <div className="p-4">
-                    <h3 className="text-lg font-medium text-gray-900">{product.name}</h3>
-                    <p className="text-sm text-gray-600 mt-2">${product.price.toFixed(2)}</p>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
-
-        <div className="mb-8 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+      <div className="mb-8 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
           <div className="flex-1">
             <input
               type="text"
@@ -179,6 +140,47 @@ const ProductPage: React.FC = () => {
             </div>
           )}
         </div>
+
+        {featuredProducts.length > 0 && (
+          <div className="mb-12">
+            <h2 className="text-2xl font-bold text-indigo-700 mb-6 text-center">Featured Products</h2>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {featuredProducts.map((product) => (
+                <Link 
+                  key={product._id} 
+                  to={`/products/${product._id}`}
+                  className="bg-yellow-50 border-2 border-yellow-300 overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow duration-300"
+                >
+                  <div className="relative h-48">
+                    <img 
+                      className="w-full h-full object-cover" 
+                      src={product.images[0] || 'https://via.placeholder.com/800x400'} 
+                      alt={product.name} 
+                    />
+                  </div>
+                  <div className="p-4">
+                    <h3 className="text-lg font-medium text-gray-900">{product.name}</h3>
+                    <p className="text-sm text-gray-600 mt-2">${product.price.toFixed(2)}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* All Products Text */}
+        <div className="text-center mb-8">
+          <h2 className="text-xl font-semibold text-gray-700">All Products</h2>
+        </div>
+
+        {/* Browse All Products Description */}
+        <div className="text-center mb-16">
+          <p className="text-2xl text-gray-500 max-w-2xl mx-auto">
+            Browse all products available in the marketplace
+          </p>
+        </div>
+
+       
 
         {loading ? (
           <div className="flex justify-center">
