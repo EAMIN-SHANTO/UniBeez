@@ -13,6 +13,7 @@ import shopRoutes from './routes/shop.route.js';
 import productRoutes from './routes/product.route.js';
 import productpageroutes from './routes/productpage.route.js';
 import cartRoutes from './routes/cart.route.js';
+import eventShopRoutes from './routes/eventShop.route.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -48,6 +49,7 @@ app.use("/api/shops", shopRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/productpage", productpageroutes);
 app.use("/api/cart", cartRoutes);
+app.use('/api/event-shops', eventShopRoutes);
 
 // Test routes
 app.get("/api/test", (req, res) => {
@@ -60,6 +62,10 @@ app.get("/api/notifications/test", (req, res) => {
 
 app.get("/api/events-21301429/test", (req, res) => {
   res.json({ message: "Event routes are working!" });
+});
+
+app.get("/api/event-shops/test", (req, res) => {
+  res.json({ message: "Event shop routes are working!" });
 });
 
 // Error handling
@@ -98,6 +104,8 @@ mongoose
       console.log('- Product routes: /api/products/*');
       console.log('- Product page routes: /api/productpage'); 
       console.log('- Cart routes: /api/cart/*');
+      console.log('- Event shop routes: /api/event-shops/*');
+      
       // Log available endpoints
       console.log('\nEvent endpoints:');
       console.log('GET    /api/events-21301429');
@@ -106,6 +114,11 @@ mongoose
       console.log('DELETE /api/events-21301429/:eventId');
       console.log('PATCH  /api/events-21301429/:eventId/archive');
       console.log('GET    /api/events-21301429/test');
+      
+      console.log('\nEvent shop endpoints:');
+      console.log('POST   /api/event-shops/:eventId/register');
+      console.log('GET    /api/event-shops/:eventId/shops');
+      console.log('GET    /api/event-shops/test');
       
       console.log('\nNotification endpoints:');
       console.log('GET    /api/notifications');
