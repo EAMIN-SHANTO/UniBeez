@@ -156,34 +156,41 @@ export const getAllShopProducts = async (req, res) => {
   }
 };
 
-// Update product
 export const updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
+    const { name, description, price, category, images, quantity } = req.body;
+
+    if (!name || !description || !price || !category) {
+      return res.status(400).json({
+        success: false,
+        message: 'Missing required fields',
+      });
+    }
 
     const updatedProduct = await Product.findByIdAndUpdate(
       id,
-      { $set: req.body },
+      { name, description, price, category, images, quantity },
       { new: true, runValidators: true }
     );
 
     if (!updatedProduct) {
       return res.status(404).json({
         success: false,
-        message: 'Product not found'
+        message: 'Product not found',
       });
     }
 
     res.status(200).json({
       success: true,
       message: 'Product updated successfully',
-      product: updatedProduct
+      product: updatedProduct,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
       message: 'Failed to update product',
-      error: error.message
+      error: error.message,
     });
   }
 };
@@ -214,3 +221,4 @@ export const deleteProduct = async (req, res) => {
     });
   }
 };
+

@@ -29,6 +29,7 @@ import ProductPage from './pages/ProductPage';
 import CartPage from './pages/CartPage';
 import Checkout from './pages/Checkout';
 import { CartProvider } from './context/CartContext'; 
+import UpdateProductDetails from './pages/UpdateProductDetails'; 
 
 const App: React.FC = () => {
   return (
@@ -122,6 +123,12 @@ const App: React.FC = () => {
                   </div>
                 } />
                 <Route path="/productpage" element={<ProductPage />} />
+                <Route path="/updateproductpage/:id" element={
+                  <ProtectedRoute>
+                    <UpdateProductDetails />
+                  </ProtectedRoute>
+                } />
+                <Route path="/updateproductdetails/:id" element={<UpdateProductDetails />} />
               </Route>
             </Routes>
           </NotificationProvider>
@@ -132,4 +139,4 @@ const App: React.FC = () => {
   );
 };
 
-export default App; 
+export default App;

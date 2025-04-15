@@ -77,6 +77,9 @@ const ProductDetail: React.FC = () => {
     }
   };
 
+
+
+
   const handleAddToCart = async () => {
     if (!user) {
       navigate('/login');
@@ -101,6 +104,8 @@ const ProductDetail: React.FC = () => {
       setIsAddingToCart(false);
     }
   };
+
+
 
   if (loading) {
     return (
@@ -194,7 +199,7 @@ const ProductDetail: React.FC = () => {
                      {isOwner && (
                       <div className="flex space-x-4">
                         <Link
-                          to={`/products/edit/${product._id}`}
+                          to={`/updateproductdetails/${product._id}`} // Corrected path
                           className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                         >
                           Edit Product
