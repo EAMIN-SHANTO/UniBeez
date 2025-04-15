@@ -124,4 +124,47 @@ export const getEventShops = async (req, res) => {
       error: error.message
     });
   }
+};
+
+// Remove shop from event
+export const removeEventShop = async (req, res) => {
+  try {
+    const { eventId, shopId } = req.params;
+    const userId = req.user._id;
+
+    // Find the event shop registration
+    const eventShop = await EventShop.findOne({ event: eventId, shop: shopId })
+      .populate('shop', 'owner');
+
+    if (!eventShop) {
+      return res.status(404).json({
+        success: false,
+        message: 'Shop is not registered for this event'
+      });
+    }
+
+    // Check if user is authorized (shop owner or admin/staff)
+    if (eventShop.shop.owner.toString() !== userId.toString() && 
+        !['admin', 'staff'].includes(req.user.role)) {
+      return res.status(403).json({
+        success: false,
+        message: 'You are not authorized to remove this shop'
+      });
+    }
+
+    // Remove the event shop registration
+    await EventShop.findByIdAndDelete(eventShop._id);
+
+    res.status(200).json({
+      success: true,
+      message: 'Shop removed from event successfully'
+    });
+  } catch (error) {
+    console.error('Error removing event shop:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error removing shop from event',
+      error: error.message
+    });
+  }
 }; 

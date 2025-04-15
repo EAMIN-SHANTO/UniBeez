@@ -24,10 +24,11 @@ interface Shop {
   category: string;
   rating: number;
   reviewCount: number;
+  owner?: string;
 }
 
 const CurrentEvent: React.FC = () => {
-  const { API_URL } = useAuth();
+  const { API_URL, user } = useAuth();
   const [currentEvent, setCurrentEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -133,6 +134,32 @@ const CurrentEvent: React.FC = () => {
     } catch (err) {
       console.error('Error registering shop:', err);
       setRegistrationStatus('Failed to register shop');
+    }
+  };
+
+  const handleRemoveShop = async (shopId: string) => {
+    if (!currentEvent || !window.confirm('Are you sure you want to remove this shop from the event?')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/api/event-shops/${currentEvent._id}/shops/${shopId}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        setRegistrationStatus('Shop removed successfully');
+        // Refresh the list of event shops
+        fetchEventShops(currentEvent._id);
+      } else {
+        setRegistrationStatus(data.message);
+      }
+    } catch (err) {
+      console.error('Error removing shop:', err);
+      setRegistrationStatus('Failed to remove shop');
     }
   };
 
@@ -315,12 +342,11 @@ const CurrentEvent: React.FC = () => {
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {eventShops.map(shop => (
-                      <Link
-                        key={shop._id}
-                        to={`/shops/${shop._id}`}
-                        className="block bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
-                      >
-                        <div className="p-4">
+                      <div key={shop._id} className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                        <Link
+                          to={`/shops/${shop._id}`}
+                          className="block p-4"
+                        >
                           <div className="flex items-center space-x-4">
                             <img
                               src={shop.logo}
@@ -344,8 +370,18 @@ const CurrentEvent: React.FC = () => {
                             <span className="mx-2">•</span>
                             <span>{shop.reviewCount} reviews</span>
                           </div>
-                        </div>
-                      </Link>
+                        </Link>
+                        {(user?.role === 'admin' || user?.role === 'staff' || user?._id === shop.owner) && (
+                          <div className="px-4 pb-4">
+                            <button
+                              onClick={() => handleRemoveShop(shop._id)}
+                              className="w-full px-4 py-2 text-red-600 border border-red-600 rounded-lg hover:bg-red-50 transition-colors"
+                            >
+                              Remove from Event
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     ))}
                   </div>
                 )}
