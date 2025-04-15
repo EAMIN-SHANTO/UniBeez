@@ -130,6 +130,7 @@ const App: React.FC = () => {
                     <UpdateProductDetails />
                   </ProtectedRoute>
                 } />
+                
                 <Route path="/updateproductdetails/:id" element={<UpdateProductDetails />} />
                 <Route path="/feature-product/:id" element={
                   <ProtectedRoute>

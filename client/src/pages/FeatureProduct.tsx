@@ -11,7 +11,8 @@ const paymentMethods = [
 
 const durationTypes = [
   { label: 'Days', value: 'days' },
-  { label: 'Weeks', value: 'weeks' }
+  { label: 'Weeks', value: 'weeks' },
+  { label: 'Months', value: 'months' }
 ];
 
 const FeatureProduct: React.FC = () => {
@@ -23,14 +24,43 @@ const FeatureProduct: React.FC = () => {
   const [durationType, setDurationType] = useState('days');
   const [paymentMethod, setPaymentMethod] = useState('');
   const [transactionId, setTransactionId] = useState('');
+  const [startDate, setStartDate] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+
+  const checkFeatureStatus = async () => {
+    try {
+      const response = await axios.get(
+        `${API_URL}/api/productpage/feature/${id}/requests`,
+        { withCredentials: true }
+      );
+      const requests = response.data.data;
+      const pendingRequest = requests.find((req: { status: string; }) => req.status === 'pending');
+      if (pendingRequest) {
+        setError('You already have a pending feature request for this product.');
+        return false;
+      }
+      return true;
+    } catch (err: any) {
+      setError('Failed to check feature status.');
+      return false;
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setSuccess(false);
+
+    if (!(await checkFeatureStatus())) {
+      return;
+    }
+
+    if (!startDate) {
+      setError('Please select a start date.');
+      return;
+    }
 
     if (!duration || isNaN(Number(duration)) || Number(duration) <= 0) {
       setError('Please enter a valid duration.');
@@ -50,6 +80,7 @@ const FeatureProduct: React.FC = () => {
       await axios.post(
         `${API_URL}/api/productpage/feature/${id}`,
         {
+          startDate,
           duration: Number(duration),
           durationType,
           paymentMethod,
@@ -80,6 +111,17 @@ const FeatureProduct: React.FC = () => {
           </div>
         )}
         <form onSubmit={handleSubmit} className="space-y-5">
+          <div>
+            <label className="block mb-2 font-semibold text-gray-700">Start Date</label>
+            <input
+              type="date"
+              className="border px-3 py-2 rounded-lg w-full focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-all"
+              value={startDate}
+              onChange={e => setStartDate(e.target.value)}
+              min={new Date().toISOString().split('T')[0]}
+              required
+            />
+          </div>
           <div>
             <label className="block mb-2 font-semibold text-gray-700">Duration</label>
             <div className="flex gap-3">

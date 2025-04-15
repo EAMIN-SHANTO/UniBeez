@@ -27,6 +27,9 @@ const CreateProduct: React.FC = () => {
     images: ['']
   });
 
+  const [userShops, setUserShops] = useState<Shop[]>([]);
+  const [selectedShopId, setSelectedShopId] = useState<string>('');
+
   useEffect(() => {
     const fetchShopDetails = async () => {
       try {
@@ -57,6 +60,38 @@ const CreateProduct: React.FC = () => {
       fetchShopDetails();
     }
   }, [shopId, API_URL, user]);
+
+  useEffect(() => {
+    const fetchUserShops = async () => {
+      try {
+        const response = await axios.get(`${API_URL}/api/shops`, {
+          withCredentials: true
+        });
+        
+        // Filter shops owned by the user
+        const ownedShops = response.data.shops.filter((shop: any) => {
+          const shopOwnerId = typeof shop.owner === 'object' ? shop.owner._id : shop.owner;
+          return shopOwnerId === user?._id;
+        });
+        
+        setUserShops(ownedShops);
+        
+        // If shopId is provided, set it as selected
+        if (shopId) {
+          setSelectedShopId(shopId);
+        } else if (ownedShops.length > 0) {
+          // Otherwise select first shop
+          setSelectedShopId(ownedShops[0]._id);
+        }
+      } catch (err) {
+        console.error('Failed to fetch user shops:', err);
+      }
+    };
+
+    if (user) {
+      fetchUserShops();
+    }
+  }, [API_URL, user, shopId]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -95,6 +130,11 @@ const CreateProduct: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!selectedShopId) {
+      setError('Please select a shop');
+      return;
+    }
+    
     if (!formData.name || !formData.description || !formData.price || !formData.category) {
       setError('Please fill in all required fields');
       return;
@@ -114,7 +154,7 @@ const CreateProduct: React.FC = () => {
         price: parseFloat(formData.price),
         category: formData.category,
         quantity: parseInt(formData.quantity),
-        shop: shopId,
+        shop: selectedShopId,
         images: filteredImages
       };
       
@@ -134,7 +174,7 @@ const CreateProduct: React.FC = () => {
       );
       
       console.log('Server response:', response.data);
-      navigate(`/shops/${shopId}`);
+      navigate(`/shops/${selectedShopId}`);
     } catch (err: any) {
       console.log('Error response:', err.response?.data);
       
@@ -193,7 +233,7 @@ const CreateProduct: React.FC = () => {
         <div className="text-center mb-8">
           <h2 className="text-3xl font-extrabold text-gray-900">Add New Product</h2>
           <p className="mt-2 text-gray-600">
-            Add a new product to {shop?.name}
+            Select a shop and add your product
           </p>
         </div>
         
@@ -213,6 +253,26 @@ const CreateProduct: React.FC = () => {
         )}
         
         <form onSubmit={handleSubmit} className="bg-white py-8 px-6 shadow rounded-lg sm:px-10">
+          <div className="mb-6">
+            <label htmlFor="shop" className="block text-sm font-medium text-gray-700 mb-1">
+              Select Shop *
+            </label>
+            <select
+              id="shop"
+              value={selectedShopId}
+              onChange={(e) => setSelectedShopId(e.target.value)}
+              className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              required
+            >
+              <option value="">Select a shop</option>
+              {userShops.map((shop) => (
+                <option key={shop._id} value={shop._id}>
+                  {shop.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <div className="mb-6">
             <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
               Product Name *
