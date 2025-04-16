@@ -44,4 +44,5 @@ const featureRequestSchema = new mongoose.Schema({
   }
 });
 
-module.exports = mongoose.model('FeatureRequest', featureRequestSchema);
+const FeatureRequest = mongoose.model('FeatureRequest', featureRequestSchema);
+export default FeatureRequest;

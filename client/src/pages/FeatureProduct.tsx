@@ -57,8 +57,7 @@ const FeatureProduct: React.FC = () => {
     e.preventDefault();
     setError(null);
     setSuccess(false);
-
-
+    
     if (!startDate) {
       setError('Please select a start date.');
       return;
@@ -80,8 +79,9 @@ const FeatureProduct: React.FC = () => {
     setSubmitting(true);
     try {
       await axios.put(
-        `${API_URL}/api/feature/${id}/true`,
+        `${API_URL}/api/featureproducts/feature-product`,
         {
+          productId: id, // Include the productId in the request body
           startDate,
           duration: Number(duration),
           durationType,

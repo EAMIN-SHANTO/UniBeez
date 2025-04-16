@@ -1,9 +1,12 @@
 import Product from '../models/product.model.js';
+import FeatureRequest from '../models/featurerequest.model.js'; // Add this import
 import mongoose from 'mongoose'; // Added missing import
 
 // Feature a product
 export const featureProduct = async (req, res) => {
   try {
+    console.log('Feature product request body:', req.body);
+    console.log('User:', req.user);
     const { productId, startDate, duration, durationType, paymentMethod, transactionId } = req.body;
     const userId = req.user._id; // Extract userId from authenticated user
 
@@ -48,6 +51,7 @@ export const featureProduct = async (req, res) => {
       featureRequest,
     });
   } catch (error) {
+    console.error('Feature product error:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to feature product',

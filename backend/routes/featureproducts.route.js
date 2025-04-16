@@ -1,4 +1,5 @@
 import express from 'express';
+import { verifyToken } from '../middleware/auth.middleware.js';
 const router = express.Router();
 
 import {
@@ -8,11 +9,11 @@ import {
   getProductById,
 } from '../controllers/featureproduct.controller.js';
 
-// Route to feature a product
-router.put('/feature-product',  featureProduct);
+// Route to feature a product - add verifyToken middleware
+router.put('/feature-product', verifyToken, featureProduct);
 
-// Route to unfeature a product
-router.put('/unfeature-product/:productId', unfeatureProduct);
+// Route to unfeature a product - add verifyToken middleware
+router.put('/unfeature-product/:productId', verifyToken, unfeatureProduct);
 
 // Route to get featured product details
 router.get('/featuredproduct/:id', getFeatureProduct);
