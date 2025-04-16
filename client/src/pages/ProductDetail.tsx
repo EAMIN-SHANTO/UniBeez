@@ -194,7 +194,7 @@ const ProductDetail: React.FC = () => {
                   <div>
                     <h2 className="text-2xl font-bold text-gray-800">{product.name}</h2>
                     {product.isFeatured && (
-                      <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-200 text-yellow-800 border border-yellow-400">
+                      <span className="ml-2 mr-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-200 text-yellow-800 border border-yellow-400">
                         Featured
                       </span>
                     )}
@@ -203,26 +203,34 @@ const ProductDetail: React.FC = () => {
                     </Link>
                   </div>
                   <div>
-                     {isOwner && (
-                      <div className="flex space-x-4">
+                    {isOwner && (
+                      <div className="flex flex-col space-y-2 items-end">
                         <Link
-                          to={`/updateproductdetails/${product._id}`} // Corrected path
-                          className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                          to={`/updateproductdetails/${product._id}`}
+                          className="w-24 flex items-center justify-center gap-2 px-2.5 py-1.5 rounded bg-indigo-600 text-white hover:bg-indigo-700 transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 text-sm"
                         >
+                          {/* Edit icon */}
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536M9 13l6.586-6.586a2 2 0 112.828 2.828L11.828 15.828a2 2 0 01-2.828 0L9 13zm-6 6h6" />
+                          </svg>
                           Edit
                         </Link>
                         <button
                           onClick={handleDelete}
-                          className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                          className="w-24 flex items-center justify-center gap-2 px-2.5 py-1.5 rounded bg-red-600 text-white hover:bg-red-700 transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 text-sm"
                         >
+                          {/* Delete icon */}
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                          </svg>
                           Delete
                         </button>
                         <button
                           onClick={() => navigate(`/feature-product/${product._id}`)}
-                          className="flex items-center gap-2 px-3 py-1.5 rounded bg-amber-500 text-white font-semibold hover:bg-amber-600 transition"
+                          className="w-24 flex items-center justify-center gap-2 px-2.5 py-1.5 rounded bg-amber-500 text-white hover:bg-amber-600 transition text-sm"
                         >
                           <svg
-                            className="w-5 h-5"
+                            className="w-4 h-4"
                             fill="currentColor"
                             viewBox="0 0 20 20"
                             xmlns="http://www.w3.org/2000/svg"
@@ -232,7 +240,7 @@ const ProductDetail: React.FC = () => {
                           Feature
                         </button>
                       </div>
-                     )}
+                    )}
                   </div>
                 </div>
                 
@@ -329,9 +337,7 @@ const ProductDetail: React.FC = () => {
                       )}
                     </div>
                   ) : (
-                    <div className="inline-block bg-red-100 text-red-700 px-4 py-2 rounded-md">
-                      Out of Stock
-                    </div>
+                    null
                   )}
                 </div>
                 

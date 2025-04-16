@@ -12,9 +12,9 @@ const UpdateProductDetails: React.FC = () => {
     description: '',
     price: '',
     category: '',
-    image: '',
-    quantity: '', 
-    inStock: true 
+    images: [''],
+    quantity: '',
+    inStock: true
   });
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -27,13 +27,13 @@ const UpdateProductDetails: React.FC = () => {
       try {
         setLoading(true);
         const response = await axios.get(
-          `${API_URL}/api/productpage/${id}`, // Corrected endpoint
-          { withCredentials: true } // Ensure credentials are included
+          `${API_URL}/api/productpage/${id}`,
+          { withCredentials: true }
         );
         const product = response.data.product;
 
         // Check if current user is the product owner
-        if (user?._id !== product.shop.owner._id) { 
+        if (user?._id !== product.shop.owner._id) {
           navigate(`/products/${id}`);
           return;
         }
@@ -43,9 +43,9 @@ const UpdateProductDetails: React.FC = () => {
           description: product.description,
           price: product.price.toString(),
           category: product.category,
-          image: product.images?.[0] || '', // Handle image array
-          quantity: product.quantity?.toString() || '1', // Set quantity
-          inStock: product.inStock ?? true // Set inStock
+          images: product.images && product.images.length > 0 ? product.images : [''],
+          quantity: product.quantity?.toString() || '1',
+          inStock: product.inStock ?? true
         });
 
         setError(null);
@@ -62,6 +62,7 @@ const UpdateProductDetails: React.FC = () => {
     }
   }, [id, API_URL, user, navigate]);
 
+  // Handle changes for all fields except images
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type, checked } = e.target as any;
     setFormData(prev => ({
@@ -70,9 +71,34 @@ const UpdateProductDetails: React.FC = () => {
     }));
   };
 
+  // Handle changes for image fields
+  const handleImageChange = (index: number, value: string) => {
+    setFormData(prev => {
+      const newImages = [...prev.images];
+      newImages[index] = value;
+      return { ...prev, images: newImages };
+    });
+  };
+
+  const addImageField = () => {
+    setFormData(prev => ({
+      ...prev,
+      images: [...prev.images, '']
+    }));
+  };
+
+  const removeImageField = (index: number) => {
+    setFormData(prev => {
+      if (prev.images.length <= 1) return prev;
+      const newImages = prev.images.filter((_, i) => i !== index);
+      return { ...prev, images: newImages };
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Validation: If inStock is true, quantity must be > 0
     if (
       !formData.name.trim() ||
       !formData.description.trim() ||
@@ -85,21 +111,34 @@ const UpdateProductDetails: React.FC = () => {
       setError('Please fill in all required fields and ensure quantity is valid.');
       return;
     }
+    if (formData.inStock && Number(formData.quantity) <= 0) {
+      setError('If the product is in stock, quantity must be greater than 0.');
+      return;
+    }
+    if (!formData.inStock && Number(formData.quantity) !== 0) {
+      setError('If the product is not in stock, quantity must be 0.');
+      return;
+    }
 
     try {
       setSubmitting(true);
       setError(null);
 
-      // If inStock is false, force quantity to 0
       const adjustedQuantity = formData.inStock ? Number(formData.quantity) : 0;
+
+      // Filter out empty image URLs
+      const filteredImages = formData.images.map(img => img.trim()).filter(Boolean);
 
       const payload = {
         ...formData,
         price: parseFloat(formData.price),
         quantity: adjustedQuantity,
-        inStock: Boolean(formData.inStock), // Ensure boolean is sent
-        image: formData.image.trim() || undefined, // Remove empty image field
+        inStock: Boolean(formData.inStock),
+        images: filteredImages
       };
+
+      // Remove 'image' property if it exists
+      delete (payload as any).image;
 
       try {
         await axios.patch(
@@ -232,18 +271,41 @@ const UpdateProductDetails: React.FC = () => {
           </div>
 
           <div>
-            <label htmlFor="image" className="block text-sm font-semibold text-gray-700 mb-1">
-              Image URL (Optional)
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Product Images (URLs)
             </label>
-            <input
-              type="url"
-              id="image"
-              name="image"
-              value={formData.image}
-              onChange={handleChange}
-              placeholder="https://example.com/image.png"
-              className="appearance-none block w-full px-4 py-3 border border-gray-200 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-150 ease-in-out"
-            />
+            {formData.images.map((image, index) => (
+              <div key={index} className="flex items-center mb-2">
+                <input
+                  type="url"
+                  value={image}
+                  onChange={e => handleImageChange(index, e.target.value)}
+                  placeholder="https://example.com/image.jpg"
+                  className="appearance-none block flex-1 px-3 py-2 border border-gray-200 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm mr-2"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeImageField(index)}
+                  className="inline-flex items-center p-1.5 border border-transparent rounded-full shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                  disabled={formData.images.length <= 1}
+                  title="Remove image"
+                >
+                  <svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10l-4.293-4.293a1 1 0 011.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                </button>
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={addImageField}
+              className="mt-2 inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            >
+              <svg className="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
+              </svg>
+              Add Image URL
+            </button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

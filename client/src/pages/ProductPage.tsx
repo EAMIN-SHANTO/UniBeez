@@ -75,8 +75,13 @@ const ProductPage: React.FC = () => {
     fetchProducts();
   }, [API_URL]);
 
-  const featuredProducts = products.slice(0, 5); // First five products as featured
-  const nonFeaturedProducts = products.slice(5); // Remaining products as non-featured
+  // Show only featured products in the featured section
+  const featuredProducts = products.filter(
+    (product: any) => product.isFeatured || product.featured
+  );
+  const nonFeaturedProducts = products.filter(
+    (product: any) => !(product.isFeatured || product.featured)
+  );
   const filteredProducts = nonFeaturedProducts.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(filter.toLowerCase());
     const matchesCategory = categoryFilter === '' || product.description?.toLowerCase().includes(categoryFilter.toLowerCase());

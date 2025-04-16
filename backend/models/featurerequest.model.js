@@ -33,6 +33,10 @@ const featureRequestSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  amount: {
+    type: Number,
+    required: true
+  },
   status: {
     type: String,
     enum: ['pending', 'approved', 'rejected'],

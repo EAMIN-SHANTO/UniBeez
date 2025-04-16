@@ -7,11 +7,11 @@ export const featureProduct = async (req, res) => {
   try {
     console.log('Feature product request body:', req.body);
     console.log('User:', req.user);
-    const { productId, startDate, duration, durationType, paymentMethod, transactionId } = req.body;
+    const { productId, startDate, duration, durationType, paymentMethod, transactionId, amount } = req.body;
     const userId = req.user._id; // Extract userId from authenticated user
 
     // Validate required fields
-    if (!productId || !startDate || !duration || !durationType || !paymentMethod || !transactionId) {
+    if (!productId || !startDate || !duration || !durationType || !paymentMethod || !transactionId || typeof amount !== 'number') {
       return res.status(400).json({
         success: false,
         message: 'Missing required fields',
@@ -34,12 +34,13 @@ export const featureProduct = async (req, res) => {
     // Save feature request record
     const featureRequest = new FeatureRequest({
       productId,
-      userId, // Include userId
+      userId,
       startDate,
       duration,
       durationType,
       paymentMethod,
       transactionId,
+      amount, // save amount
       status: 'approved',
     });
     await featureRequest.save();
