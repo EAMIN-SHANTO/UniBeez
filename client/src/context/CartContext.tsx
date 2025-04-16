@@ -161,7 +161,14 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         { withCredentials: true }
       );
       
-      setCart({ ...cart!, items: [] } as Cart);
+      // Properly reset the cart state
+      setCart({
+        _id: cart?._id || '',
+        user: cart?.user || '',
+        items: [],
+        totalAmount: 0
+      } as Cart);
+      
       return response.data;
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || 'Checkout failed';

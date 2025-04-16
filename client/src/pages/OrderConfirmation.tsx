@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link, useLocation, Navigate } from 'react-router-dom';
+import { useCart } from '../context/CartContext';
 
 interface OrderConfirmationState {
   orderId: string;
@@ -9,6 +10,12 @@ interface OrderConfirmationState {
 const OrderConfirmation: React.FC = () => {
   const location = useLocation();
   const orderInfo = location.state as OrderConfirmationState;
+  const { clearCart } = useCart();
+  
+  // Clear cart when order confirmation page loads
+  useEffect(() => {
+    clearCart();
+  }, []);
   
   if (!orderInfo) {
     return <Navigate to="/" replace />;

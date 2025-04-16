@@ -326,8 +326,11 @@ export const processPayment = async (req, res) => {
       });
     }
     
+    // Store cart items for processing before clearing
+    const cartItems = [...cart.items];
+    
     // Verify all products have sufficient inventory
-    for (const item of cart.items) {
+    for (const item of cartItems) {
       const product = await Product.findById(item.product._id);
       
       if (!product) {
@@ -369,7 +372,7 @@ export const processPayment = async (req, res) => {
     const confirmationId = 'CNF-' + Math.floor(Math.random() * 1000000);
     
     // Update product inventory
-    for (const item of cart.items) {
+    for (const item of cartItems) {
       const product = await Product.findById(item.product._id);
       
       // Calculate new quantity
@@ -382,7 +385,7 @@ export const processPayment = async (req, res) => {
       });
     }
     
-    // Clear the cart
+    // Clear the cart - make sure this happens after all processing
     cart.items = [];
     await cart.save();
     
