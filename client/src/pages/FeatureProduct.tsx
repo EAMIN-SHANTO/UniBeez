@@ -20,11 +20,13 @@ const FeatureProduct: React.FC = () => {
   const { API_URL } = useAuth();
   const navigate = useNavigate();
 
+  // Set default startDate to today
+  const today = new Date().toISOString().split('T')[0];
   const [duration, setDuration] = useState('3'); // Default to 3 for days
   const [durationType, setDurationType] = useState('days');
   const [paymentMethod, setPaymentMethod] = useState('');
   const [transactionId, setTransactionId] = useState('');
-  const [startDate, setStartDate] = useState('');
+  const [startDate, setStartDate] = useState(today);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
