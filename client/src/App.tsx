@@ -33,6 +33,7 @@ import UpdateProductDetails from './pages/UpdateProductDetails';
 import FeatureProduct from './pages/FeatureProduct';
 import PaymentPage from './pages/PaymentPage';
 import OrderConfirmation from './pages/OrderConfirmation';
+import ServicesPage from './pages/ServicesPage';
 const App: React.FC = () => {
   return (
     <AuthProvider>
@@ -134,6 +135,7 @@ const App: React.FC = () => {
                 <Route path="/payment" element={<PaymentPage />} />
                 <Route path="/order-confirmation" element={<OrderConfirmation />} />
                 <Route path="/updateproductdetails/:id" element={<UpdateProductDetails />} />
+                <Route path="/services" element={<ServicesPage />} />
                 <Route path="/feature-product/:id" element={
                   <ProtectedRoute>
                     <FeatureProduct />
