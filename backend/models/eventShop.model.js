@@ -24,7 +24,7 @@ const eventShopSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Ensure a shop can only register once for an event
+
 eventShopSchema.index({ event: 1, shop: 1 }, { unique: true });
 
 const EventShop = mongoose.model("EventShop", eventShopSchema);
