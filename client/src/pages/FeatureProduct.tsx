@@ -112,22 +112,31 @@ const FeatureProduct: React.FC = () => {
 
     setSubmitting(true);
     try {
-      await axios.put(
-        `${API_URL}/api/featureproducts/feature-product`,
-        {
-          productId: id,
-          startDate,
-          duration: Number(duration),
-          durationType,
-          paymentMethod,
-          transactionId,
-          amount // send amount to backend
-        },
+      // Create request payload with all required fields explicitly set
+      const requestData = {
+        productId: id, // Make sure productId is explicitly included in the request body
+        startDate,
+        duration: Number(duration),
+        durationType,
+        paymentMethod,
+        transactionId,
+        amount: Number(amount.toFixed(2)) // Ensure amount is a number, not a string
+      };
+      
+      // Log the request data for debugging
+      console.log('Sending feature request data:', requestData);
+      
+      const response = await axios.post(
+        `${API_URL}/api/featureproducts/feature-product/${id}`,
+        requestData,
         { withCredentials: true }
       );
+      
+      console.log('Feature response:', response.data);
       setSuccess(true);
       setTimeout(() => navigate(`/products/${id}`), 1500);
     } catch (err: any) {
+      console.error('Feature error:', err.response?.data || err.message);
       setError(err.response?.data?.message || 'Failed to feature product.');
     } finally {
       setSubmitting(false);
