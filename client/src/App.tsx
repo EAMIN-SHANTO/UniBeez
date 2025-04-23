@@ -34,6 +34,7 @@ import FeatureProduct from './pages/FeatureProduct';
 import PaymentPage from './pages/PaymentPage';
 import OrderConfirmation from './pages/OrderConfirmation';
 import ServicesPage from './pages/ServicesPage';
+import FeaturedProductmanagement from './pages/admin/FeaturedProductManagement';
 const App: React.FC = () => {
   return (
     <AuthProvider>
@@ -136,6 +137,11 @@ const App: React.FC = () => {
                 <Route path="/order-confirmation" element={<OrderConfirmation />} />
                 <Route path="/updateproductdetails/:id" element={<UpdateProductDetails />} />
                 <Route path="/services" element={<ServicesPage />} />
+                <Route path="/admin/featured-product-management" element={
+                  <ProtectedRoute >
+                    <FeaturedProductmanagement />
+                  </ProtectedRoute>
+                } />
                 <Route path="/feature-product/:id" element={
                   <ProtectedRoute>
                     <FeatureProduct />
