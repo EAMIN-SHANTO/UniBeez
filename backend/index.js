@@ -18,6 +18,7 @@ import featureproductsroutes from './routes/featureproducts.route.js';
 import serviceRoutes from './routes/serviceRequest.routes.js';
 import wishlistRoutes from './routes/wishlist.route.js';
 import ratingRoutes from './routes/rating.route.js';
+import customProductRequestRoutes from './routes/customProductRequest.routes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -59,6 +60,7 @@ app.use('/api/featureproducts', featureproductsroutes);
 app.use('/api/services', serviceRoutes);
 app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/ratings', ratingRoutes);
+app.use('/api/custom-product-requests', customProductRequestRoutes);
 
 // Test routes
 app.get("/api/test", (req, res) => {

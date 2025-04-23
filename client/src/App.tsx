@@ -35,6 +35,8 @@ import PaymentPage from './pages/PaymentPage';
 import OrderConfirmation from './pages/OrderConfirmation';
 import ServicesPage from './pages/ServicesPage';
 import Wishlist from './pages/Wishlist';
+import CustomProductRequestForm from './pages/CustomProductRequestForm';
+import ShopCustomRequestsDashboard from './pages/ShopCustomRequestsDashboard';
 
 const App: React.FC = () => {
   return (
@@ -122,7 +124,18 @@ const App: React.FC = () => {
                   </ProtectedRoute>
                 } />
                 
-
+                {/* Custom Product Request Routes */}
+                <Route path="/shops/:shopId/request-custom-product" element={
+                  <ProtectedRoute>
+                    <CustomProductRequestForm />
+                  </ProtectedRoute>
+                } />
+                <Route path="/shops/:shopId/custom-requests" element={
+                  <ProtectedRoute>
+                    <ShopCustomRequestsDashboard />
+                  </ProtectedRoute>
+                } />
+                
 
                 <Route path="/current-event-21301429" element={<CurrentEvent />} />
                 <Route path="*" element={

@@ -92,4 +92,25 @@ export const createEventNotification = async (userId, event) => {
     console.error('Error creating event notification:', error);
     throw error;
   }
-}; 
+};
+
+// Generic create notification function
+export const createNotification = async ({ recipient, type, title, content, relatedModel, relatedId }) => {
+  try {
+    const notification = new Notification({
+      userId: recipient,
+      title: title,
+      message: content,
+      type: type,
+      read: false,
+      modelType: relatedModel,
+      modelId: relatedId
+    });
+
+    await notification.save();
+    return notification;
+  } catch (error) {
+    console.error('Error creating notification:', error);
+    throw error;
+  }
+};

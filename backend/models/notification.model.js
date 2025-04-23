@@ -16,7 +16,15 @@ const notificationSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ['event', 'system'],
+    enum: [
+      'event', 
+      'system', 
+      'custom_product_request',
+      'custom_product_accepted',
+      'custom_product_rejected',
+      'service_request',
+      'order'
+    ],
     default: 'system'
   },
   read: {
@@ -27,6 +35,15 @@ const notificationSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Event'
   },
+  modelType: {
+    type: String,
+    enum: ['Event', 'CustomProductRequest', 'ServiceRequest', 'Order', null],
+    default: null
+  },
+  modelId: {
+    type: mongoose.Schema.Types.ObjectId,
+    refPath: 'modelType'
+  },
   createdAt: {
     type: Date,
     default: Date.now
@@ -34,4 +51,4 @@ const notificationSchema = new mongoose.Schema({
 });
 
 const Notification = mongoose.model('Notification', notificationSchema);
-export default Notification; 
+export default Notification;
