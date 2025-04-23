@@ -10,7 +10,7 @@ export const getCart = async (req, res) => {
     let cart = await Cart.findOne({ user: userId })
       .populate({
         path: 'items.product',
-        select: 'name price images description'
+        select: 'name price images description discount'
       });
     
     if (!cart) {
@@ -18,9 +18,44 @@ export const getCart = async (req, res) => {
       await cart.save();
     }
     
+    // Calculate any active discounts
+    const cartWithDiscounts = cart.toObject();
+    let totalDiscount = 0;
+    
+    for (let i = 0; i < cart.items.length; i++) {
+      const item = cart.items[i];
+      const product = item.product;
+      
+      if (product.discount?.isActive) {
+        // Check for active flash sale
+        if (product.discount.type === 'flash_sale') {
+          const now = new Date();
+          if (now >= product.discount.startDate && now <= product.discount.endDate) {
+            const discountAmount = item.price * (product.discount.value / 100);
+            const discountedPrice = item.price - discountAmount;
+            
+            cartWithDiscounts.items[i].originalPrice = item.price;
+            cartWithDiscounts.items[i].discountedPrice = discountedPrice;
+            cartWithDiscounts.items[i].discountPercentage = product.discount.value;
+            cartWithDiscounts.items[i].discountType = 'flash_sale';
+            
+            totalDiscount += discountAmount * item.quantity;
+          }
+        } else if (product.discount.type === 'voucher') {
+          // Just mark that this product has a voucher available
+          cartWithDiscounts.items[i].hasVoucher = true;
+          cartWithDiscounts.items[i].discountPercentage = product.discount.value;
+          cartWithDiscounts.items[i].discountType = 'voucher';
+        }
+      }
+    }
+    
+    cartWithDiscounts.totalDiscount = totalDiscount;
+    cartWithDiscounts.finalAmount = cart.totalAmount - totalDiscount;
+    
     res.status(200).json({
       success: true,
-      cart
+      cart: cartWithDiscounts
     });
   } catch (error) {
     console.error('Error getting cart:', error);
@@ -89,13 +124,48 @@ export const addToCart = async (req, res) => {
     // Populate product details before sending response
     await cart.populate({
       path: 'items.product',
-      select: 'name price images description'
+      select: 'name price images description discount'
     });
+    
+    // Calculate any active discounts
+    const cartWithDiscounts = cart.toObject();
+    let totalDiscount = 0;
+    
+    for (let i = 0; i < cart.items.length; i++) {
+      const item = cart.items[i];
+      const product = item.product;
+      
+      if (product.discount?.isActive) {
+        // Check for active flash sale
+        if (product.discount.type === 'flash_sale') {
+          const now = new Date();
+          if (now >= product.discount.startDate && now <= product.discount.endDate) {
+            const discountAmount = item.price * (product.discount.value / 100);
+            const discountedPrice = item.price - discountAmount;
+            
+            cartWithDiscounts.items[i].originalPrice = item.price;
+            cartWithDiscounts.items[i].discountedPrice = discountedPrice;
+            cartWithDiscounts.items[i].discountPercentage = product.discount.value;
+            cartWithDiscounts.items[i].discountType = 'flash_sale';
+            
+            totalDiscount += discountAmount * item.quantity;
+          }
+        } else if (product.discount.type === 'voucher') {
+          // Just mark that this product has a voucher available
+          cartWithDiscounts.items[i].hasVoucher = true;
+          cartWithDiscounts.items[i].discountPercentage = product.discount.value;
+          cartWithDiscounts.items[i].discountType = 'voucher';
+        }
+      }
+    }
+    
+    cartWithDiscounts.totalDiscount = totalDiscount;
+    cartWithDiscounts.finalAmount = cart.totalAmount - totalDiscount;
     
     res.status(200).json({
       success: true,
       message: 'Item added to cart',
-      cart
+      cart: cartWithDiscounts
     });
   } catch (error) {
     console.error('Error adding to cart:', error);
@@ -154,13 +224,48 @@ export const updateCartItem = async (req, res) => {
     // Populate product details before sending response
     await cart.populate({
       path: 'items.product',
-      select: 'name price images description'
+      select: 'name price images description discount'
     });
+    
+    // Calculate any active discounts
+    const cartWithDiscounts = cart.toObject();
+    let totalDiscount = 0;
+    
+    for (let i = 0; i < cart.items.length; i++) {
+      const item = cart.items[i];
+      const product = item.product;
+      
+      if (product.discount?.isActive) {
+        // Check for active flash sale
+        if (product.discount.type === 'flash_sale') {
+          const now = new Date();
+          if (now >= product.discount.startDate && now <= product.discount.endDate) {
+            const discountAmount = item.price * (product.discount.value / 100);
+            const discountedPrice = item.price - discountAmount;
+            
+            cartWithDiscounts.items[i].originalPrice = item.price;
+            cartWithDiscounts.items[i].discountedPrice = discountedPrice;
+            cartWithDiscounts.items[i].discountPercentage = product.discount.value;
+            cartWithDiscounts.items[i].discountType = 'flash_sale';
+            
+            totalDiscount += discountAmount * item.quantity;
+          }
+        } else if (product.discount.type === 'voucher') {
+          // Just mark that this product has a voucher available
+          cartWithDiscounts.items[i].hasVoucher = true;
+          cartWithDiscounts.items[i].discountPercentage = product.discount.value;
+          cartWithDiscounts.items[i].discountType = 'voucher';
+        }
+      }
+    }
+    
+    cartWithDiscounts.totalDiscount = totalDiscount;
+    cartWithDiscounts.finalAmount = cart.totalAmount - totalDiscount;
     
     res.status(200).json({
       success: true,
       message: 'Cart updated successfully',
-      cart
+      cart: cartWithDiscounts
     });
   } catch (error) {
     console.error('Error updating cart:', error);
@@ -204,13 +309,48 @@ export const removeFromCart = async (req, res) => {
     // Populate product details before sending response
     await cart.populate({
       path: 'items.product',
-      select: 'name price images description'
+      select: 'name price images description discount'
     });
+    
+    // Calculate any active discounts
+    const cartWithDiscounts = cart.toObject();
+    let totalDiscount = 0;
+    
+    for (let i = 0; i < cart.items.length; i++) {
+      const item = cart.items[i];
+      const product = item.product;
+      
+      if (product.discount?.isActive) {
+        // Check for active flash sale
+        if (product.discount.type === 'flash_sale') {
+          const now = new Date();
+          if (now >= product.discount.startDate && now <= product.discount.endDate) {
+            const discountAmount = item.price * (product.discount.value / 100);
+            const discountedPrice = item.price - discountAmount;
+            
+            cartWithDiscounts.items[i].originalPrice = item.price;
+            cartWithDiscounts.items[i].discountedPrice = discountedPrice;
+            cartWithDiscounts.items[i].discountPercentage = product.discount.value;
+            cartWithDiscounts.items[i].discountType = 'flash_sale';
+            
+            totalDiscount += discountAmount * item.quantity;
+          }
+        } else if (product.discount.type === 'voucher') {
+          // Just mark that this product has a voucher available
+          cartWithDiscounts.items[i].hasVoucher = true;
+          cartWithDiscounts.items[i].discountPercentage = product.discount.value;
+          cartWithDiscounts.items[i].discountType = 'voucher';
+        }
+      }
+    }
+    
+    cartWithDiscounts.totalDiscount = totalDiscount;
+    cartWithDiscounts.finalAmount = cart.totalAmount - totalDiscount;
     
     res.status(200).json({
       success: true,
       message: 'Item removed from cart',
-      cart
+      cart: cartWithDiscounts
     });
   } catch (error) {
     console.error('Error removing from cart:', error);
@@ -255,11 +395,105 @@ export const clearCart = async (req, res) => {
   }
 };
 
+// Apply voucher discount to cart items
+export const applyVoucher = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { voucherCode } = req.body;
+    
+    if (!voucherCode) {
+      return res.status(400).json({
+        success: false,
+        message: 'Voucher code is required'
+      });
+    }
+    
+    // Find user's cart
+    const cart = await Cart.findOne({ user: userId }).populate({
+      path: 'items.product',
+      select: 'name price discount'
+    });
+    
+    if (!cart || cart.items.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Cart is empty'
+      });
+    }
+    
+    // Check if any cart items have this voucher code
+    let voucherFound = false;
+    let totalDiscount = 0;
+    const cartWithDiscounts = cart.toObject();
+    
+    for (let i = 0; i < cart.items.length; i++) {
+      const item = cart.items[i];
+      const product = item.product;
+      
+      // Check for flash sale discounts first
+      if (product.discount?.isActive && product.discount.type === 'flash_sale') {
+        const now = new Date();
+        if (now >= product.discount.startDate && now <= product.discount.endDate) {
+          const discountAmount = item.price * (product.discount.value / 100);
+          const discountedPrice = item.price - discountAmount;
+          
+          cartWithDiscounts.items[i].originalPrice = item.price;
+          cartWithDiscounts.items[i].discountedPrice = discountedPrice;
+          cartWithDiscounts.items[i].discountPercentage = product.discount.value;
+          cartWithDiscounts.items[i].discountType = 'flash_sale';
+          
+          totalDiscount += discountAmount * item.quantity;
+        }
+      }
+      
+      // Then check for voucher discounts
+      if (product.discount?.isActive && product.discount.type === 'voucher' && 
+          product.discount.voucherCode === voucherCode) {
+        const discountAmount = item.price * (product.discount.value / 100);
+        const discountedPrice = item.price - discountAmount;
+        
+        cartWithDiscounts.items[i].originalPrice = item.price;
+        cartWithDiscounts.items[i].discountedPrice = discountedPrice;
+        cartWithDiscounts.items[i].discountPercentage = product.discount.value;
+        cartWithDiscounts.items[i].discountType = 'voucher';
+        cartWithDiscounts.items[i].voucherApplied = true;
+        
+        totalDiscount += discountAmount * item.quantity;
+        voucherFound = true;
+      }
+    }
+    
+    if (!voucherFound) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid voucher code or no applicable products in cart'
+      });
+    }
+    
+    cartWithDiscounts.totalDiscount = totalDiscount;
+    cartWithDiscounts.finalAmount = cart.totalAmount - totalDiscount;
+    cartWithDiscounts.voucherApplied = voucherCode;
+    
+    res.status(200).json({
+      success: true,
+      message: 'Voucher applied successfully',
+      cart: cartWithDiscounts
+    });
+  } catch (error) {
+    console.error('Error applying voucher:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to apply voucher',
+      error: error.message
+    });
+  }
+};
+
 // Process checkout
 export const checkout = async (req, res) => {
   try {
     const userId = req.user._id;
-    const { shippingAddress, paymentMethod } = req.body;
+    const { shippingAddress, paymentMethod, voucherCode } = req.body;
     
     if (!shippingAddress || !paymentMethod) {
       return res.status(400).json({
@@ -271,7 +505,7 @@ export const checkout = async (req, res) => {
     // Find user's cart
     const cart = await Cart.findOne({ user: userId }).populate({
       path: 'items.product',
-      select: 'name price quantity'
+      select: 'name price quantity discount'
     });
     
     if (!cart || cart.items.length === 0) {
@@ -281,12 +515,55 @@ export const checkout = async (req, res) => {
       });
     }
     
+    // Calculate discounts
+    let totalDiscount = 0;
+    const orderItems = [];
+    
+    for (const item of cart.items) {
+      const product = item.product;
+      let discountedPrice = item.price;
+      let discountType = 'none';
+      let discountPercentage = 0;
+      
+      // Check for flash sale discounts
+      if (product.discount?.isActive && product.discount.type === 'flash_sale') {
+        const now = new Date();
+        if (now >= product.discount.startDate && now <= product.discount.endDate) {
+          discountPercentage = product.discount.value;
+          discountedPrice = item.price - (item.price * (discountPercentage / 100));
+          discountType = 'flash_sale';
+          totalDiscount += (item.price - discountedPrice) * item.quantity;
+        }
+      }
+      
+      // Check for voucher discounts
+      if (voucherCode && product.discount?.isActive && 
+          product.discount.type === 'voucher' && 
+          product.discount.voucherCode === voucherCode) {
+        discountPercentage = product.discount.value;
+        discountedPrice = item.price - (item.price * (discountPercentage / 100));
+        discountType = 'voucher';
+        totalDiscount += (item.price - discountedPrice) * item.quantity;
+      }
+      
+      orderItems.push({
+        product: product._id,
+        name: product.name,
+        quantity: item.quantity,
+        price: item.price,
+        discountedPrice,
+        discountType,
+        discountPercentage
+      });
+    }
+    
+    const finalAmount = cart.totalAmount - totalDiscount;
+    
     // In a real application, you would:
-    // 1. Verify item availability
-    // 2. Create an order
-    // 3. Process payment
-    // 4. Update inventory
-    // 5. Clear the cart
+    // 1. Create an order with the calculated discounts
+    // 2. Process payment
+    // 3. Update inventory
+    // 4. Clear the cart
     
     // For this example, we'll just clear the cart
     cart.items = [];
@@ -295,7 +572,12 @@ export const checkout = async (req, res) => {
     res.status(200).json({
       success: true,
       message: 'Checkout successful',
-      orderId: 'ORD-' + Math.floor(Math.random() * 1000000)
+      orderId: 'ORD-' + Math.floor(Math.random() * 1000000),
+      items: orderItems,
+      totalAmount: cart.totalAmount,
+      totalDiscount,
+      finalAmount,
+      voucherApplied: voucherCode || null
     });
   } catch (error) {
     console.error('Error during checkout:', error);
@@ -311,12 +593,12 @@ export const checkout = async (req, res) => {
 export const processPayment = async (req, res) => {
   try {
     const userId = req.user._id;
-    const { orderId, paymentMethod, paymentDetails, shippingAddress } = req.body;
+    const { orderId, paymentMethod, paymentDetails, shippingAddress, voucherCode } = req.body;
     
     // Find user's cart
     const cart = await Cart.findOne({ user: userId }).populate({
       path: 'items.product',
-      select: 'name price quantity _id'
+      select: 'name price quantity _id discount'
     });
     
     if (!cart || cart.items.length === 0) {
@@ -329,7 +611,10 @@ export const processPayment = async (req, res) => {
     // Store cart items for processing before clearing
     const cartItems = [...cart.items];
     
-    // Verify all products have sufficient inventory
+    // Calculate discounts and verify inventory
+    let totalDiscount = 0;
+    const processedItems = [];
+    
     for (const item of cartItems) {
       const product = await Product.findById(item.product._id);
       
@@ -346,7 +631,45 @@ export const processPayment = async (req, res) => {
           message: `Insufficient inventory for ${product.name}. Available: ${product.quantity}`
         });
       }
+      
+      let discountedPrice = item.price;
+      let discountType = 'none';
+      let discountPercentage = 0;
+      
+      // Check for flash sale discounts
+      if (product.discount?.isActive && product.discount.type === 'flash_sale') {
+        const now = new Date();
+        if (now >= product.discount.startDate && now <= product.discount.endDate) {
+          discountPercentage = product.discount.value;
+          discountedPrice = item.price - (item.price * (discountPercentage / 100));
+          discountType = 'flash_sale';
+          totalDiscount += (item.price - discountedPrice) * item.quantity;
+        }
+      }
+      
+      // Check for voucher discounts
+      if (voucherCode && product.discount?.isActive && 
+          product.discount.type === 'voucher' && 
+          product.discount.voucherCode === voucherCode) {
+        discountPercentage = product.discount.value;
+        discountedPrice = item.price - (item.price * (discountPercentage / 100));
+        discountType = 'voucher';
+        totalDiscount += (item.price - discountedPrice) * item.quantity;
+      }
+      
+      processedItems.push({
+        product: product._id,
+        name: product.name,
+        quantity: item.quantity,
+        price: item.price,
+        discountedPrice,
+        discountType,
+        discountPercentage
+      });
     }
+    
+    const totalAmount = cart.totalAmount;
+    const finalAmount = totalAmount - totalDiscount;
     
     // Process payment based on method
     if (paymentMethod === 'card') {
@@ -393,7 +716,12 @@ export const processPayment = async (req, res) => {
       success: true,
       message: 'Payment processed successfully',
       orderId,
-      confirmationId
+      confirmationId,
+      items: processedItems,
+      totalAmount,
+      totalDiscount,
+      finalAmount,
+      voucherApplied: voucherCode || null
     });
   } catch (error) {
     console.error('Error processing payment:', error);

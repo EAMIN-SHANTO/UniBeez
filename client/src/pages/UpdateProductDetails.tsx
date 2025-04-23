@@ -1,83 +1,163 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 
+interface Product {
+  _id: string;
+  name: string;
+  description: string;
+  price: number;
+  category: string;
+  images: string[];
+  quantity: number;
+  shop: {
+    _id: string;
+    name: string;
+    owner: string | {
+      _id: string;
+      username: string;
+    };
+  };
+  discount?: {
+    isActive: boolean;
+    type: string;
+    value: number;
+    startDate?: string;
+    endDate?: string;
+    voucherCode?: string;
+  };
+}
+
 const UpdateProductDetails: React.FC = () => {
-  const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const { API_URL, user } = useAuth();
+  
+  const [loading, setLoading] = useState<boolean>(true);
+  const [submitting, setSubmitting] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [product, setProduct] = useState<Product | null>(null);
+  
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     price: '',
     category: '',
+    quantity: '1',
     images: [''],
-    quantity: '',
-    inStock: true
+    discount: {
+      isActive: false,
+      type: 'none',
+      value: '',
+      startDate: '',
+      endDate: '',
+      voucherCode: ''
+    }
   });
-  const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  const categories = ['Food', 'Clothing', 'Electronics', 'Books', 'Services', 'Other'];
-
+  // Fetch product details for editing
   useEffect(() => {
     const fetchProductDetails = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(
-          `${API_URL}/api/productpage/${id}`,
-          { withCredentials: true }
-        );
-        const product = response.data.product;
-
-        // Check if current user is the product owner
-        if (user?._id !== product.shop.owner._id) {
-          navigate(`/products/${id}`);
+        const response = await axios.get(`${API_URL}/api/products/${id}`, {
+          withCredentials: true
+        });
+        
+        const productData = response.data.product;
+        setProduct(productData);
+        
+        // Handle different owner types (string ID or object)
+        const ownerId = typeof productData.shop.owner === 'object' 
+          ? productData.shop.owner._id 
+          : productData.shop.owner;
+          
+        if (ownerId.toString() !== user?._id.toString()) {
+          setError("You don't have permission to edit this product");
           return;
         }
-
+        
+        // Initialize form data with product details
         setFormData({
-          name: product.name,
-          description: product.description,
-          price: product.price.toString(),
-          category: product.category,
-          images: product.images && product.images.length > 0 ? product.images : [''],
-          quantity: product.quantity?.toString() || '1',
-          inStock: product.inStock ?? true
+          name: productData.name || '',
+          description: productData.description || '',
+          price: productData.price ? productData.price.toString() : '',
+          category: productData.category || '',
+          quantity: productData.quantity ? productData.quantity.toString() : '1',
+          images: productData.images && productData.images.length > 0 ? productData.images : [''],
+          discount: {
+            isActive: productData.discount?.isActive || false,
+            type: productData.discount?.type || 'none',
+            value: productData.discount?.value ? productData.discount.value.toString() : '',
+            startDate: productData.discount?.startDate || '',
+            endDate: productData.discount?.endDate || '',
+            voucherCode: productData.discount?.voucherCode || ''
+          }
         });
-
-        setError(null);
-      } catch (err: any) {
-        setError(err.response?.data?.message || 'Failed to fetch product details. Please try again later.');
+      } catch (err) {
+        setError('Failed to fetch product details');
         console.error(err);
       } finally {
         setLoading(false);
       }
     };
-
+  
     if (id) {
       fetchProductDetails();
     }
-  }, [id, API_URL, user, navigate]);
+  }, [id, API_URL, user]);
 
-  // Handle changes for all fields except images
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value, type, checked } = e.target as any;
+    const { name, value } = e.target;
+    if (name.startsWith('discount.')) {
+      const discountField = name.split('.')[1];
+      setFormData(prev => ({
+        ...prev,
+        discount: {
+          ...prev.discount,
+          [discountField]: value
+        }
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
+  };
+
+  const handleDiscountTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const { value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      discount: {
+        ...prev.discount,
+        type: value,
+        isActive: value !== 'none'
+      }
     }));
   };
 
-  // Handle changes for image fields
+  const handleDiscountToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const isActive = e.target.checked;
+    setFormData(prev => ({
+      ...prev,
+      discount: {
+        ...prev.discount,
+        isActive,
+        type: isActive ? (prev.discount.type !== 'none' ? prev.discount.type : 'flash_sale') : 'none'
+      }
+    }));
+  };
+
   const handleImageChange = (index: number, value: string) => {
-    setFormData(prev => {
-      const newImages = [...prev.images];
-      newImages[index] = value;
-      return { ...prev, images: newImages };
-    });
+    const newImages = [...formData.images];
+    newImages[index] = value;
+    setFormData(prev => ({
+      ...prev,
+      images: newImages
+    }));
   };
 
   const addImageField = () => {
@@ -88,80 +168,99 @@ const UpdateProductDetails: React.FC = () => {
   };
 
   const removeImageField = (index: number) => {
-    setFormData(prev => {
-      if (prev.images.length <= 1) return prev;
-      const newImages = prev.images.filter((_, i) => i !== index);
-      return { ...prev, images: newImages };
-    });
+    if (formData.images.length <= 1) return;
+    
+    const newImages = formData.images.filter((_, i) => i !== index);
+    setFormData(prev => ({
+      ...prev,
+      images: newImages
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!formData.name || !formData.description || !formData.price || !formData.category) {
+      setError('Please fill in all required fields');
+      return;
+    }
 
-    // Validation: If inStock is true, quantity must be > 0
-    if (
-      !formData.name.trim() ||
-      !formData.description.trim() ||
-      !formData.price ||
-      !formData.category.trim() ||
-      formData.quantity === '' ||
-      isNaN(Number(formData.quantity)) ||
-      Number(formData.quantity) < 0
-    ) {
-      setError('Please fill in all required fields and ensure quantity is valid.');
-      return;
-    }
-    if (formData.inStock && Number(formData.quantity) <= 0) {
-      setError('If the product is in stock, quantity must be greater than 0.');
-      return;
-    }
-    if (!formData.inStock && Number(formData.quantity) !== 0) {
-      setError('If the product is not in stock, quantity must be 0.');
-      return;
+    // Validate discount fields if discount is active
+    if (formData.discount.isActive) {
+      if (formData.discount.type === 'flash_sale') {
+        if (!formData.discount.startDate || !formData.discount.endDate || !formData.discount.value) {
+          setError('Please fill in all flash sale fields');
+          return;
+        }
+      } else if (formData.discount.type === 'voucher') {
+        if (!formData.discount.voucherCode || !formData.discount.value) {
+          setError('Please fill in all voucher fields');
+          return;
+        }
+      }
     }
 
     try {
       setSubmitting(true);
       setError(null);
-
-      const adjustedQuantity = formData.inStock ? Number(formData.quantity) : 0;
-
+      
       // Filter out empty image URLs
-      const filteredImages = formData.images.map(img => img.trim()).filter(Boolean);
-
-      const payload = {
-        ...formData,
+      const filteredImages = formData.images.filter(img => img.trim() !== '');
+      
+      // Prepare the data we're sending
+      const productData = {
+        name: formData.name,
+        description: formData.description,
         price: parseFloat(formData.price),
-        quantity: adjustedQuantity,
-        inStock: Boolean(formData.inStock),
-        images: filteredImages
-      };
-
-      // Remove 'image' property if it exists
-      delete (payload as any).image;
-
-      try {
-        await axios.patch(
-          `${API_URL}/api/productpage/updateProduct/${id}`,
-          payload,
-          { withCredentials: true }
-        );
-      } catch (err: any) {
-        if (err.response && err.response.status === 404) {
-          await axios.patch(
-            `${API_URL}/api/productpage/${id}`,
-            payload,
-            { withCredentials: true }
-          );
-        } else {
-          throw err;
+        category: formData.category,
+        quantity: parseInt(formData.quantity),
+        images: filteredImages,
+        discount: formData.discount.isActive ? {
+          isActive: true,
+          type: formData.discount.type,
+          value: parseFloat(formData.discount.value),
+          ...(formData.discount.type === 'flash_sale' && {
+            startDate: formData.discount.startDate,
+            endDate: formData.discount.endDate
+          }),
+          ...(formData.discount.type === 'voucher' && {
+            voucherCode: formData.discount.voucherCode
+          })
+        } : {
+          isActive: false,
+          type: 'none',
+          value: 0
         }
-      }
-
+      };
+      
+      // Log what we're sending to the server
+      console.log('Sending updated product data:', productData);
+      
+      const response = await axios.put(
+        `${API_URL}/api/products/${id}`,
+        productData,
+        {
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          withCredentials: true
+        }
+      );
+      
+      console.log('Server response:', response.data);
+      // Navigate back to product detail page
       navigate(`/products/${id}`);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to update product. Please try again.');
-      console.error('Error updating product:', err);
+      console.log('Error response:', err.response?.data);
+      
+      // Set a more descriptive error message
+      const errorMessage = err.response?.data?.message || 
+                          err.response?.data?.error || 
+                          'Failed to update product';
+      
+      setError(errorMessage);
+      console.error('Error details:', err);
     } finally {
       setSubmitting(false);
     }
@@ -175,18 +274,47 @@ const UpdateProductDetails: React.FC = () => {
     );
   }
 
+  if (error && !product) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md mx-auto bg-white shadow-sm rounded-lg p-6">
+          <div className="bg-red-50 p-4 rounded-md">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-red-800">{error}</h3>
+              </div>
+            </div>
+          </div>
+          <div className="mt-4 text-center">
+            <button 
+              onClick={() => navigate(-1)} 
+              className="text-indigo-600 hover:text-indigo-800"
+            >
+              Go Back
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 py-20 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-2xl mx-auto">
-        <div className="text-center mb-15">
-          <h2 className="text-4xl font-bold text-gray-900 tracking-tight">Edit Product</h2>
-          <p className="mt-2 text-lg text-gray-600">
-            Update your product's information
+    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md mx-auto">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-extrabold text-gray-900">Update Product</h2>
+          <p className="mt-2 text-gray-600">
+            Edit your product details
           </p>
         </div>
-
+        
         {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 p-4 rounded-xl shadow-sm">
+          <div className="mb-4 bg-red-50 p-4 rounded-md">
             <div className="flex">
               <div className="flex-shrink-0">
                 <svg className="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -199,10 +327,10 @@ const UpdateProductDetails: React.FC = () => {
             </div>
           </div>
         )}
-
-        <form onSubmit={handleSubmit} className="bg-white backdrop-blur-sm bg-opacity-80 py-8 px-6 shadow-lg rounded-2xl sm:px-10 space-y-6">
-          <div>
-            <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-1">
+        
+        <form onSubmit={handleSubmit} className="bg-white py-8 px-6 shadow rounded-lg sm:px-10">
+          <div className="mb-6">
+            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
               Product Name *
             </label>
             <input
@@ -211,13 +339,13 @@ const UpdateProductDetails: React.FC = () => {
               name="name"
               value={formData.name}
               onChange={handleChange}
-              className="appearance-none block w-full px-4 py-3 border border-gray-200 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-150 ease-in-out"
+              className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
               required
             />
           </div>
-
-          <div>
-            <label htmlFor="description" className="block text-sm font-semibold text-gray-700 mb-1">
+          
+          <div className="mb-6">
+            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
               Description *
             </label>
             <textarea
@@ -226,76 +354,86 @@ const UpdateProductDetails: React.FC = () => {
               rows={4}
               value={formData.description}
               onChange={handleChange}
-              className="appearance-none block w-full px-4 py-3 border border-gray-200 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-150 ease-in-out"
+              className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
               required
             />
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          
+          <div className="mb-6 grid grid-cols-2 gap-4">
             <div>
-              <label htmlFor="price" className="block text-sm font-semibold text-gray-700 mb-1">
-                Price *
+              <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
+                Price ($) *
               </label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
-                <input
-                  type="number"
-                  id="price"
-                  name="price"
-                  value={formData.price}
-                  onChange={handleChange}
-                  className="appearance-none block w-full pl-8 pr-4 py-3 border border-gray-200 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-150 ease-in-out"
-                  required
-                />
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor="category" className="block text-sm font-semibold text-gray-700 mb-1">
-                Category *
-              </label>
-              <select
-                id="category"
-                name="category"
-                value={formData.category}
+              <input
+                type="number"
+                id="price"
+                name="price"
+                value={formData.price}
                 onChange={handleChange}
-                className="appearance-none block w-full px-4 py-3 border border-gray-200 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-150 ease-in-out"
+                step="0.01"
+                min="0"
+                className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                 required
-              >
-                <option value="">Select a category</option>
-                {categories.map(category => (
-                  <option key={category} value={category}>{category}</option>
-                ))}
-              </select>
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="quantity" className="block text-sm font-medium text-gray-700 mb-1">
+                Quantity
+              </label>
+              <input
+                type="number"
+                id="quantity"
+                name="quantity"
+                value={formData.quantity}
+                onChange={handleChange}
+                min="0"
+                className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              />
             </div>
           </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+          
+          <div className="mb-6">
+            <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
+              Category *
+            </label>
+            <input
+              type="text"
+              id="category"
+              name="category"
+              value={formData.category}
+              onChange={handleChange}
+              className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              required
+            />
+          </div>
+          
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Product Images (URLs)
             </label>
+            
             {formData.images.map((image, index) => (
               <div key={index} className="flex items-center mb-2">
                 <input
                   type="url"
                   value={image}
-                  onChange={e => handleImageChange(index, e.target.value)}
+                  onChange={(e) => handleImageChange(index, e.target.value)}
                   placeholder="https://example.com/image.jpg"
-                  className="appearance-none block flex-1 px-3 py-2 border border-gray-200 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm mr-2"
+                  className="appearance-none block flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm mr-2"
                 />
                 <button
                   type="button"
                   onClick={() => removeImageField(index)}
                   className="inline-flex items-center p-1.5 border border-transparent rounded-full shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                  disabled={formData.images.length <= 1}
-                  title="Remove image"
                 >
                   <svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10l-4.293-4.293a1 1 0 011.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
                   </svg>
                 </button>
               </div>
             ))}
+            
             <button
               type="button"
               onClick={addImageField}
@@ -307,51 +445,122 @@ const UpdateProductDetails: React.FC = () => {
               Add Image URL
             </button>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label htmlFor="quantity" className="block text-sm font-semibold text-gray-700 mb-1">
-                Quantity *
-              </label>
+          
+          {/* Discount Section */}
+          <div className="mt-8 mb-6">
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Discount Options</h3>
+            <div className="flex items-center mb-4">
               <input
-                type="number"
-                id="quantity"
-                name="quantity"
-                value={formData.quantity}
-                onChange={handleChange}
-                min={0}
-                className="appearance-none block w-full px-4 py-3 border border-gray-200 rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-150 ease-in-out"
-                required
+                type="checkbox"
+                id="discount-active"
+                checked={formData.discount.isActive}
+                onChange={handleDiscountToggle}
+                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
               />
-            </div>
-
-            <div className="flex items-center h-full pt-6">
-              <label className="flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  id="inStock"
-                  name="inStock"
-                  checked={formData.inStock}
-                  onChange={handleChange}
-                  className="w-4 h-4 text-indigo-600 bg-gray-100 border-gray-300 rounded focus:ring-indigo-500 focus:ring-2"
-                />
-                <span className="ml-3 text-sm font-semibold text-gray-700">In Stock</span>
+              <label htmlFor="discount-active" className="ml-2 block text-sm text-gray-900">
+                Add a discount to this product
               </label>
             </div>
+            
+            {formData.discount.isActive && (
+              <div className="pl-6 space-y-4 border-l-2 border-gray-200">
+                <div>
+                  <label htmlFor="discount-type" className="block text-sm font-medium text-gray-700 mb-1">
+                    Discount Type
+                  </label>
+                  <select
+                    id="discount-type"
+                    name="discount.type"
+                    value={formData.discount.type}
+                    onChange={handleDiscountTypeChange}
+                    className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  >
+                    <option value="none">Select discount type</option>
+                    <option value="flash_sale">Flash Sale</option>
+                    <option value="voucher">Voucher Code</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label htmlFor="discount-value" className="block text-sm font-medium text-gray-700 mb-1">
+                    Discount Percentage (%)
+                  </label>
+                  <input
+                    type="number"
+                    id="discount-value"
+                    name="discount.value"
+                    value={formData.discount.value}
+                    onChange={handleChange}
+                    min="1"
+                    max="100"
+                    className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  />
+                </div>
+                
+                {formData.discount.type === 'flash_sale' && (
+                  <>
+                    <div>
+                      <label htmlFor="discount-start-date" className="block text-sm font-medium text-gray-700 mb-1">
+                        Sale Start Date
+                      </label>
+                      <input
+                        type="datetime-local"
+                        id="discount-start-date"
+                        name="discount.startDate"
+                        value={formData.discount.startDate}
+                        onChange={handleChange}
+                        className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label htmlFor="discount-end-date" className="block text-sm font-medium text-gray-700 mb-1">
+                        Sale End Date
+                      </label>
+                      <input
+                        type="datetime-local"
+                        id="discount-end-date"
+                        name="discount.endDate"
+                        value={formData.discount.endDate}
+                        onChange={handleChange}
+                        className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                      />
+                    </div>
+                  </>
+                )}
+                
+                {formData.discount.type === 'voucher' && (
+                  <div>
+                    <label htmlFor="discount-voucher-code" className="block text-sm font-medium text-gray-700 mb-1">
+                      Voucher Code
+                    </label>
+                    <input
+                      type="text"
+                      id="discount-voucher-code"
+                      name="discount.voucherCode"
+                      value={formData.discount.voucherCode}
+                      onChange={handleChange}
+                      className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                      placeholder="e.g. SUMMER10"
+                    />
+                  </div>
+                )}
+              </div>
+            )}
           </div>
-
-          <div className="flex items-center justify-between pt-6">
+          
+          <div className="flex items-center justify-between">
             <button
               type="button"
               onClick={() => navigate(`/products/${id}`)}
-              className="inline-flex items-center px-6 py-3 border border-gray-300 shadow-sm text-sm font-medium rounded-xl text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out"
+              className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className={`inline-flex items-center px-6 py-3 border border-transparent text-sm font-medium rounded-xl shadow-sm text-white bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-300 ease-in-out ${submitting ? 'opacity-70 cursor-not-allowed' : ''}`}
+              className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${submitting ? 'opacity-70 cursor-not-allowed' : ''}`}
             >
               {submitting ? 'Updating...' : 'Update Product'}
             </button>

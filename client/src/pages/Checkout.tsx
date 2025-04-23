@@ -53,13 +53,27 @@ const Checkout: React.FC = () => {
         email: formData.email
       };
       
+      // Calculate the total with any discounts
+      const subtotal = cart?.totalAmount ?? 0;
+      const discount = cart?.totalDiscount ?? 0;
+      const discountedSubtotal = cart?.finalAmount ?? subtotal;
+      const shipping = 5;
+      const tax = discountedSubtotal * 0.05;
+      const totalAmount = discountedSubtotal + shipping + tax;
+      
       // Instead of calling checkout directly, we'll redirect to payment page
       navigate('/payment', {
         state: {
           orderId: 'TEMP-' + Math.floor(Math.random() * 1000000),
           shippingAddress,
           paymentMethod: formData.paymentMethod,
-          totalAmount: (cart?.totalAmount ?? 0) + 5 + ((cart?.totalAmount ?? 0) * 0.05) // Subtotal + shipping + tax
+          subtotal,
+          discount,
+          discountedSubtotal,
+          shipping,
+          tax,
+          totalAmount,
+          voucherCode: cart?.voucherApplied // Pass voucher code if applied
         }
       });
     } catch (err) {
@@ -149,6 +163,14 @@ const Checkout: React.FC = () => {
       </div>
     );
   }
+  
+  // Calculate totals with discount
+  const subtotal = cart?.totalAmount ?? 0;
+  const discount = cart?.totalDiscount ?? 0;
+  const discountedSubtotal = cart?.finalAmount ?? subtotal;
+  const shipping = 5;
+  const tax = discountedSubtotal * 0.05;
+  const totalAmount = discountedSubtotal + shipping + tax;
   
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -349,9 +371,25 @@ const Checkout: React.FC = () => {
                           <div>
                             <div className="flex justify-between text-sm font-medium text-gray-900">
                               <h4>{item.product.name}</h4>
-                              <p className="ml-4">${(item.price * item.quantity).toFixed(2)}</p>
+                              <div>
+                                {item.discountedPrice ? (
+                                  <div className="text-right">
+                                    <p className="text-red-600">${(item.discountedPrice * item.quantity).toFixed(2)}</p>
+                                    <p className="text-sm text-gray-500 line-through">${(item.price * item.quantity).toFixed(2)}</p>
+                                  </div>
+                                ) : (
+                                  <p>${(item.price * item.quantity).toFixed(2)}</p>
+                                )}
+                              </div>
                             </div>
                             <p className="mt-1 text-sm text-gray-500">Qty {item.quantity}</p>
+                            
+                            {/* Show voucher applied badge */}
+                            {item.voucherApplied && (
+                              <span className="mt-1 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                                Voucher applied: {item.discountPercentage}% off
+                              </span>
+                            )}
                           </div>
                         </div>
                       </li>
@@ -363,22 +401,38 @@ const Checkout: React.FC = () => {
               <div className="border-t border-gray-200 pt-4">
                 <div className="flex justify-between text-sm">
                   <dt className="text-gray-600">Subtotal</dt>
-                  <dd className="font-medium text-gray-900">${cart.totalAmount.toFixed(2)}</dd>
+                  <dd className="font-medium text-gray-900">${subtotal.toFixed(2)}</dd>
                 </div>
+                
+                {/* Show discount if available */}
+                {discount > 0 && (
+                  <div className="flex justify-between text-sm mt-2">
+                    <dt className="text-red-600">Discount</dt>
+                    <dd className="font-medium text-red-600">-${discount.toFixed(2)}</dd>
+                  </div>
+                )}
+                
+                {/* Show voucher info if applied */}
+                {cart.voucherApplied && (
+                  <div className="flex justify-between text-sm mt-2">
+                    <dt className="text-gray-600">Voucher</dt>
+                    <dd className="font-medium text-green-600">{cart.voucherApplied}</dd>
+                  </div>
+                )}
                 
                 <div className="flex justify-between text-sm mt-2">
                   <dt className="text-gray-600">Shipping</dt>
-                  <dd className="font-medium text-gray-900">$5.00</dd>
+                  <dd className="font-medium text-gray-900">${shipping.toFixed(2)}</dd>
                 </div>
                 
                 <div className="flex justify-between text-sm mt-2">
                   <dt className="text-gray-600">Tax</dt>
-                  <dd className="font-medium text-gray-900">${(cart.totalAmount * 0.05).toFixed(2)}</dd>
+                  <dd className="font-medium text-gray-900">${tax.toFixed(2)}</dd>
                 </div>
                 
                 <div className="flex justify-between text-base font-medium text-gray-900 mt-6">
                   <dt>Total</dt>
-                  <dd>${(cart.totalAmount + 5 + cart.totalAmount * 0.05).toFixed(2)}</dd>
+                  <dd>${totalAmount.toFixed(2)}</dd>
                 </div>
               </div>
             </div>
