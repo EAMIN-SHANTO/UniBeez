@@ -3,6 +3,8 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
+import ProductReviews from '../components/ProductReviews';
+import StarRating from '../components/StarRating';
 
 interface Product {
   _id: string;
@@ -26,6 +28,19 @@ interface Product {
   };
   createdAt: string;
   // Remove the featured? property since we now have isFeatured
+  // New discount-related fields
+  discount?: {
+    isActive: boolean;
+    type: string;
+    value: number;
+    startDate?: string;
+    endDate?: string;
+    voucherCode?: string;
+  };
+  discountedPrice?: number;
+  isDiscounted?: boolean;
+  discountEndsAt?: string;
+  hasVoucher?: boolean;
 }
 
 const ProductDetail: React.FC = () => {
@@ -41,6 +56,13 @@ const ProductDetail: React.FC = () => {
   const [quantity, setQuantity] = useState<number>(1);
   const [isAddingToCart, setIsAddingToCart] = useState<boolean>(false);
   const [cartMessage, setCartMessage] = useState<string | null>(null);
+  
+  // New state for voucher code
+  const [voucherCode, setVoucherCode] = useState<string>('');
+  const [voucherMessage, setVoucherMessage] = useState<string | null>(null);
+  const [voucherApplied, setVoucherApplied] = useState<boolean>(false);
+  const [voucherLoading, setVoucherLoading] = useState<boolean>(false);
+  const [applyingVoucher, setApplyingVoucher] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchProductDetails = async () => {
@@ -79,8 +101,62 @@ const ProductDetail: React.FC = () => {
     }
   };
 
+  const applyVoucher = async () => {
+    if (!voucherCode.trim()) {
+      setVoucherMessage('Please enter a voucher code');
+      return;
+    }
 
+    try {
+      setVoucherLoading(true);
+      setVoucherMessage(null);
+      
+      const response = await axios.post(`${API_URL}/api/products/voucher/verify`, {
+        productId: product?._id,
+        voucherCode: voucherCode
+      });
 
+      if (response.data.success) {
+        setVoucherApplied(true);
+        setVoucherMessage('Voucher applied successfully!');
+        // Update product with discounted price
+        setProduct(prev => {
+          if (!prev) return null;
+          return {
+            ...prev,
+            discountedPrice: response.data.discountedPrice,
+            isDiscounted: true
+          };
+        });
+      }
+    } catch (err: any) {
+      setVoucherMessage(err.response?.data?.message || 'Invalid voucher code');
+      setVoucherApplied(false);
+    } finally {
+      setVoucherLoading(false);
+    }
+  };
+
+  const toggleVoucherForm = () => {
+    setApplyingVoucher(prev => !prev);
+    setVoucherMessage(null);
+    if (voucherApplied) {
+      // Reset voucher if it was already applied
+      setVoucherApplied(false);
+      setVoucherCode('');
+      // Reset product discount from voucher
+      if (product?.hasVoucher) {
+        setProduct(prev => {
+          if (!prev) return null;
+          return {
+            ...prev,
+            discountedPrice: undefined,
+            isDiscounted: false
+          };
+        });
+      }
+    }
+  };
 
   const handleAddToCart = async () => {
     if (!user) {
@@ -93,7 +169,12 @@ const ProductDetail: React.FC = () => {
       setCartMessage(null);
       
       if (product) {
-        await addToCart(product._id, quantity);
+        // If voucher is applied, pass it in the request
+        if (voucherApplied && product.hasVoucher) {
+          await addToCart(product._id, quantity, voucherCode);
+        } else {
+          await addToCart(product._id, quantity);
+        }
       }
       setCartMessage('Product added to cart!');
       
@@ -107,7 +188,29 @@ const ProductDetail: React.FC = () => {
     }
   };
 
+  // Format a date with time
+  const formatDateTime = (dateString: string) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleString();
+  };
 
+  // Calculate time remaining for flash sale
+  const getTimeRemaining = (endDate: string) => {
+    if (!endDate) return '';
+    
+    const end = new Date(endDate).getTime();
+    const now = new Date().getTime();
+    const distance = end - now;
+    
+    if (distance <= 0) return 'Sale ended';
+    
+    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    
+    return `${days}d ${hours}h ${minutes}m`;
+  };
 
   if (loading) {
     return (
@@ -245,22 +348,84 @@ const ProductDetail: React.FC = () => {
                 </div>
                 
                 <div className="mt-2 flex items-center">
-                  <div className="flex items-center">
-                    <svg className="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                    <span className="ml-1 text-sm text-gray-500">
-                      {product.rating.toFixed(1)} ({product.reviewCount} reviews)
-                    </span>
-                  </div>
+                  <StarRating 
+                    rating={product.rating} 
+                    disabled={true} 
+                    size="small"
+                    showCount={true}
+                    reviewCount={product.reviewCount}
+                  />
                   <span className="mx-2 text-gray-300">|</span>
                   <span className="text-sm text-gray-500">
                     {product.category}
                   </span>
                 </div>
                 
+                {/* Price display with discount information */}
                 <div className="mt-4">
-                  <span className="text-3xl font-bold text-gray-900">${product.price.toFixed(2)}</span>
+                  {product.isDiscounted || voucherApplied ? (
+                    <div className="flex items-center">
+                      <span className="text-3xl font-bold text-gray-900">${product.discountedPrice?.toFixed(2)}</span>
+                      <span className="ml-2 line-through text-gray-500">${product.price.toFixed(2)}</span>
+                      <span className="ml-2 bg-red-100 text-red-800 text-xs font-medium px-2 py-0.5 rounded-full">
+                        {product.discount?.value}% OFF
+                      </span>
+                    </div>
+                  ) : (
+                    <span className="text-3xl font-bold text-gray-900">${product.price.toFixed(2)}</span>
+                  )}
+                  
+                  {/* Flash sale countdown */}
+                  {product.isDiscounted && product.discount?.type === 'flash_sale' && product.discountEndsAt && (
+                    <div className="mt-2 flex items-center">
+                      <svg className="w-5 h-5 text-red-500 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span className="text-sm text-red-600">
+                        Flash Sale ends in: {getTimeRemaining(product.discountEndsAt)}
+                      </span>
+                    </div>
+                  )}
+                  
+                  {/* Voucher code availability */}
+                  {product.hasVoucher && !voucherApplied && (
+                    <div className="mt-2">
+                      <button 
+                        onClick={toggleVoucherForm}
+                        className="flex items-center text-sm text-indigo-600 hover:text-indigo-800"
+                      >
+                        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2 3.5-2 3.5 2z" />
+                        </svg>
+                        Have a voucher code?
+                      </button>
+                      
+                      {applyingVoucher && (
+                        <div className="mt-2 flex items-center">
+                          <input
+                            type="text"
+                            value={voucherCode}
+                            onChange={(e) => setVoucherCode(e.target.value)}
+                            placeholder="Enter voucher code"
+                            className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                          />
+                          <button
+                            onClick={applyVoucher}
+                            disabled={voucherLoading}
+                            className="ml-2 inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                          >
+                            {voucherLoading ? 'Applying...' : 'Apply'}
+                          </button>
+                        </div>
+                      )}
+                      
+                      {voucherMessage && (
+                        <div className={`mt-2 text-sm ${voucherApplied ? 'text-green-600' : 'text-red-600'}`}>
+                          {voucherMessage}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
                 
                 <div className="mt-6 prose prose-sm text-gray-500">
@@ -290,7 +455,7 @@ const ProductDetail: React.FC = () => {
                   </div>
                 </div>
                 
-                {/* Cart/quantity section remains below */}
+                {/* Cart/quantity section */}
                 <div className="mt-6">
                   {product.inStock ? (
                     <div>
@@ -351,6 +516,16 @@ const ProductDetail: React.FC = () => {
                 </div>
               </div>
             </div>
+
+            {/* Product Reviews Section */}
+            {product && (
+              <div className="mt-8 pt-8 border-t border-gray-200">
+                <ProductReviews
+                  productId={product._id}
+                  shopOwnerId={product.shop.owner._id || product.shop.owner.toString()}
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>

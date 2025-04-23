@@ -1,5 +1,5 @@
 import express from 'express';
-import { createProduct, getAllProducts, getProductById, updateProduct, deleteProduct } from '../controllers/product.controller.js';
+import { createProduct, getAllProducts, getProductById, updateProduct, deleteProduct, applyVoucherDiscount } from '../controllers/product.controller.js';
 import { verifyToken } from '../middleware/auth.middleware.js';
 
 const router = express.Router();
@@ -19,4 +19,7 @@ router.put('/:id', verifyToken, updateProduct);
 // Delete product (requires authentication)
 router.delete('/:id', verifyToken, deleteProduct);
 
-export default router; 
+// Apply voucher discount
+router.post('/voucher/verify', applyVoucherDiscount);
+
+export default router;

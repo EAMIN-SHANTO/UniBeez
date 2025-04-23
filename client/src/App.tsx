@@ -34,7 +34,12 @@ import FeatureProduct from './pages/FeatureProduct';
 import PaymentPage from './pages/PaymentPage';
 import OrderConfirmation from './pages/OrderConfirmation';
 import ServicesPage from './pages/ServicesPage';
+
 import FeaturedProductmanagement from './pages/admin/FeaturedProductManagement';
+
+import Wishlist from './pages/Wishlist';
+
+
 const App: React.FC = () => {
   return (
     <AuthProvider>
@@ -63,6 +68,11 @@ const App: React.FC = () => {
                 <Route path="/profile/edit" element={
                   <ProtectedRoute>
                     <EditProfile />
+                  </ProtectedRoute>
+                } />
+                <Route path="/wishlist" element={
+                  <ProtectedRoute>
+                    <Wishlist />
                   </ProtectedRoute>
                 } />
                 <Route path="/admin" element={

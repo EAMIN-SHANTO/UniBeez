@@ -24,7 +24,15 @@ const CreateProduct: React.FC = () => {
     price: '',
     category: '',
     quantity: '1',
-    images: ['']
+    images: [''],
+    discount: {
+      isActive: false,
+      type: 'none',
+      value: '',
+      startDate: '',
+      endDate: '',
+      voucherCode: ''
+    }
   });
 
   const [userShops, setUserShops] = useState<Shop[]>([]);
@@ -95,9 +103,44 @@ const CreateProduct: React.FC = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
+    if (name.startsWith('discount.')) {
+      const discountField = name.split('.')[1];
+      setFormData(prev => ({
+        ...prev,
+        discount: {
+          ...prev.discount,
+          [discountField]: value
+        }
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
+  };
+
+  const handleDiscountTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const { value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      discount: {
+        ...prev.discount,
+        type: value,
+        isActive: value !== 'none'
+      }
+    }));
+  };
+
+  const handleDiscountToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const isActive = e.target.checked;
+    setFormData(prev => ({
+      ...prev,
+      discount: {
+        ...prev.discount,
+        isActive,
+        type: isActive ? prev.discount.type : 'none'
+      }
     }));
   };
 
@@ -140,6 +183,21 @@ const CreateProduct: React.FC = () => {
       return;
     }
 
+    // Validate discount fields if discount is active
+    if (formData.discount.isActive) {
+      if (formData.discount.type === 'flash_sale') {
+        if (!formData.discount.startDate || !formData.discount.endDate || !formData.discount.value) {
+          setError('Please fill in all flash sale fields');
+          return;
+        }
+      } else if (formData.discount.type === 'voucher') {
+        if (!formData.discount.voucherCode || !formData.discount.value) {
+          setError('Please fill in all voucher fields');
+          return;
+        }
+      }
+    }
+
     try {
       setSubmitting(true);
       setError(null);
@@ -155,7 +213,23 @@ const CreateProduct: React.FC = () => {
         category: formData.category,
         quantity: parseInt(formData.quantity),
         shop: selectedShopId,
-        images: filteredImages
+        images: filteredImages,
+        discount: formData.discount.isActive ? {
+          isActive: true,
+          type: formData.discount.type,
+          value: parseFloat(formData.discount.value),
+          ...(formData.discount.type === 'flash_sale' && {
+            startDate: formData.discount.startDate,
+            endDate: formData.discount.endDate
+          }),
+          ...(formData.discount.type === 'voucher' && {
+            voucherCode: formData.discount.voucherCode
+          })
+        } : {
+          isActive: false,
+          type: 'none',
+          value: 0
+        }
       };
       
       // Log what we're sending to the server
@@ -388,6 +462,109 @@ const CreateProduct: React.FC = () => {
               </svg>
               Add Image URL
             </button>
+          </div>
+          
+          {/* Discount Section */}
+          <div className="mt-8 mb-6">
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Discount Options</h3>
+            <div className="flex items-center mb-4">
+              <input
+                type="checkbox"
+                id="discount-active"
+                checked={formData.discount.isActive}
+                onChange={handleDiscountToggle}
+                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+              />
+              <label htmlFor="discount-active" className="ml-2 block text-sm text-gray-900">
+                Add a discount to this product
+              </label>
+            </div>
+            
+            {formData.discount.isActive && (
+              <div className="pl-6 space-y-4 border-l-2 border-gray-200">
+                <div>
+                  <label htmlFor="discount-type" className="block text-sm font-medium text-gray-700 mb-1">
+                    Discount Type
+                  </label>
+                  <select
+                    id="discount-type"
+                    name="discount.type"
+                    value={formData.discount.type}
+                    onChange={handleDiscountTypeChange}
+                    className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  >
+                    <option value="none">Select discount type</option>
+                    <option value="flash_sale">Flash Sale</option>
+                    <option value="voucher">Voucher Code</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label htmlFor="discount-value" className="block text-sm font-medium text-gray-700 mb-1">
+                    Discount Percentage (%)
+                  </label>
+                  <input
+                    type="number"
+                    id="discount-value"
+                    name="discount.value"
+                    value={formData.discount.value}
+                    onChange={handleChange}
+                    min="1"
+                    max="100"
+                    className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  />
+                </div>
+                
+                {formData.discount.type === 'flash_sale' && (
+                  <>
+                    <div>
+                      <label htmlFor="discount-start-date" className="block text-sm font-medium text-gray-700 mb-1">
+                        Sale Start Date
+                      </label>
+                      <input
+                        type="datetime-local"
+                        id="discount-start-date"
+                        name="discount.startDate"
+                        value={formData.discount.startDate}
+                        onChange={handleChange}
+                        className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label htmlFor="discount-end-date" className="block text-sm font-medium text-gray-700 mb-1">
+                        Sale End Date
+                      </label>
+                      <input
+                        type="datetime-local"
+                        id="discount-end-date"
+                        name="discount.endDate"
+                        value={formData.discount.endDate}
+                        onChange={handleChange}
+                        className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                      />
+                    </div>
+                  </>
+                )}
+                
+                {formData.discount.type === 'voucher' && (
+                  <div>
+                    <label htmlFor="discount-voucher-code" className="block text-sm font-medium text-gray-700 mb-1">
+                      Voucher Code
+                    </label>
+                    <input
+                      type="text"
+                      id="discount-voucher-code"
+                      name="discount.voucherCode"
+                      value={formData.discount.voucherCode}
+                      onChange={handleChange}
+                      className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                      placeholder="e.g. SUMMER10"
+                    />
+                  </div>
+                )}
+              </div>
+            )}
           </div>
           
           <div className="flex items-center justify-between">

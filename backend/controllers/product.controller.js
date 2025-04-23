@@ -5,7 +5,7 @@ import Shop from '../models/shop.model.js';
 export const createProduct = async (req, res) => {
   try {
     console.log('Received product creation request:', req.body);
-    const { name, description, price, category, images, quantity } = req.body;
+    const { name, description, price, category, images, quantity, discount } = req.body;
     const shopId = req.body.shop;
     const userId = req.user._id;
     
@@ -48,7 +48,12 @@ export const createProduct = async (req, res) => {
       images: images || [],
       shop: shopId,
       quantity: quantity || 0,
-      inStock: (quantity && quantity > 0) || false
+      inStock: (quantity && quantity > 0) || false,
+      discount: discount || {
+        isActive: false,
+        type: 'none',
+        value: 0
+      }
     });
     
     console.log('Attempting to save product:', newProduct);
@@ -84,10 +89,31 @@ export const getAllProducts = async (req, res) => {
     const products = await Product.find(query)
       .populate('shop', 'name logo');
     
+    // Calculate active discounts for each product
+    const productsWithDiscounts = products.map(product => {
+      const productObj = product.toObject();
+      
+      // Check if product has active flash sale
+      if (product.discount?.isActive && product.discount.type === 'flash_sale') {
+        const now = new Date();
+        if (now >= product.discount.startDate && now <= product.discount.endDate) {
+          productObj.discountedPrice = product.price - (product.price * (product.discount.value / 100));
+          productObj.isDiscounted = true;
+        }
+      }
+      
+      // For voucher products, just indicate there's a voucher available
+      if (product.discount?.isActive && product.discount.type === 'voucher') {
+        productObj.hasVoucher = true;
+      }
+      
+      return productObj;
+    });
+    
     res.status(200).json({
       success: true,
       count: products.length,
-      products
+      products: productsWithDiscounts
     });
   } catch (error) {
     res.status(500).json({
@@ -111,9 +137,28 @@ export const getProductById = async (req, res) => {
       });
     }
     
+    const productObj = product.toObject();
+    
+    // Check if product has active flash sale
+    if (product.discount?.isActive && product.discount.type === 'flash_sale') {
+      const now = new Date();
+      if (now >= product.discount.startDate && now <= product.discount.endDate) {
+        productObj.discountedPrice = product.price - (product.price * (product.discount.value / 100));
+        productObj.isDiscounted = true;
+        productObj.discountEndsAt = product.discount.endDate;
+      }
+    }
+    
+    // For voucher products, indicate there's a voucher available
+    if (product.discount?.isActive && product.discount.type === 'voucher') {
+      productObj.hasVoucher = true;
+      productObj.discountValue = product.discount.value;
+      // Don't expose voucher code to regular users
+    }
+    
     res.status(200).json({
       success: true,
-      product
+      product: productObj
     });
   } catch (error) {
     res.status(500).json({
@@ -127,7 +172,7 @@ export const getProductById = async (req, res) => {
 // Update product
 export const updateProduct = async (req, res) => {
   try {
-    const { name, description, price, category, images, stock, status } = req.body;
+    const { name, description, price, category, images, quantity, discount } = req.body;
     const productId = req.params.id;
     const userId = req.user._id;
     
@@ -155,8 +200,34 @@ export const updateProduct = async (req, res) => {
     if (price !== undefined) product.price = price;
     if (category) product.category = category;
     if (images) product.images = images;
-    if (stock !== undefined) product.stock = stock;
-    if (status) product.status = status;
+    if (quantity !== undefined) product.quantity = quantity;
+    if (quantity <= 0) product.inStock = false;
+    else product.inStock = true;
+    
+    // Update discount fields if provided
+    if (discount) {
+      product.discount = {
+        ...product.discount,
+        ...discount
+      };
+      
+      // Validate discount data
+      if (discount.type === 'flash_sale') {
+        if (!discount.startDate || !discount.endDate || discount.value <= 0) {
+          return res.status(400).json({
+            success: false,
+            message: 'Flash sale requires start date, end date, and a discount value'
+          });
+        }
+      } else if (discount.type === 'voucher') {
+        if (!discount.voucherCode || discount.value <= 0) {
+          return res.status(400).json({
+            success: false,
+            message: 'Voucher discount requires a voucher code and a discount value'
+          });
+        }
+      }
+    }
     
     const updatedProduct = await product.save();
     
@@ -208,6 +279,54 @@ export const deleteProduct = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to delete product',
+      error: error.message
+    });
+  }
+};
+
+// Apply voucher discount to a product
+export const applyVoucherDiscount = async (req, res) => {
+  try {
+    const { productId, voucherCode } = req.body;
+    
+    // Find product
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: 'Product not found'
+      });
+    }
+    
+    // Check if product has a valid voucher discount
+    if (!product.discount?.isActive || product.discount.type !== 'voucher') {
+      return res.status(400).json({
+        success: false,
+        message: 'No voucher discount available for this product'
+      });
+    }
+    
+    // Check if voucher code matches
+    if (product.discount.voucherCode !== voucherCode) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid voucher code'
+      });
+    }
+    
+    // Calculate discounted price
+    const discountedPrice = product.price - (product.price * (product.discount.value / 100));
+    
+    res.status(200).json({
+      success: true,
+      message: 'Voucher discount applied successfully',
+      discountedPrice,
+      discountValue: product.discount.value
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Failed to apply voucher discount',
       error: error.message
     });
   }

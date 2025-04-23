@@ -10,6 +10,7 @@ interface Product {
   images: string[];
   description?: string;
   featured?: boolean; // Add featured property
+  isInWishlist?: boolean; // Add this property to track wishlist status
 }
 
 const ProductPage: React.FC = () => {
@@ -57,12 +58,67 @@ const ProductPage: React.FC = () => {
     fetchShopId();
   }, [API_URL, user]);
 
+  // Function to toggle wishlist status
+  const toggleWishlist = async (productId: string, e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent navigation to product details
+    
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    
+    try {
+      const response = await axios.post(`${API_URL}/api/wishlist/${productId}`, {}, {
+        withCredentials: true
+      });
+      
+      if (response.data.success) {
+        // Update the product's wishlist status in state
+        setProducts(prevProducts => 
+          prevProducts.map(product => 
+            product._id === productId 
+              ? { ...product, isInWishlist: !product.isInWishlist } 
+              : product
+          )
+        );
+      }
+    } catch (error) {
+      console.error('Error toggling wishlist:', error);
+    }
+  };
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
         const response = await axios.get(`${API_URL}/api/productpage`);
-        setProducts(response.data.products);
+        
+        let productsData = response.data.products;
+        
+        // If user is logged in, check wishlist status for products
+        if (user) {
+          try {
+            const wishlistResponse = await axios.get(`${API_URL}/api/wishlist`, {
+              withCredentials: true
+            });
+            
+            if (wishlistResponse.data.success) {
+              const wishlistProductIds = wishlistResponse.data.wishlist.products.map((p: any) => 
+                typeof p === 'object' ? p._id : p
+              );
+              
+              // Mark products that are in the wishlist
+              productsData = productsData.map((product: Product) => ({
+                ...product,
+                isInWishlist: wishlistProductIds.includes(product._id)
+              }));
+            }
+          } catch (err) {
+            console.error('Error fetching wishlist:', err);
+          }
+        }
+        
+        setProducts(productsData);
         setError(null);
       } catch (err) {
         setError('Failed to fetch products. Please try again later.');
@@ -73,7 +129,7 @@ const ProductPage: React.FC = () => {
     };
 
     fetchProducts();
-  }, [API_URL]);
+  }, [API_URL, user]);
 
   // Show only featured products in the featured section
   const featuredProducts = products.filter(
@@ -151,23 +207,58 @@ const ProductPage: React.FC = () => {
             <h2 className="text-2xl font-bold text-indigo-700 mb-6 text-center">Featured Products</h2>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {featuredProducts.map((product) => (
-                <Link 
-                  key={product._id} 
-                  to={`/products/${product._id}`}
-                  className="bg-yellow-50 border-2 border-yellow-300 overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow duration-300"
-                >
-                  <div className="relative h-48">
-                    <img 
-                      className="w-full h-full object-cover" 
-                      src={product.images[0] || 'https://via.placeholder.com/800x400'} 
-                      alt={product.name} 
-                    />
-                  </div>
-                  <div className="p-4">
-                    <h3 className="text-lg font-medium text-gray-900">{product.name}</h3>
-                    <p className="text-sm text-gray-600 mt-2">${product.price.toFixed(2)}</p>
-                  </div>
-                </Link>
+                <div key={product._id} className="relative bg-yellow-50 border-2 border-yellow-300 overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow duration-300">
+                  <Link 
+                    to={`/products/${product._id}`}
+                    className="block"
+                  >
+                    <div className="relative h-48">
+                      <img 
+                        className="w-full h-full object-cover" 
+                        src={product.images[0] || 'https://via.placeholder.com/800x400'} 
+                        alt={product.name} 
+                      />
+                    </div>
+                    <div className="p-4">
+                      <h3 className="text-lg font-medium text-gray-900">{product.name}</h3>
+                      <p className="text-sm text-gray-600 mt-2">${product.price.toFixed(2)}</p>
+                    </div>
+                  </Link>
+                  <button 
+                    onClick={(e) => toggleWishlist(product._id, e)}
+                    className="absolute top-2 right-2 p-2 rounded-full bg-white bg-opacity-80 hover:bg-opacity-100 transition"
+                  >
+                    {product.isInWishlist ? (
+                      <svg 
+                        className="w-6 h-6 text-red-500" 
+                        fill="currentColor" 
+                        viewBox="0 0 20 20" 
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path 
+                          fillRule="evenodd" 
+                          d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" 
+                          clipRule="evenodd" 
+                        />
+                      </svg>
+                    ) : (
+                      <svg 
+                        className="w-6 h-6 text-gray-400" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24" 
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path 
+                          strokeLinecap="round" 
+                          strokeLinejoin="round" 
+                          strokeWidth={2} 
+                          d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" 
+                        />
+                      </svg>
+                    )}
+                  </button>
+                </div>
               ))}
             </div>
           </div>
@@ -198,7 +289,7 @@ const ProductPage: React.FC = () => {
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {filteredProducts.map((product: any) => (
-              <div key={product._id} className="bg-white overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow duration-300 flex flex-col">
+              <div key={product._id} className="relative bg-white overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow duration-300 flex flex-col">
                 <Link 
                   to={`/products/${product._id}`}
                   className="flex-1"
@@ -215,6 +306,40 @@ const ProductPage: React.FC = () => {
                     <p className="text-sm text-gray-600 mt-2">${product.price.toFixed(2)}</p>
                   </div>
                 </Link>
+                <button 
+                  onClick={(e) => toggleWishlist(product._id, e)}
+                  className="absolute top-2 right-2 p-2 rounded-full bg-white bg-opacity-80 hover:bg-opacity-100 transition"
+                >
+                  {product.isInWishlist ? (
+                    <svg 
+                      className="w-6 h-6 text-red-500" 
+                      fill="currentColor" 
+                      viewBox="0 0 20 20" 
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path 
+                        fillRule="evenodd" 
+                        d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" 
+                        clipRule="evenodd" 
+                      />
+                    </svg>
+                  ) : (
+                    <svg 
+                      className="w-6 h-6 text-gray-400" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24" 
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round" 
+                        strokeWidth={2} 
+                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" 
+                      />
+                    </svg>
+                  )}
+                </button>
                 {/* Only show Feature Product button if user owns the product's shop */}
                 {user && product.shop && (
                   (user._id === (product.shop.owner?._id || product.shop.owner)) && (

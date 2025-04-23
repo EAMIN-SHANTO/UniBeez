@@ -1,12 +1,36 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 
 const CartPage: React.FC = () => {
-  const { cart, loading, error, updateQuantity, removeFromCart } = useCart();
+  const { cart, loading, error, updateQuantity, removeFromCart, applyVoucher } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
+  
+  // New state for voucher code input
+  const [voucherCode, setVoucherCode] = useState<string>('');
+  const [applyingVoucher, setApplyingVoucher] = useState<boolean>(false);
+  const [voucherError, setVoucherError] = useState<string | null>(null);
+
+  // Handle voucher application
+  const handleApplyVoucher = async () => {
+    if (!voucherCode.trim()) {
+      setVoucherError('Please enter a voucher code');
+      return;
+    }
+
+    try {
+      setApplyingVoucher(true);
+      setVoucherError(null);
+      await applyVoucher(voucherCode);
+      // Voucher successfully applied
+    } catch (err: any) {
+      setVoucherError(err.message);
+    } finally {
+      setApplyingVoucher(false);
+    }
+  };
   
   if (!user) {
     return (
@@ -107,11 +131,45 @@ const CartPage: React.FC = () => {
                                   {item.product.name}
                                 </Link>
                               </h3>
-                              <p className="ml-4">${item.price.toFixed(2)}</p>
+                              <div>
+                                {item.discountedPrice ? (
+                                  <div className="text-right">
+                                    <p className="text-red-600">${item.discountedPrice.toFixed(2)}</p>
+                                    <p className="text-sm text-gray-500 line-through">${item.price.toFixed(2)}</p>
+                                    {item.discountPercentage && (
+                                      <span className="ml-2 bg-red-100 text-red-800 text-xs font-semibold px-2 py-0.5 rounded-full">
+                                        {item.discountPercentage}% OFF
+                                      </span>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <p>${item.price.toFixed(2)}</p>
+                                )}
+                              </div>
                             </div>
                             <p className="mt-1 text-sm text-gray-500 line-clamp-2">
                               {item.product.description}
                             </p>
+                            
+                            {/* Show voucher badge if applicable */}
+                            {item.hasVoucher && !item.voucherApplied && (
+                              <span className="mt-1 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800">
+                                <svg className="mr-1 h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                                </svg>
+                                Voucher discount available
+                              </span>
+                            )}
+                            
+                            {/* Show applied voucher badge */}
+                            {item.voucherApplied && (
+                              <span className="mt-1 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                                <svg className="mr-1 h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                                </svg>
+                                Voucher applied
+                              </span>
+                            )}
                           </div>
                           <div className="flex-1 flex items-end justify-between text-sm">
                             <div className="flex items-center">
@@ -154,12 +212,67 @@ const CartPage: React.FC = () => {
                 </div>
               </div>
 
+              {/* Voucher code input section */}
+              <div className="border-t border-gray-200 pt-4 mt-4">
+                <div className="flex flex-col sm:flex-row">
+                  <div className="flex-1">
+                    <label htmlFor="voucher-code" className="block text-sm font-medium text-gray-700 mb-1">
+                      Voucher Code
+                    </label>
+                    <div className="flex">
+                      <input
+                        type="text"
+                        id="voucher-code"
+                        name="voucher-code"
+                        value={voucherCode}
+                        onChange={(e) => setVoucherCode(e.target.value)}
+                        placeholder="Enter voucher code"
+                        className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleApplyVoucher}
+                        disabled={applyingVoucher}
+                        className="ml-3 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                      >
+                        {applyingVoucher ? 'Applying...' : 'Apply'}
+                      </button>
+                    </div>
+                    {voucherError && (
+                      <p className="mt-2 text-sm text-red-600">{voucherError}</p>
+                    )}
+                    {cart.voucherApplied && (
+                      <p className="mt-2 text-sm text-green-600">
+                        Voucher code {cart.voucherApplied} applied successfully!
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
               <div className="border-t border-gray-200 py-6">
-                <div className="flex justify-between text-base font-medium text-gray-900">
+                <div className="flex justify-between text-base font-medium text-gray-900 mb-1">
                   <p>Subtotal</p>
                   <p>${cart.totalAmount.toFixed(2)}</p>
                 </div>
-                <p className="mt-0.5 text-sm text-gray-500">Shipping and taxes calculated at checkout.</p>
+                
+                {/* Display discount if available */}
+                {cart.totalDiscount && cart.totalDiscount > 0 && (
+                  <div className="flex justify-between text-base font-medium text-red-600 mb-1">
+                    <p>Discount</p>
+                    <p>-${cart.totalDiscount.toFixed(2)}</p>
+                  </div>
+                )}
+                
+                {/* Display final amount if available */}
+                {cart.finalAmount !== undefined && (
+                  <div className="flex justify-between text-lg font-bold text-gray-900 mb-1">
+                    <p>Total</p>
+                    <p>${cart.finalAmount.toFixed(2)}</p>
+                  </div>
+                )}
+                
+                <p className="mt-2 text-sm text-gray-500">Shipping and taxes calculated at checkout.</p>
                 <div className="mt-6">
                   <button
                     onClick={() => navigate('/checkout')}

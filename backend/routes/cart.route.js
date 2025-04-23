@@ -6,7 +6,8 @@ import {
   removeFromCart, 
   clearCart,
   checkout,
-  processPayment // Add this import
+  processPayment,
+  applyVoucher 
 } from '../controllers/cart.controller.js';
 import { verifyToken } from '../middleware/auth.middleware.js';
 
@@ -29,6 +30,9 @@ router.delete('/remove/:itemId', removeFromCart);
 
 // Clear cart
 router.delete('/clear', clearCart);
+
+// Apply voucher code
+router.post('/apply-voucher', applyVoucher);
 
 // Checkout
 router.post('/checkout', checkout);
