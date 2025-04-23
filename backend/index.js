@@ -62,6 +62,7 @@ app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/ratings', ratingRoutes);
 app.use('/api/custom-product-requests', customProductRequestRoutes);
 
+
 // Test routes
 app.get("/api/test", (req, res) => {
   res.json({ message: "API is working!" });
