@@ -29,7 +29,7 @@ export const getUserShops = async (req, res) => {
 export const registerEventShop = async (req, res) => {
   try {
     const { eventId } = req.params;
-    const { shopId } = req.body; // Now expecting shopId in request body
+    const { shopId } = req.body; 
     const userId = req.user._id;
 
     // Find the event
