@@ -17,6 +17,7 @@ import eventShopRoutes from './routes/eventShop.route.js';
 import featureproductsroutes from './routes/featureproducts.route.js';
 import serviceRoutes from './routes/serviceRequest.routes.js';
 import wishlistRoutes from './routes/wishlist.route.js';
+import ratingRoutes from './routes/rating.route.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -57,6 +58,7 @@ app.use('/api/event-shops', eventShopRoutes);
 app.use('/api/featureproducts', featureproductsroutes);
 app.use('/api/services', serviceRoutes);
 app.use('/api/wishlist', wishlistRoutes);
+app.use('/api/ratings', ratingRoutes);
 
 // Test routes
 app.get("/api/test", (req, res) => {
