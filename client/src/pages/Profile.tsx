@@ -1,11 +1,15 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useProfile } from '../context/ProfileContext';
 import { useAuth } from '../context/AuthContext';
+import axios from 'axios';
 
 const Profile: React.FC = () => {
   const { user } = useAuth();
   const { profile, loading, error, fetchProfile } = useProfile();
+  const { API_URL } = useAuth();
+  const [wishlistCount, setWishlistCount] = useState(0);
+  const [wishlistLoading, setWishlistLoading] = useState(true);
 
   useEffect(() => {
     console.log('Profile component mounted, fetching profile...');
@@ -31,6 +35,30 @@ const Profile: React.FC = () => {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Fetch wishlist count
+  useEffect(() => {
+    const fetchWishlistCount = async () => {
+      if (!user) return;
+      
+      try {
+        setWishlistLoading(true);
+        const response = await axios.get(`${API_URL}/api/wishlist`, {
+          withCredentials: true,
+        });
+        
+        if (response.data.success && response.data.wishlist) {
+          setWishlistCount(response.data.wishlist.products?.length || 0);
+        }
+      } catch (error) {
+        console.error('Error fetching wishlist count:', error);
+      } finally {
+        setWishlistLoading(false);
+      }
+    };
+    
+    fetchWishlistCount();
+  }, [user, API_URL]);
 
   console.log('Profile component rendering, profile state:', profile, 'loading:', loading);
 
@@ -201,8 +229,14 @@ const Profile: React.FC = () => {
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-900">2 Items</p>
-                      <p className="text-xs text-gray-500">Last updated: Today</p>
+                      {wishlistLoading ? (
+                        <p className="text-sm font-medium text-gray-500">Loading...</p>
+                      ) : (
+                        <>
+                          <p className="text-sm font-medium text-gray-900">{wishlistCount} Items</p>
+                          <p className="text-xs text-gray-500">Products you love</p>
+                        </>
+                      )}
                     </div>
                     <Link to="/wishlist" className="text-sm text-blue-600 hover:text-blue-700">
                       View All
