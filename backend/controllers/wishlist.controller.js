@@ -26,7 +26,7 @@ export const getUserWishlist = async (req, res) => {
   }
 };
 
-// Toggle product in wishlist (add if not present, remove if present)
+// Toggle product in wishlist 
 export const toggleWishlistItem = async (req, res) => {
   try {
     const userId = req.user._id;
