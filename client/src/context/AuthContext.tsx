@@ -14,7 +14,14 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+  
+  // Always use the environment variable in production, or localhost for development
+  const API_URL = window.location.hostname === 'localhost' 
+    ? 'http://localhost:3000' 
+    : 'https://unibeez.onrender.com';
+    
+  console.log('Current hostname:', window.location.hostname);
+  console.log('Using API_URL:', API_URL);
 
   useEffect(() => {
     const checkAuth = async () => {

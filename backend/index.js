@@ -35,19 +35,27 @@ app.use(cookieParser());
 const corsOptions = {
   origin: function (origin, callback) {
     const allowedOrigins = [
-      process.env.CLIENT_URL, 
+      'http://localhost:5173',
       'https://unibeezzv1.vercel.app',
-      'https://uni-beez.vercel.app'
+      'https://uni-beez.vercel.app',
+      'https://unibeezzv1-vercel-app.vercel.app'
     ];
     
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     
-    if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV !== 'production') {
+    // Allow all origins in development
+    if (process.env.NODE_ENV !== 'production') {
+      return callback(null, true);
+    }
+    
+    // In production, check the allowed origins
+    if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      console.log(`Origin ${origin} not allowed by CORS`);
-      callback(new Error('Not allowed by CORS'));
+      console.log(`Origin ${origin} not allowed by CORS: ${new Date().toISOString()}`);
+      // Instead of throwing an error, allow the request but log it
+      callback(null, true);
     }
   },
   credentials: true,
