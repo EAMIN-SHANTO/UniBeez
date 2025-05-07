@@ -38,7 +38,13 @@ const EventSlideshow: React.FC = () => {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const response = await fetchApi('/api/events-21301429');
+        // HARDCODED API URL - Direct fetch to live API
+        const PRODUCTION_API_URL = 'https://unibeez.onrender.com';
+        console.log('⚠️ Using HARDCODED URL in EventSlideshow:', `${PRODUCTION_API_URL}/api/events-21301429`);
+        
+        const response = await fetch(`${PRODUCTION_API_URL}/api/events-21301429?_cb=${Date.now()}`, {
+          credentials: 'include'
+        });
         const data = await response.json();
         if (data.success && data.events.length > 0) {
           setEvents(data.events);
@@ -91,7 +97,7 @@ const EventSlideshow: React.FC = () => {
           <img
             src={event.bannerImage.startsWith('http') 
               ? event.bannerImage 
-              : `${getApiUrl()}${event.bannerImage}`}
+              : `https://unibeez.onrender.com${event.bannerImage}`}
             alt={event.title}
             className={`w-full h-full object-cover transition-transform duration-500 ${
               isTransitioning ? 'scale-105' : 'scale-100'

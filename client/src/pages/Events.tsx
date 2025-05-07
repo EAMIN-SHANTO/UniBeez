@@ -37,10 +37,14 @@ const Events: React.FC = () => {
   const fetchEvents = async () => {
     console.log('Fetching events...');
     try {
-      const apiUrl = getApiUrl();
-      console.log('Making request to:', `${apiUrl}/api/events-21301429`);
+      // HARDCODED API URL - Direct fetch to live API
+      const PRODUCTION_API_URL = 'https://unibeez.onrender.com';
+      console.log('⚠️ Using HARDCODED URL:', `${PRODUCTION_API_URL}/api/events-21301429`);
       
-      const response = await fetchApi('/api/events-21301429');
+      // Use direct fetch with hardcoded URL
+      const response = await fetch(`${PRODUCTION_API_URL}/api/events-21301429?_cb=${Date.now()}`, {
+        credentials: 'include'
+      });
       console.log('Response received:', response);
       const data = await response.json();
       console.log('Data received:', data);

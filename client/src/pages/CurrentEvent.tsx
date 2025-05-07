@@ -50,7 +50,11 @@ const CurrentEvent: React.FC = () => {
   useEffect(() => {
     const fetchCurrentEvent = async () => {
       try {
-        const response = await fetch(`${API_URL}/api/events-21301429`, {
+        // HARDCODED API URL - Direct fetch to live API
+        const PRODUCTION_API_URL = 'https://unibeez.onrender.com';
+        console.log('⚠️ Using HARDCODED URL in CurrentEvent:', `${PRODUCTION_API_URL}/api/events-21301429`);
+        
+        const response = await fetch(`${PRODUCTION_API_URL}/api/events-21301429?_cb=${Date.now()}`, {
           credentials: 'include'
         });
         const data = await response.json();
@@ -73,11 +77,14 @@ const CurrentEvent: React.FC = () => {
     };
 
     fetchCurrentEvent();
-  }, [API_URL]);
+  }, []);
 
   const fetchUserShops = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/event-shops/user-shops`, {
+      // HARDCODED API URL - Direct fetch to live API
+      const PRODUCTION_API_URL = 'https://unibeez.onrender.com';
+      
+      const response = await fetch(`${PRODUCTION_API_URL}/api/event-shops/user-shops?_cb=${Date.now()}`, {
         credentials: 'include'
       });
       const data = await response.json();
