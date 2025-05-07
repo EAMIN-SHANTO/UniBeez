@@ -30,16 +30,37 @@ const app = express();
 // Middleware
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors({
-  origin: [process.env.CLIENT_URL, 'https://unibeezzv1.vercel.app/', process.env.FRONTEND_URL || '*'],
+
+// Configure CORS with more detailed options
+const corsOptions = {
+  origin: function (origin, callback) {
+    const allowedOrigins = [
+      process.env.CLIENT_URL, 
+      'https://unibeezzv1.vercel.app',
+      'https://uni-beez.vercel.app'
+    ];
+    
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV !== 'production') {
+      callback(null, true);
+    } else {
+      console.log(`Origin ${origin} not allowed by CORS`);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-access-token']
+};
+
+app.use(cors(corsOptions));
 
 // Add debug logging middleware
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.url}`);
+  console.log(`Origin: ${req.headers.origin || 'No origin header'}`);
   next();
 });
 
