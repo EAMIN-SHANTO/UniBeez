@@ -19,13 +19,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Use the getApiUrl helper from api.ts
   const API_URL = getApiUrl();
     
-  console.log('Current hostname:', window.location.hostname);
-  console.log('Auth using API_URL:', API_URL);
+  console.log('🔐 AuthContext initialized with API_URL:', API_URL);
+  console.log('🔐 Current hostname:', window.location.hostname);
+  console.log('🔐 Current origin:', window.location.origin);
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        console.log('Checking auth at:', `${API_URL}/api/auth/profile`);
+        console.log('🔐 Checking auth at:', `${API_URL}/api/auth/profile`);
         
         // First check if we have a user in localStorage
         const storedUser = localStorage.getItem('user');
@@ -33,25 +34,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           try {
             const parsedUser = JSON.parse(storedUser);
             setUser(parsedUser);
-            console.log('User loaded from localStorage:', parsedUser);
+            console.log('🔐 User loaded from localStorage:', parsedUser.username);
           } catch (e) {
-            console.error('Error parsing stored user:', e);
+            console.error('🔐 Error parsing stored user:', e);
             localStorage.removeItem('user');
           }
         }
         
         // Then try to fetch from the server
+        console.log('🔐 Making auth check request with credentials to:', `${API_URL}/api/auth/profile`);
         const res = await fetch(`${API_URL}/api/auth/profile`, {
           credentials: 'include',
           headers: {
             'Accept': 'application/json',
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache'
           },
           mode: 'cors'
         });
         
         if (!res.ok) {
-          console.log('Auth check failed with status:', res.status);
+          console.log('🔐 Auth check failed with status:', res.status);
           setUser(null);
           localStorage.removeItem('user');
           setLoading(false);
@@ -59,12 +63,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
 
         const data = await res.json();
-        console.log('Auth check response:', data);
+        console.log('🔐 Auth check response:', data.success ? 'successful' : 'failed');
         
         if (data.success) {
+          console.log('🔐 User authenticated:', data.user.username);
           setUser(data.user);
           localStorage.setItem('user', JSON.stringify(data.user));
         } else {
+          console.log('🔐 Auth failed:', data.message);
           setUser(null);
           localStorage.removeItem('user');
         }

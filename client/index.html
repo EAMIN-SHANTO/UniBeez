@@ -11,6 +11,51 @@
   <meta http-equiv="Expires" content="0" />
   <meta name="build-time" content="<%= Date.now() %>" />
   <title>UniBeez</title>
+  <!-- API URL interceptor - Runs before any other code -->
+  <script>
+    // Set production API URL - this is hardcoded to ensure it's always correct
+    window.PRODUCTION_API_URL = 'https://unibeez.onrender.com';
+
+    // Save the original fetch function
+    const originalFetch = window.fetch;
+
+    // Override the fetch function to redirect localhost:3000 to production URL
+    window.fetch = function (url, options) {
+      let newUrl = url;
+
+      // Check if the URL is a string (it could be a Request object)
+      if (typeof url === 'string') {
+        // Check for any localhost reference
+        if (url.includes('localhost:3000') || url.includes('127.0.0.1:3000')) {
+          console.warn('⚠️ INTERCEPTOR: Redirecting localhost API call:', url);
+          newUrl = url.replace(/https?:\/\/(localhost|127\.0\.0\.1):3000/g, window.PRODUCTION_API_URL);
+          console.log('🔄 INTERCEPTOR: Redirected to:', newUrl);
+        }
+
+        // Handle relative URLs that might be intended for the API
+        if (url.startsWith('/api/') && !url.includes('://')) {
+          console.warn('⚠️ INTERCEPTOR: Detected relative API path:', url);
+          newUrl = `${window.PRODUCTION_API_URL}${url}`;
+          console.log('🔄 INTERCEPTOR: Redirected to:', newUrl);
+        }
+      } else if (url instanceof Request) {
+        // Handle Request objects
+        const originalUrl = url.url;
+        if (originalUrl.includes('localhost:3000') || originalUrl.includes('127.0.0.1:3000')) {
+          console.warn('⚠️ INTERCEPTOR: Redirecting localhost API Request object:', originalUrl);
+          const newUrlStr = originalUrl.replace(/https?:\/\/(localhost|127\.0\.0\.1):3000/g, window.PRODUCTION_API_URL);
+          // Create a new Request with the updated URL
+          newUrl = new Request(newUrlStr, url);
+          console.log('🔄 INTERCEPTOR: Redirected Request to:', newUrlStr);
+        }
+      }
+
+      // Call the original fetch with the new URL
+      return originalFetch.call(this, newUrl, options);
+    };
+
+    console.log('🔥 Fetch interceptor installed - all localhost calls will be redirected to production');
+  </script>
   <!-- <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
     rel="stylesheet" /> -->
 </head>

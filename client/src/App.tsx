@@ -3,7 +3,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import { AuthProvider } from './context/AuthContext';
 import { ProfileProvider } from './context/ProfileContext';
 import { NotificationProvider } from './context/NotificationContext';
-import { getApiUrl } from './utils/api';
+import { API_URL, getApiUrl } from './config';
+import axios from 'axios';
 import Layout from "./pages/Layout";
 import Homepage from "./pages/Homepage";
 import Login from "./pages/Login";
@@ -48,9 +49,64 @@ import UserOrdersPage from './pages/UserOrdersPage';
 const App: React.FC = () => {
   useEffect(() => {
     // Log the API URL at application startup for debugging
-    const apiUrl = getApiUrl();
-    console.log('🔥 APP INIT - API URL:', apiUrl);
+    console.log('🔥 APP INIT - API URL:', API_URL);
     console.log('🔥 APP INIT - Hostname:', window.location.hostname);
+    console.log('🔥 APP INIT - Origin:', window.location.origin);
+    
+    // Set up axios defaults at app level
+    axios.defaults.baseURL = API_URL;
+    axios.defaults.withCredentials = true;
+    axios.defaults.headers.common['Cache-Control'] = 'no-cache, no-store, must-revalidate';
+    axios.defaults.headers.common['Pragma'] = 'no-cache';
+    
+    // Monitor all axios requests
+    axios.interceptors.request.use(config => {
+      if (config.url) {
+        // For absolute URLs, make sure they use the production API
+        if (config.url.includes('localhost:3000')) {
+          console.warn('⚠️ Intercepted localhost API call in axios:', config.url);
+          config.url = config.url.replace('http://localhost:3000', API_URL);
+          console.log('🔄 Redirected to:', config.url);
+        }
+        
+        // For relative URLs, make sure they are correctly prefixed
+        if (!config.url.includes('://') && !config.baseURL) {
+          console.warn('⚠️ Relative URL without baseURL:', config.url);
+          config.baseURL = API_URL;
+        }
+      }
+      return config;
+    });
+    
+    // Monitor axios responses
+    axios.interceptors.response.use(
+      response => {
+        console.log(`✅ [${response.config.method?.toUpperCase()}] ${response.config.url}: ${response.status}`);
+        return response;
+      },
+      error => {
+        console.error('❌ Axios error:', error.message);
+        if (error.response) {
+          console.error(`❌ [${error.config.method?.toUpperCase()}] ${error.config.url}: ${error.response.status}`);
+          console.error('Response data:', error.response.data);
+        } else if (error.request) {
+          console.error(`❌ Request made but no response received: ${error.config.url}`);
+        }
+        return Promise.reject(error);
+      }
+    );
+    
+    // Force a configuration check to show in console
+    if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+      console.log('⚠️ PRODUCTION BUILD - Ensuring all API calls go to:', API_URL);
+      
+      // Check if fetch has been intercepted properly
+      if (window.fetch.toString().includes('function fetch() { [native code] }')) {
+        console.warn('⚠️ FETCH INTERCEPTOR NOT INSTALLED CORRECTLY!');
+      } else {
+        console.log('✅ Fetch interceptor correctly installed');
+      }
+    }
   }, []);
 
   return (
