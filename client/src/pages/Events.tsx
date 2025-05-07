@@ -16,6 +16,9 @@ interface Event {
   };
 }
 
+// Hardcoded production URL to ensure it's always used
+const PRODUCTION_API_URL = 'https://unibeez.onrender.com';
+
 const Events: React.FC = () => {
   const { user } = useAuth();
   const [events, setEvents] = useState<Event[]>([]);
@@ -33,37 +36,67 @@ const Events: React.FC = () => {
     status: 'upcoming' as const
   });
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
+  const [fetchAttempted, setFetchAttempted] = useState(false);
 
   const fetchEvents = async () => {
-    console.log('Fetching events...');
+    console.log('🚀 Events: Starting fetch events...');
+    console.log('🚀 Events: Current hostname:', window.location.hostname);
+    console.log('🚀 Events: Current origin:', window.location.origin);
+    
     try {
-      // HARDCODED API URL - Direct fetch to live API
-      const PRODUCTION_API_URL = 'https://unibeez.onrender.com';
-      console.log('⚠️ Using HARDCODED URL:', `${PRODUCTION_API_URL}/api/events-21301429`);
+      setFetchAttempted(true);
       
-      // Use direct fetch with hardcoded URL
-      const response = await fetch(`${PRODUCTION_API_URL}/api/events-21301429?_cb=${Date.now()}`, {
-        credentials: 'include'
+      // HARDCODED API URL with cache buster - Direct fetch to production API
+      const cacheBuster = `_cb=${Date.now()}`;
+      const apiUrl = `${PRODUCTION_API_URL}/api/events-21301429?${cacheBuster}`;
+      
+      console.log('⚠️ Events: Using EXPLICIT hardcoded fetch to:', apiUrl);
+      
+      const response = await fetch(apiUrl, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Accept': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache'
+        }
       });
-      console.log('Response received:', response);
+      
+      console.log('⚠️ Events: Response received -', 'Status:', response.status, 'OK:', response.ok);
+      
+      // Debug headers 
+      response.headers.forEach((value, key) => {
+        console.log(`🚀 Response Header: ${key} = ${value}`);
+      });
+      
       const data = await response.json();
-      console.log('Data received:', data);
+      console.log('⚠️ Events: Data received -', 'Success:', data.success, 'Events count:', data.events?.length || 0);
       
       if (data.success) {
+        console.log('✅ Events: Successfully loaded events');
         setEvents(data.events);
       } else {
+        console.error('❌ Events: Success false -', data.message);
         setError(data.message);
       }
     } catch (err) {
-      console.error('Error fetching events:', err);
-      setError('Failed to fetch events');
+      console.error('❌ Events: Error fetching events:', err);
+      // Enhanced error reporting
+      if (err instanceof Error) {
+        console.error('❌ Error details:', {
+          message: err.message,
+          stack: err.stack,
+          name: err.name
+        });
+      }
+      setError('Failed to fetch events. Please check console for details.');
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    console.log('Events component mounted');
+    console.log('🚀 Events component mounted');
     fetchEvents();
   }, []);
 
@@ -240,10 +273,11 @@ const Events: React.FC = () => {
     }
   };
 
-  if (loading) {
+  if (loading && !fetchAttempted) {
     return (
-      <div className="min-h-screen pt-20 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500" />
+      <div className="min-h-screen pt-20 flex flex-col items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4" />
+        <p className="text-gray-600">Loading events...</p>
       </div>
     );
   }

@@ -30,6 +30,9 @@ interface Shop {
   owner: string;
 }
 
+// Hardcoded production URL to ensure it's always used
+const PRODUCTION_API_URL = 'https://unibeez.onrender.com';
+
 const CurrentEvent: React.FC = () => {
   const { API_URL, user } = useAuth();
   const [currentEvent, setCurrentEvent] = useState<Event | null>(null);
@@ -43,34 +46,71 @@ const CurrentEvent: React.FC = () => {
   const [selectedShopId, setSelectedShopId] = useState<string>('');
   const [showErrorPopup, setShowErrorPopup] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [fetchAttempted, setFetchAttempted] = useState(false);
 
   // Update the placeholder URL constant
   const PLACEHOLDER_IMAGE = 'https://cdn-icons-png.flaticon.com/512/166/166169.png';
 
   useEffect(() => {
+    console.log('🔍 CurrentEvent: Component mounted');
+    console.log('🔍 CurrentEvent: Current hostname:', window.location.hostname);
+    console.log('🔍 CurrentEvent: Current origin:', window.location.origin);
+    
     const fetchCurrentEvent = async () => {
+      setFetchAttempted(true);
       try {
-        // HARDCODED API URL - Direct fetch to live API
-        const PRODUCTION_API_URL = 'https://unibeez.onrender.com';
-        console.log('⚠️ Using HARDCODED URL in CurrentEvent:', `${PRODUCTION_API_URL}/api/events-21301429`);
+        // HARDCODED API URL - Direct fetch to live API with cache buster
+        const cacheBuster = `_cb=${Date.now()}`;
+        const apiUrl = `${PRODUCTION_API_URL}/api/events-21301429?${cacheBuster}`;
         
-        const response = await fetch(`${PRODUCTION_API_URL}/api/events-21301429?_cb=${Date.now()}`, {
-          credentials: 'include'
+        console.log('⚠️ CurrentEvent: DIRECT FETCH to:', apiUrl);
+        
+        const response = await fetch(apiUrl, {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Accept': 'application/json',
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache'
+          }
         });
+        
+        console.log('🔍 CurrentEvent: Response status:', response.status, 'OK:', response.ok);
+        
+        // Log response headers for debugging
+        response.headers.forEach((value, key) => {
+          console.log(`🔍 Response Header: ${key} = ${value}`);
+        });
+        
         const data = await response.json();
+        console.log('🔍 CurrentEvent: Data received:', {
+          success: data.success,
+          eventsCount: data.events?.length || 0
+        });
         
         if (data.success) {
           const current = data.events.find((event: Event) => event.status === 'current');
+          console.log('🔍 CurrentEvent: Current event found:', !!current);
+          
           setCurrentEvent(current || null);
           if (current) {
             fetchEventShops(current._id);
           }
         } else {
+          console.error('❌ CurrentEvent: API returned success=false:', data.message);
           setError(data.message);
         }
       } catch (err) {
-        console.error('Error fetching current event:', err);
-        setError('Failed to fetch current event');
+        console.error('❌ CurrentEvent: Error fetching event:', err);
+        // Enhanced error logging
+        if (err instanceof Error) {
+          console.error('❌ Error details:', {
+            message: err.message,
+            stack: err.stack,
+            name: err.name
+          });
+        }
+        setError('Failed to fetch current event. Please check console.');
       } finally {
         setLoading(false);
       }
@@ -81,13 +121,26 @@ const CurrentEvent: React.FC = () => {
 
   const fetchUserShops = async () => {
     try {
-      // HARDCODED API URL - Direct fetch to live API
-      const PRODUCTION_API_URL = 'https://unibeez.onrender.com';
+      // HARDCODED API URL - Direct fetch to live API with cache buster
+      const cacheBuster = `_cb=${Date.now()}`;
+      const apiUrl = `${PRODUCTION_API_URL}/api/event-shops/user-shops?${cacheBuster}`;
       
-      const response = await fetch(`${PRODUCTION_API_URL}/api/event-shops/user-shops?_cb=${Date.now()}`, {
-        credentials: 'include'
+      console.log('⚠️ CurrentEvent: DIRECT FETCH for user shops to:', apiUrl);
+      
+      const response = await fetch(apiUrl, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Accept': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache'
+        }
       });
+      
+      console.log('🔍 UserShops: Response status:', response.status, 'OK:', response.ok);
+      
       const data = await response.json();
+      console.log('🔍 UserShops: Data received:', data);
       
       if (data.success) {
         // Filter out shops that are already registered in the event
@@ -107,23 +160,39 @@ const CurrentEvent: React.FC = () => {
         setRegistrationStatus(data.message);
       }
     } catch (err) {
-      console.error('Error fetching user shops:', err);
+      console.error('❌ Error fetching user shops:', err);
       setRegistrationStatus('Failed to fetch your shops');
     }
   };
 
   const fetchEventShops = async (eventId: string) => {
     try {
-      const response = await fetch(`${API_URL}/api/event-shops/${eventId}/shops`, {
-        credentials: 'include'
+      // Use direct API URL call for consistency
+      const apiUrl = `${PRODUCTION_API_URL}/api/event-shops/${eventId}/shops?_cb=${Date.now()}`;
+      console.log('⚠️ CurrentEvent: Fetching event shops from:', apiUrl);
+      
+      const response = await fetch(apiUrl, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Accept': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache'
+        }
       });
+      
+      console.log('🔍 EventShops: Response status:', response.status, 'OK:', response.ok);
+      
       const data = await response.json();
+      console.log('🔍 EventShops: Data received:', data);
       
       if (data.success) {
         setEventShops(data.eventShops);
+      } else {
+        console.error('❌ Failed to get event shops:', data.message);
       }
     } catch (err) {
-      console.error('Error fetching event shops:', err);
+      console.error('❌ Error fetching event shops:', err);
     }
   };
 
@@ -200,10 +269,12 @@ const CurrentEvent: React.FC = () => {
     ? eventShops.filter(shop => shop.owner === user._id)
     : eventShops;
 
-  if (loading) {
+  // Ensure we use the loading indicator if we're still waiting for the first fetch
+  if (loading && !fetchAttempted) {
     return (
-      <div className="min-h-screen pt-20 flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600" />
+      <div className="min-h-screen pt-20 flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600 mb-4" />
+        <p className="text-gray-600">Loading current event...</p>
       </div>
     );
   }
@@ -343,7 +414,7 @@ const CurrentEvent: React.FC = () => {
             <img
               src={currentEvent.bannerImage.startsWith('http') 
                 ? currentEvent.bannerImage 
-                : `${API_URL}${currentEvent.bannerImage}`}
+                : `${PRODUCTION_API_URL}${currentEvent.bannerImage}`}
               alt={currentEvent.title}
               className="w-full h-full object-cover"
               onError={(e) => {

@@ -10,10 +10,14 @@ interface Event {
   status: string;
 }
 
+// Hardcoded production URL to ensure it's always used
+const PRODUCTION_API_URL = 'https://unibeez.onrender.com';
+
 const EventSlideshow: React.FC = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [fetchAttempted, setFetchAttempted] = useState(false);
 
   // Default placeholder events
   const placeholderEvents = [
@@ -36,24 +40,54 @@ const EventSlideshow: React.FC = () => {
   ];
 
   useEffect(() => {
+    // Add console logs to track component rendering
+    console.log('📊 EventSlideshow component mounted');
+    console.log('📊 Current hostname:', window.location.hostname);
+    console.log('📊 Current origin:', window.location.origin);
+
     const fetchEvents = async () => {
       try {
-        // HARDCODED API URL - Direct fetch to live API
-        const PRODUCTION_API_URL = 'https://unibeez.onrender.com';
-        console.log('⚠️ Using HARDCODED URL in EventSlideshow:', `${PRODUCTION_API_URL}/api/events-21301429`);
+        // HARDCODED API URL - Direct fetch to live API with cache buster
+        const cacheBuster = `_cb=${Date.now()}`;
+        const apiUrl = `${PRODUCTION_API_URL}/api/events-21301429?${cacheBuster}`;
         
-        const response = await fetch(`${PRODUCTION_API_URL}/api/events-21301429?_cb=${Date.now()}`, {
-          credentials: 'include'
+        console.log('⚠️ DIRECT FETCH in EventSlideshow to:', apiUrl);
+        
+        // IMPORTANT: Using raw fetch with explicit prod URL and headers
+        const response = await fetch(apiUrl, {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Accept': 'application/json',
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache'
+          }
         });
+        
+        console.log('📊 Response status:', response.status);
+        console.log('📊 Response OK:', response.ok);
+        
         const data = await response.json();
-        if (data.success && data.events.length > 0) {
+        console.log('📊 Events data received:', data);
+        
+        if (data.success && data.events && data.events.length > 0) {
+          console.log('📊 Setting events:', data.events.length);
           setEvents(data.events);
         } else {
+          console.log('📊 No events found, using placeholders');
           setEvents(placeholderEvents);
         }
       } catch (err) {
-        console.error('Error fetching events:', err);
+        console.error('❌ Error fetching events:', err);
+        // Show detailed error info
+        if (err instanceof Error) {
+          console.error('❌ Error message:', err.message);
+          console.error('❌ Error stack:', err.stack);
+        }
+        console.log('📊 Using placeholder events due to error');
         setEvents(placeholderEvents);
+      } finally {
+        setFetchAttempted(true);
       }
     };
 
@@ -78,6 +112,18 @@ const EventSlideshow: React.FC = () => {
 
   const displayEvents = events.length > 0 ? events : placeholderEvents;
 
+  // Additional debugging indicator
+  if (!fetchAttempted) {
+    return (
+      <div className="w-full aspect-[16/9] rounded-lg overflow-hidden shadow-lg bg-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
+          <p className="text-gray-600">Loading events...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="relative w-full aspect-[16/9] rounded-lg overflow-hidden shadow-lg bg-gray-100">
       {displayEvents.map((event, index) => (
@@ -97,13 +143,14 @@ const EventSlideshow: React.FC = () => {
           <img
             src={event.bannerImage.startsWith('http') 
               ? event.bannerImage 
-              : `https://unibeez.onrender.com${event.bannerImage}`}
+              : `${PRODUCTION_API_URL}${event.bannerImage}`}
             alt={event.title}
             className={`w-full h-full object-cover transition-transform duration-500 ${
               isTransitioning ? 'scale-105' : 'scale-100'
             }`}
             onError={(e) => {
               const target = e.target as HTMLImageElement;
+              console.log('❌ Image load error for:', target.src);
               target.src = 'https://placehold.co/1200x600/648dcb/ffffff?text=UniBeez+Events';
             }}
           />
