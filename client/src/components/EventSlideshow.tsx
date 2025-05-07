@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { fetchApi, getApiUrl } from '../utils/api';
 
 interface Event {
   _id: string;
@@ -11,7 +11,6 @@ interface Event {
 }
 
 const EventSlideshow: React.FC = () => {
-  const { API_URL } = useAuth();
   const [events, setEvents] = useState<Event[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -39,9 +38,7 @@ const EventSlideshow: React.FC = () => {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const response = await fetch(`${API_URL}/api/events-21301429`, {
-          credentials: 'include'
-        });
+        const response = await fetchApi('/api/events-21301429');
         const data = await response.json();
         if (data.success && data.events.length > 0) {
           setEvents(data.events);
@@ -55,7 +52,7 @@ const EventSlideshow: React.FC = () => {
     };
 
     fetchEvents();
-  }, [API_URL]);
+  }, []);
 
   const handleSlideChange = (newIndex: number) => {
     setIsTransitioning(true);
@@ -94,7 +91,7 @@ const EventSlideshow: React.FC = () => {
           <img
             src={event.bannerImage.startsWith('http') 
               ? event.bannerImage 
-              : `${API_URL}${event.bannerImage}`}
+              : `${getApiUrl()}${event.bannerImage}`}
             alt={event.title}
             className={`w-full h-full object-cover transition-transform duration-500 ${
               isTransitioning ? 'scale-105' : 'scale-100'

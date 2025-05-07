@@ -6,7 +6,8 @@ import { resolve } from 'path';
 export default defineConfig(({ mode }) => {
   // Log the environment mode
   console.log('Vite build mode:', mode);
-  console.log('Environment variables:', process.env.VITE_API_URL);
+  console.log('API URL:', process.env.VITE_API_URL);
+  console.log('API URL DEV:', process.env.VITE_API_URL_DEV);
   
   return {
     plugins: [react()],
@@ -25,6 +26,7 @@ export default defineConfig(({ mode }) => {
     define: {
       // Make sure environment variables are correctly replaced at build time
       'process.env.VITE_API_URL': JSON.stringify(process.env.VITE_API_URL),
+      'process.env.VITE_API_URL_DEV': JSON.stringify(process.env.VITE_API_URL_DEV),
     }
   };
 }); 

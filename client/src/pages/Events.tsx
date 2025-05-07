@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { fetchApi, getApiUrl } from '../utils/api';
 
 interface Event {
   _id: string;
@@ -16,7 +17,7 @@ interface Event {
 }
 
 const Events: React.FC = () => {
-  const { user, API_URL } = useAuth();
+  const { user } = useAuth();
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -36,10 +37,10 @@ const Events: React.FC = () => {
   const fetchEvents = async () => {
     console.log('Fetching events...');
     try {
-      console.log('Making request to:', `${API_URL}/api/events-21301429`);
-      const response = await fetch(`${API_URL}/api/events-21301429`, {
-        credentials: 'include'
-      });
+      const apiUrl = getApiUrl();
+      console.log('Making request to:', `${apiUrl}/api/events-21301429`);
+      
+      const response = await fetchApi('/api/events-21301429');
       console.log('Response received:', response);
       const data = await response.json();
       console.log('Data received:', data);
@@ -98,9 +99,8 @@ const Events: React.FC = () => {
         file: selectedFile.name
       });
 
-      const response = await fetch(`${API_URL}/api/events-21301429`, {
+      const response = await fetchApi('/api/events-21301429', {
         method: 'POST',
-        credentials: 'include',
         body: formData // Don't set Content-Type header for FormData
       });
 
@@ -137,9 +137,8 @@ const Events: React.FC = () => {
     if (!window.confirm('Are you sure you want to delete this event?')) return;
 
     try {
-      const response = await fetch(`${API_URL}/api/events-21301429/${eventId}`, {
+      const response = await fetchApi(`/api/events-21301429/${eventId}`, {
         method: 'DELETE',
-        credentials: 'include',
         headers: {
           'Content-Type': 'application/json'
         }
@@ -159,9 +158,8 @@ const Events: React.FC = () => {
 
   const handleArchive = async (eventId: string) => {
     try {
-      const response = await fetch(`${API_URL}/api/events-21301429/${eventId}/archive`, {
+      const response = await fetchApi(`/api/events-21301429/${eventId}/archive`, {
         method: 'PATCH',
-        credentials: 'include',
         headers: {
           'Content-Type': 'application/json'
         }
@@ -181,9 +179,8 @@ const Events: React.FC = () => {
 
   const handleToggleCurrent = async (eventId: string) => {
     try {
-      const response = await fetch(`${API_URL}/api/events-21301429/${eventId}/toggle-current`, {
+      const response = await fetchApi(`/api/events-21301429/${eventId}/toggle-current`, {
         method: 'PATCH',
-        credentials: 'include',
         headers: {
           'Content-Type': 'application/json'
         }
@@ -207,13 +204,12 @@ const Events: React.FC = () => {
 
   const handleUpdate = async (eventId: string, updatedData: Partial<Event>) => {
     try {
-      const url = `${API_URL}/api/events-21301429/${eventId}`;
+      const url = `${getApiUrl()}/api/events-21301429/${eventId}`;
       console.log('Making request to:', url);
       console.log('With data:', updatedData);
       
-      const response = await fetch(url, {
+      const response = await fetchApi(url, {
         method: 'PUT',
-        credentials: 'include',
         headers: {
           'Content-Type': 'application/json'
         },
@@ -374,7 +370,7 @@ const Events: React.FC = () => {
               <img
                 src={event.bannerImage.startsWith('http') 
                   ? event.bannerImage 
-                  : `${API_URL}${event.bannerImage}`}
+                  : `${getApiUrl()}${event.bannerImage}`}
                 alt={event.title}
                 className="w-full h-48 object-cover"
                 onError={(e) => {

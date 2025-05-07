@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User } from '../types/user';
+import { getApiUrl } from '../utils/api';
 
 interface AuthContextType {
   user: User | null;
@@ -15,13 +16,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   
-  // Always use the environment variable in production, or localhost for development
-  const API_URL = window.location.hostname === 'localhost' 
-    ? 'http://localhost:3000' 
-    : 'https://unibeez.onrender.com';
+  // Use the getApiUrl helper from api.ts
+  const API_URL = getApiUrl();
     
   console.log('Current hostname:', window.location.hostname);
-  console.log('Using API_URL:', API_URL);
+  console.log('Auth using API_URL:', API_URL);
 
   useEffect(() => {
     const checkAuth = async () => {
