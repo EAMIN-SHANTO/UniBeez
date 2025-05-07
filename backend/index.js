@@ -19,6 +19,7 @@ import serviceRoutes from './routes/serviceRequest.routes.js';
 import wishlistRoutes from './routes/wishlist.route.js';
 import ratingRoutes from './routes/rating.route.js';
 import customProductRequestRoutes from './routes/customProductRequest.routes.js';
+import orderRoutes from './routes/order.route.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -90,6 +91,7 @@ app.use('/api/services', serviceRoutes);
 app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/ratings', ratingRoutes);
 app.use('/api/custom-product-requests', customProductRequestRoutes);
+app.use('/api/orders', orderRoutes);
 
 
 // Root route
@@ -155,6 +157,7 @@ mongoose
       console.log('- Product page routes: /api/productpage'); 
       console.log('- Cart routes: /api/cart/*');
       console.log('- Event shop routes: /api/event-shops/*');
+      console.log('- Order routes: /api/orders/*');
       
       // Log available endpoints
       console.log('\nEvent endpoints:');

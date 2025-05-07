@@ -1,5 +1,5 @@
 import express from 'express';
-import { createShop, getAllShops, getShopById, updateShop, deleteShop } from '../controllers/shop.controller.js';
+import { createShop, getAllShops, getShopById, updateShop, deleteShop, getShopsByOwner } from '../controllers/shop.controller.js';
 import { verifyToken } from '../middleware/auth.middleware.js';
 
 const router = express.Router();
@@ -9,6 +9,9 @@ router.post('/', verifyToken, createShop);
 
 // Get all shops (public)
 router.get('/', getAllShops);
+
+// IMPORTANT: Put specific routes BEFORE parameter routes
+router.get('/owned-by-user', verifyToken, getShopsByOwner);
 
 // Get shop by ID (public)
 router.get('/:id', getShopById);

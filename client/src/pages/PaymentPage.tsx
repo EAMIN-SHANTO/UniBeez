@@ -102,8 +102,10 @@ const PaymentPage: React.FC = () => {
       }, 3000);
       
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Payment processing failed. Please try again.');
       console.error('Payment error:', err);
+      console.error('Response data:', err.response?.data);
+      console.error('Full error:', JSON.stringify(err, null, 2));
+      setError(err.response?.data?.message || 'Payment processing failed. Please try again.');
     } finally {
       setIsProcessing(false);
     }

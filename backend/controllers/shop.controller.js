@@ -179,3 +179,26 @@ export const deleteShop = async (req, res) => {
     });
   }
 };
+
+// Add this function to get shops owned by the current user
+export const getShopsByOwner = async (req, res) => {
+  try {
+    // req.user is provided by the verifyToken middleware
+    const userId = req.user.id;
+    
+    // Find all shops where the owner field matches the current user's ID
+    const shops = await Shop.find({ owner: userId });
+    
+    res.status(200).json({
+      success: true,
+      shops
+    });
+  } catch (error) {
+    console.error('Error fetching user shops:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch user shops',
+      error: error.message
+    });
+  }
+};

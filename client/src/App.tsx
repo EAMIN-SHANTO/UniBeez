@@ -34,12 +34,14 @@ import FeatureProduct from './pages/FeatureProduct';
 import PaymentPage from './pages/PaymentPage';
 import OrderConfirmation from './pages/OrderConfirmation';
 import ServicesPage from './pages/ServicesPage';
-
 import FeaturedProductmanagement from './pages/admin/FeaturedProductManagement';
-
 import Wishlist from './pages/Wishlist';
 import CustomProductRequestForm from './pages/CustomProductRequestForm';
 import ShopCustomRequestsDashboard from './pages/ShopCustomRequestsDashboard';
+// New imports for order management
+import ShopOrdersPage from './pages/ShopOrdersPage';
+import OrderDetailsPage from './pages/OrderDetailsPage';
+import UserOrdersPage from './pages/UserOrdersPage';
 
 
 const App: React.FC = () => {
@@ -168,6 +170,23 @@ const App: React.FC = () => {
                 <Route path="/feature-product/:id" element={
                   <ProtectedRoute>
                     <FeatureProduct />
+                  </ProtectedRoute>
+                } />
+                
+                {/* New Order Management Routes */}
+                <Route path="/shop-orders" element={
+                  <ProtectedRoute>
+                    <ShopOrdersPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/orders/:id" element={
+                  <ProtectedRoute>
+                    <OrderDetailsPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/my-orders" element={
+                  <ProtectedRoute>
+                    <UserOrdersPage />
                   </ProtectedRoute>
                 } />
               </Route>

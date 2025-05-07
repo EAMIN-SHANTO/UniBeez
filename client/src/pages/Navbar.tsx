@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import NotificationDropdown from '../components/NotificationDropdown';
 import { useCart } from '../context/CartContext';
+
 const Navbar: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -35,7 +36,6 @@ const Navbar: React.FC = () => {
     { path: '/events-21301429', label: 'Events' },
     { path: '/productpage', label: 'Products' },
     { path: '/services', label: 'Services' }
-
   ];
 
   const renderNotifications = () => {
@@ -88,18 +88,16 @@ const Navbar: React.FC = () => {
                 {renderNotifications()}
 
                 {/* Cart */}
-                {/* <button className="relative p-1 text-gray-500 hover:text-blue-600 transition-colors"> */}
                 <Link to="/cart" className="relative p-2 text-gray-600 hover:text-indigo-600">
-  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
-  </svg>
-  {cart && cart.items.length > 0 && (
-    <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
-      {cart.items.length}
-    </span>
-  )}
-</Link>
-                {/* </button> */}
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                  </svg>
+                  {cart && cart.items.length > 0 && (
+                    <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
+                      {cart.items.length}
+                    </span>
+                  )}
+                </Link>
               </div>
             )}
 
@@ -139,6 +137,22 @@ const Navbar: React.FC = () => {
                         onClick={() => setIsProfileOpen(false)}
                       >
                         Admin Dashboard
+                      </Link>
+                    )}
+                    <Link
+                      to="/my-orders"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                      onClick={() => setIsProfileOpen(false)}
+                    >
+                      My Orders
+                    </Link>
+                    {user.role === 'user' && (
+                      <Link
+                        to="/shop-orders"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        onClick={() => setIsProfileOpen(false)}
+                      >
+                        Shop Orders
                       </Link>
                     )}
                     <button
@@ -210,4 +224,4 @@ const Navbar: React.FC = () => {
   );
 };
 
-export default Navbar; 
+export default Navbar;

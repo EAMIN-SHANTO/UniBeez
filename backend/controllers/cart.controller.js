@@ -1,5 +1,6 @@
 import Cart from '../models/cart.model.js';
 import Product from '../models/product.model.js';
+import Order from '../models/order.model.js';
 
 // Get user's cart
 export const getCart = async (req, res) => {
@@ -505,7 +506,7 @@ export const checkout = async (req, res) => {
     // Find user's cart
     const cart = await Cart.findOne({ user: userId }).populate({
       path: 'items.product',
-      select: 'name price quantity discount'
+      select: 'name price quantity discount shop'
     });
     
     if (!cart || cart.items.length === 0) {
@@ -548,31 +549,26 @@ export const checkout = async (req, res) => {
       
       orderItems.push({
         product: product._id,
+        shop: product.shop,
         name: product.name,
         quantity: item.quantity,
         price: item.price,
         discountedPrice,
         discountType,
-        discountPercentage
+        discountPercentage,
+        status: 'processing'
       });
     }
     
     const finalAmount = cart.totalAmount - totalDiscount;
     
-    // In a real application, you would:
-    // 1. Create an order with the calculated discounts
-    // 2. Process payment
-    // 3. Update inventory
-    // 4. Clear the cart
-    
-    // For this example, we'll just clear the cart
-    cart.items = [];
-    await cart.save();
+    // Generate random order ID
+    const orderId = 'ORD-' + Math.floor(Math.random() * 1000000);
     
     res.status(200).json({
       success: true,
       message: 'Checkout successful',
-      orderId: 'ORD-' + Math.floor(Math.random() * 1000000),
+      orderId,
       items: orderItems,
       totalAmount: cart.totalAmount,
       totalDiscount,
@@ -589,7 +585,7 @@ export const checkout = async (req, res) => {
   }
 };
 
-// Process payment and reduce inventory
+// Process payment and create order
 export const processPayment = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -598,7 +594,7 @@ export const processPayment = async (req, res) => {
     // Find user's cart
     const cart = await Cart.findOne({ user: userId }).populate({
       path: 'items.product',
-      select: 'name price quantity _id discount'
+      select: 'name price quantity _id discount shop'
     });
     
     if (!cart || cart.items.length === 0) {
@@ -608,14 +604,11 @@ export const processPayment = async (req, res) => {
       });
     }
     
-    // Store cart items for processing before clearing
-    const cartItems = [...cart.items];
-    
     // Calculate discounts and verify inventory
     let totalDiscount = 0;
-    const processedItems = [];
+    const orderItems = [];
     
-    for (const item of cartItems) {
+    for (const item of cart.items) {
       const product = await Product.findById(item.product._id);
       
       if (!product) {
@@ -657,67 +650,72 @@ export const processPayment = async (req, res) => {
         totalDiscount += (item.price - discountedPrice) * item.quantity;
       }
       
-      processedItems.push({
+      orderItems.push({
         product: product._id,
-        name: product.name,
+        shop: product.shop,
         quantity: item.quantity,
         price: item.price,
         discountedPrice,
         discountType,
-        discountPercentage
+        discountPercentage,
+        status: 'processing'
       });
     }
     
     const totalAmount = cart.totalAmount;
     const finalAmount = totalAmount - totalDiscount;
     
-    // Process payment based on method
-    if (paymentMethod === 'card') {
-      if (!paymentDetails.cardNumber || !paymentDetails.cardName || 
-          !paymentDetails.expiryDate || !paymentDetails.cvv) {
-        return res.status(400).json({
-          success: false,
-          message: 'Invalid card details'
-        });
-      }
-      // In a real app, you would process the card payment here
-    } else if (paymentMethod === 'Bkash') {
-      if (!paymentDetails.bkashNumber || !paymentDetails.bkashTransaction) {
-        return res.status(400).json({
-          success: false,
-          message: 'Invalid Bkash details'
-        });
-      }
-      // In a real app, you would verify the Bkash transaction here
-    }
-    
     // Generate confirmation ID
-    const confirmationId = 'CNF-' + Math.floor(Math.random() * 1000000);
+    const confirmationId = `CONF-${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
     
-    // Update product inventory
-    for (const item of cartItems) {
+    // Create new order with discount information
+    const newOrder = new Order({
+      user: userId,
+      items: orderItems,
+      shippingAddress,
+      paymentMethod,
+      paymentDetails,
+      totalAmount,
+      totalDiscount,
+      finalAmount,
+      orderId,
+      confirmationId,
+      voucherApplied: voucherCode || null
+    });
+    
+    // Save the order
+    await newOrder.save();
+    
+    // Update product quantities
+    for (const item of cart.items) {
       const product = await Product.findById(item.product._id);
-      
-      // Calculate new quantity
-      const newQuantity = product.quantity - item.quantity;
-      
-      // Update product
-      await Product.findByIdAndUpdate(item.product._id, {
-        $inc: { quantity: -item.quantity },
-        $set: { inStock: newQuantity > 0 }
-      });
+      if (product) {
+        // Decrease the quantity
+        product.quantity -= item.quantity;
+        
+        // If quantity reaches 0, mark as out of stock
+        if (product.quantity <= 0) {
+          product.quantity = 0;
+          product.inStock = false;
+        }
+        
+        // Save the updated product
+        await product.save();
+      }
     }
     
-    // Clear the cart - make sure this happens after all processing
+    // Clear the cart
     cart.items = [];
     await cart.save();
     
     res.status(200).json({
       success: true,
       message: 'Payment processed successfully',
-      orderId,
       confirmationId,
-      items: processedItems,
+      order: {
+        _id: newOrder._id,
+        orderId: newOrder.orderId
+      },
       totalAmount,
       totalDiscount,
       finalAmount,
