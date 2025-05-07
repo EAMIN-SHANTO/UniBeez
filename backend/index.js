@@ -31,7 +31,7 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({
-  origin: ['http://localhost:5173', 'https://uni-beez.vercel.app', process.env.FRONTEND_URL || '*'],
+  origin: [process.env.CLIENT_URL, 'https://unibeezzv1.vercel.app/', process.env.FRONTEND_URL || '*'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
