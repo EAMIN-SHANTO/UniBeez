@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from './context/AuthContext';
 import { ProfileProvider } from './context/ProfileContext';
 import { NotificationProvider } from './context/NotificationContext';
+import { getApiUrl } from './utils/api';
 import Layout from "./pages/Layout";
 import Homepage from "./pages/Homepage";
 import Login from "./pages/Login";
@@ -45,6 +46,13 @@ import UserOrdersPage from './pages/UserOrdersPage';
 
 
 const App: React.FC = () => {
+  useEffect(() => {
+    // Log the API URL at application startup for debugging
+    const apiUrl = getApiUrl();
+    console.log('🔥 APP INIT - API URL:', apiUrl);
+    console.log('🔥 APP INIT - Hostname:', window.location.hostname);
+  }, []);
+
   return (
     <AuthProvider>
       <ProfileProvider>

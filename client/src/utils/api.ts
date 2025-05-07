@@ -2,16 +2,26 @@
 export const getApiUrl = () => {
   // Check if we're in a browser environment
   if (typeof window !== 'undefined') {
-    // Use environment variables for API URLs
-    return window.location.hostname === 'localhost' 
-      ? import.meta.env.VITE_API_URL_DEV || 'http://localhost:3000'
-      : import.meta.env.VITE_API_URL || 'https://unibeez.onrender.com';
+    // IMPORTANT: Always use the production URL in deployed environments
+    // Use simple hostname check for development/production
+    const isLocalhost = window.location.hostname === 'localhost' || 
+                         window.location.hostname === '127.0.0.1';
+                         
+    if (isLocalhost) {
+      console.log('Development environment detected, using local API');
+      return 'http://localhost:3000';
+    } else {
+      console.log('Production environment detected, using Render API');
+      // Directly use the Render URL to bypass any env variable loading issues
+      return 'https://unibeez.onrender.com';
+    }
   }
-  // Default to production URL if not in browser (unlikely scenario)
-  return import.meta.env.VITE_API_URL || 'https://unibeez.onrender.com';
+  
+  // Default to production URL if not in browser
+  return 'https://unibeez.onrender.com';
 };
 
-// Log the API URL once for debugging
+// Log the API URL for debugging
 console.log('API URL set to:', getApiUrl());
 
 // Helper function for API fetching with correct URL
