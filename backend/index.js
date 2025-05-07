@@ -63,9 +63,18 @@ app.use('/api/ratings', ratingRoutes);
 app.use('/api/custom-product-requests', customProductRequestRoutes);
 
 
+// Root route
+app.get("/", (req, res) => {
+  res.json({ message: "Welcome to UniBeez API! Please use /api/* routes to access the API endpoints." });
+});
+
 // Test routes
 app.get("/api/test", (req, res) => {
   res.json({ message: "API is working!" });
+});
+
+app.get("/shops", (req, res) => {
+  res.redirect('/api/shops');
 });
 
 app.get("/api/notifications/test", (req, res) => {
